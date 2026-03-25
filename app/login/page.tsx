@@ -1,52 +1,31 @@
 'use client'
-
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
   const [message, setMessage] = useState('')
-
   const supabase = createClient()
-
   const handleSubmit = async () => {
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) setMessage(error.message)
-      else setMessage('Tarkista sähköpostisi vahvistaaksesi tilin!')
+      else setMessage('Tarkista sahkopostisi!')
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setMessage(error.message)
-      else setMessage('Kirjautuminen onnistui!')
+      else { setMessage('Kirjautuminen onnistui!'); window.location.href = '/profile' }
     }
   }
-
   return (
     <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px' }}>
-      <h1>{isSignUp ? 'Luo tili' : 'Kirjaudu sisä?/h1>
-      <input
-        type="email"
-        placeholder="Sähköposti"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px' }}
-      />
-      <input
-        type="password"
-        placeholder="Salasana"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px' }}
-      />
-      <button onClick={handleSubmit} style={{ width: '100%', padding: '10px', marginBottom: '10px' }}>
-        {isSignUp ? 'Rekisteröidy' : 'Kirjaudu'}
-      </button>
-      <button onClick={() => setIsSignUp(!isSignUp)} style={{ width: '100%', padding: '10px' }}>
-        {isSignUp ? 'Onko sinulla jo tili? Kirjaudu' : 'Ei tiliä? Rekisteröidy'}
-      </button>
-      {message && <p style={{ marginTop: '10px', color: 'green' }}>{message}</p>}
+      <h1>{isSignUp ? 'Luo tili' : 'Kirjaudu'}</h1>
+      <input type="email" placeholder="Sahkoposti" value={email} onChange={e => setEmail(e.target.value)} style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px' }} />
+      <input type="password" placeholder="Salasana" value={password} onChange={e => setPassword(e.target.value)} style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px' }} />
+      <button onClick={handleSubmit} style={{ width: '100%', padding: '10px', marginBottom: '10px' }}>{isSignUp ? 'Rekisteroidy' : 'Kirjaudu'}</button>
+      <button onClick={() => setIsSignUp(!isSignUp)} style={{ width: '100%', padding: '10px' }}>{isSignUp ? 'Onko tili? Kirjaudu' : 'Ei tilia? Rekisteroidy'}</button>
+      {message && <p style={{ color: 'green', marginTop: '10px' }}>{message}</p>}
     </div>
   )
 }
