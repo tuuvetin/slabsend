@@ -25,9 +25,9 @@ export default function LoginPage() {
 
   return (
     <div style={{ maxWidth: '400px', margin: '100px auto', padding: '20px' }}>
-      <h1>{isSignUp ? 'Luo tili' : 'Kirjaudu sisään'}</h1>
+      <h1>{isSignUp ? 'Luo tili' : 'Kirjaudu sisä?/h1>
       <input
-        type="e"
+        type="email"
         placeholder="Sähköposti"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
