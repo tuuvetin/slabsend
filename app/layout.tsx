@@ -12,6 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <nav style={{ padding: '15px 20px', borderBottom: '1px solid #333', display: 'flex', gap: '20px' }}>
           <a href="/" style={{ textDecoration: 'none', fontWeight: 'bold' }}>Slabsend</a>
+          <a href="/listings/new" style={{ textDecoration: 'none' }}>Myy varuste</a>
           <a href="/profile" style={{ textDecoration: 'none' }}>Profiili</a>
           <a href="/login" style={{ textDecoration: 'none' }}>Kirjaudu</a>
         </nav>
