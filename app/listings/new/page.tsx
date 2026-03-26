@@ -1,20 +1,54 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+
+const categories: Record<string, string[]> = {
+  'Vaatteet': ['Paidat', 'Hupparit', 'Housut', 'Shortsit', 'Takit', 'Muut vaatteet'],
+  'Kengät': ['Kiipeilykengät', 'Lähestymis- ja vaelluskengät', 'Vuoristokengät', 'Muut kengät'],
+  'Varusteet': ['Valjaat', 'Köydet', 'Vuorikiipeily', 'Jääkiipeily', 'Kypärät', 'Crashpadit', 'Mankkapussit ja harjat', 'Treenivälineet', 'Muut tarvikkeet'],
+  'Kiipeilyseinätarvikkeet': ['Kiipeilyotteet', 'Turva-alustat', 'Seinämateriaalit'],
+}
+
 export default function NewListingPage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [location, setLocation] = useState('')
+  const [category, setCategory] = useState('')
+  const [subcategory, setSubcategory] = useState('')
+  const [images, setImages] = useState<File[]>([])
   const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
   const supabase = createClient()
+
+  const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) setImages(Array.from(e.target.files).slice(0, 5))
+  }
+
   const handleSubmit = async () => {
+    setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { window.location.href = '/login'; return }
-    const { error } = await supabase.from('listings').insert({ user_id: user.id, title, description, price: parseInt(price), location })
+
+    const imageUrls: string[] = []
+    for (const image of images) {
+      const filename = `${user.id}/${Date.now()}-${image.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
+      const { error } = await supabase.storage.from('listing-images').upload(filename, image)
+      if (!error) {
+        const { data } = supabase.storage.from('listing-images').getPublicUrl(filename)
+        imageUrls.push(data.publicUrl)
+      }
+    }
+
+    const { error } = await supabase.from('listings').insert({
+      user_id: user.id, title, description, price: parseInt(price), location, category, subcategory, images: imageUrls
+    })
+
+    setLoading(false)
     if (error) setMessage('Virhe: ' + error.message)
-    else { setMessage('Ilmoitus lisatty!'); setTitle(''); setDescription(''); setPrice(''); setLocation('') }
+    else { setMessage('Ilmoitus lisätty!'); setTitle(''); setDescription(''); setPrice(''); setLocation(''); setCategory(''); setSubcategory(''); setImages([]) }
   }
+
   return (
     <div style={{ maxWidth: '500px', margin: '50px auto', padding: '20px' }}>
       <h1>Uusi ilmoitus</h1>
@@ -22,7 +56,24 @@ export default function NewListingPage() {
       <textarea placeholder="Kuvaus" value={description} onChange={e => setDescription(e.target.value)} style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px', height: '100px' }} />
       <input placeholder="Hinta (EUR)" value={price} onChange={e => setPrice(e.target.value)} type="number" style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px' }} />
       <input placeholder="Sijainti" value={location} onChange={e => setLocation(e.target.value)} style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px' }} />
-      <button onClick={handleSubmit} style={{ width: '100%', padding: '10px' }}>Julkaise ilmoitus</button>
+      <select value={category} onChange={e => { setCategory(e.target.value); setSubcategory('') }} style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px' }}>
+        <option value="">Valitse kategoria</option>
+        {Object.keys(categories).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+      </select>
+      {category && (
+        <select value={subcategory} onChange={e => setSubcategory(e.target.value)} style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px' }}>
+          <option value="">Valitse alakategoria</option>
+          {categories[category].map(sub => <option key={sub} value={sub}>{sub}</option>)}
+        </select>
+      )}
+      <div style={{ marginBottom: '10px' }}>
+        <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', color: '#888' }}>Kuvat (max 5)</label>
+        <input type="file" accept="image/*" multiple onChange={handleImages} />
+        {images.length > 0 && <p style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>{images.length} kuva valittu</p>}
+      </div>
+      <button onClick={handleSubmit} disabled={loading} style={{ width: '100%', padding: '10px' }}>
+        {loading ? 'Ladataan...' : 'Julkaise ilmoitus'}
+      </button>
       {message && <p style={{ color: 'green', marginTop: '10px' }}>{message}</p>}
     </div>
   )
