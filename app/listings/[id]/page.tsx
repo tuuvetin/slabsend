@@ -8,6 +8,8 @@ export default function ListingPage() {
   const [listing, setListing] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState<any>(null)
+  const [message, setMessage] = useState('')
+  const [messageSent, setMessageSent] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
@@ -25,8 +27,21 @@ export default function ListingPage() {
     window.location.href = '/listings'
   }
 
+  const handleSendMessage = async () => {
+    if (!currentUser) { window.location.href = '/login'; return }
+    if (!message.trim()) return
+    const { error } = await supabase.from('messages').insert({
+      sender_id: currentUser.id,
+      receiver_id: listing.user_id,
+      listing_id: listing.id,
+      content: message
+    })
+    if (error) setMessageSent('Virhe: ' + error.message)
+    else { setMessageSent('Viesti lähetetty!'); setMessage('') }
+  }
+
   if (loading) return <p style={{ padding: '20px' }}>Ladataan...</p>
-  if (!listing) return <p style={{ padding: '20px' }}>Ilmoitusta ei loydy.</p>
+  if (!listing) return <p style={{ padding: '20px' }}>Ilmoitusta ei löydy.</p>
 
   return (
     <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px' }}>
@@ -42,7 +57,24 @@ export default function ListingPage() {
           ))}
         </div>
       )}
-      <p style={{ lineHeight: '1.6' }}>{listing.description}</p>
+      <p style={{ lineHeight: '1.6', marginBottom: '30px' }}>{listing.description}</p>
+
+      {currentUser && currentUser.id !== listing.user_id && (
+        <div style={{ borderTop: '1px solid #333', paddingTop: '20px' }}>
+          <h3>Ota yhteyttä myyjään</h3>
+          <textarea
+            placeholder="Kirjoita viesti..."
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            style={{ display: 'block', width: '100%', padding: '8px', marginBottom: '10px', height: '100px', background: '#111', color: 'white', border: '1px solid #333', borderRadius: '4px' }}
+          />
+          <button onClick={handleSendMessage} style={{ padding: '10px 20px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+            Lähetä viesti
+          </button>
+          {messageSent && <p style={{ color: 'green', marginTop: '10px' }}>{messageSent}</p>}
+        </div>
+      )}
+
       {currentUser && currentUser.id === listing.user_id && (
         <button onClick={handleDelete} style={{ marginTop: '30px', padding: '10px 20px', background: 'red', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
           Poista ilmoitus
