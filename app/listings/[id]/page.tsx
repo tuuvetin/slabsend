@@ -37,11 +37,11 @@ export default function ListingPage() {
       content: message
     })
     if (error) setMessageSent('Virhe: ' + error.message)
-    else { setMessageSent('Viesti lähetetty!'); setMessage('') }
+    else { setMessageSent('Viesti lahetetty!'); setMessage('') }
   }
 
   if (loading) return <p style={{ padding: '20px' }}>Ladataan...</p>
-  if (!listing) return <p style={{ padding: '20px' }}>Ilmoitusta ei löydy.</p>
+  if (!listing) return <p style={{ padding: '20px' }}>Ilmoitusta ei loydy.</p>
 
   return (
     <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px' }}>
@@ -49,7 +49,8 @@ export default function ListingPage() {
       <h1 style={{ marginTop: '20px' }}>{listing.title}</h1>
       <p style={{ fontSize: '24px', fontWeight: 'bold', margin: '10px 0' }}>{listing.price} €</p>
       <p style={{ color: '#888', marginBottom: '5px' }}>{listing.location}</p>
-      {listing.category && <p style={{ color: '#888', fontSize: '14px', marginBottom: '20px' }}>{listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}</p>}
+      {listing.category && <p style={{ color: '#888', fontSize: '14px', marginBottom: '5px' }}>{listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}</p>}
+      {listing.condition && <p style={{ color: '#aaa', fontSize: '14px', marginBottom: '20px' }}>Kunto: <strong>{listing.condition}</strong></p>}
       {listing.images && listing.images.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px', marginBottom: '20px' }}>
           {listing.images.map((url: string, i: number) => (
@@ -61,7 +62,7 @@ export default function ListingPage() {
 
       {currentUser && currentUser.id !== listing.user_id && (
         <div style={{ borderTop: '1px solid #333', paddingTop: '20px' }}>
-          <h3>Ota yhteyttä myyjään</h3>
+          <h3>Ota yhteytta myyjaan</h3>
           <textarea
             placeholder="Kirjoita viesti..."
             value={message}
@@ -69,7 +70,7 @@ export default function ListingPage() {
             style={{ display: 'block', width: '100%', padding: '8px', marginBottom: '10px', height: '100px', background: '#111', color: 'white', border: '1px solid #333', borderRadius: '4px' }}
           />
           <button onClick={handleSendMessage} style={{ padding: '10px 20px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            Lähetä viesti
+            Laheta viesti
           </button>
           {messageSent && <p style={{ color: 'green', marginTop: '10px' }}>{messageSent}</p>}
         </div>
