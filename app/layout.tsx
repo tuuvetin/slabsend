@@ -14,6 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <a href="/" style={{ textDecoration: 'none', fontWeight: 'bold' }}>Slabsend</a>
           <a href="/listings" style={{ textDecoration: 'none' }}>Ilmoitukset</a>
           <a href="/listings/new" style={{ textDecoration: 'none' }}>Myy varuste</a>
+          <a href="/messages" style={{ textDecoration: 'none' }}>Viestit</a>
           <a href="/profile" style={{ textDecoration: 'none' }}>Profiili</a>
           <a href="/login" style={{ textDecoration: 'none' }}>Kirjaudu</a>
         </nav>
