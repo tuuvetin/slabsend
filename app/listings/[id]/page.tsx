@@ -77,9 +77,14 @@ export default function ListingPage() {
       )}
 
       {currentUser && currentUser.id === listing.user_id && (
-        <button onClick={handleDelete} style={{ marginTop: '30px', padding: '10px 20px', background: 'red', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-          Poista ilmoitus
-        </button>
+        <div style={{ marginTop: '30px', display: 'flex', gap: '10px' }}>
+          <button onClick={() => window.location.href = `/listings/${listing.id}/edit`} style={{ padding: '10px 20px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+            Muokkaa ilmoitusta
+          </button>
+          <button onClick={handleDelete} style={{ padding: '10px 20px', background: 'red', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+            Poista ilmoitus
+          </button>
+        </div>
       )}
     </div>
   )
