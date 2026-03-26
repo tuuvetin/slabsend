@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
@@ -10,12 +10,14 @@ export default function ConversationPage() {
   const [newMessage, setNewMessage] = useState('')
   const [listing, setListing] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const bottomRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { window.location.href = '/login'; return }
       setCurrentUser(user)
+
       supabase.from('messages')
         .select('*')
         .eq('listing_id', params.id)
@@ -28,11 +30,29 @@ export default function ConversationPage() {
           }
           setLoading(false)
         })
+
+      const channel = supabase
+        .channel('messages')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `listing_id=eq.${params.id}`
+        }, (payload) => {
+          setMessages(prev => [...prev, payload.new])
+        })
+        .subscribe()
+
+      return () => { supabase.removeChannel(channel) }
     })
   }, [params.id])
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
   const handleSend = async () => {
-    if (!newMessage.trim() || !currentUser) return
+    if (!newMessage.trim() || !currentUser || messages.length === 0) return
     const otherUserId = messages[0].sender_id === currentUser.id ? messages[0].receiver_id : messages[0].sender_id
     await supabase.from('messages').insert({
       sender_id: currentUser.id,
@@ -41,8 +61,6 @@ export default function ConversationPage() {
       content: newMessage
     })
     setNewMessage('')
-    const { data } = await supabase.from('messages').select('*').eq('listing_id', params.id).or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`).order('created_at', { ascending: true })
-    setMessages(data || [])
   }
 
   if (loading) return <p style={{ padding: '20px' }}>Ladataan...</p>
@@ -51,7 +69,7 @@ export default function ConversationPage() {
     <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px' }}>
       <a href="/messages" style={{ color: '#888', fontSize: '14px' }}>← Takaisin viesteihin</a>
       {listing && <h2 style={{ marginTop: '10px' }}>{listing.title}</h2>}
-      <div style={{ border: '1px solid #333', borderRadius: '8px', padding: '15px', marginTop: '20px', minHeight: '300px', marginBottom: '15px' }}>
+      <div style={{ border: '1px solid #333', borderRadius: '8px', padding: '15px', marginTop: '20px', height: '400px', overflowY: 'auto', marginBottom: '15px' }}>
         {messages.map(msg => (
           <div key={msg.id} style={{ marginBottom: '15px', textAlign: msg.sender_id === currentUser?.id ? 'right' : 'left' }}>
             <div style={{ display: 'inline-block', padding: '8px 12px', borderRadius: '8px', background: msg.sender_id === currentUser?.id ? '#333' : '#222', maxWidth: '80%' }}>
@@ -60,6 +78,7 @@ export default function ConversationPage() {
             </div>
           </div>
         ))}
+        <div ref={bottomRef} />
       </div>
       <div style={{ display: 'flex', gap: '10px' }}>
         <input
