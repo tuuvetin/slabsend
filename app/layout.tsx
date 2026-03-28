@@ -3,20 +3,32 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Slabsend',
-  description: 'Kiipeilyvarusteiden marketplace',
+  description: 'The climbing gear marketplace',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fi">
+    <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>
-        <nav style={{ padding: '15px 20px', borderBottom: '1px solid #333', display: 'flex', gap: '20px' }}>
-          <a href="/" style={{ textDecoration: 'none', fontWeight: 'bold' }}>Slabsend</a>
-          <a href="/listings" style={{ textDecoration: 'none' }}>Ilmoitukset</a>
-          <a href="/listings/new" style={{ textDecoration: 'none' }}>Myy varuste</a>
-          <a href="/messages" style={{ textDecoration: 'none' }}>Viestit</a>
-          <a href="/profile" style={{ textDecoration: 'none' }}>Profiili</a>
-          <a href="/login" style={{ textDecoration: 'none' }}>Kirjaudu</a>
+        <nav className="sb-nav">
+          <a href="/" className="sb-logo">
+            Slab<span>send</span>
+          </a>
+          <div className="sb-nav-links">
+            <a href="/listings" className="sb-nav-link">Listings</a>
+            <a href="/messages" className="sb-nav-link">Messages</a>
+            <a href="/profile" className="sb-nav-link">Profile</a>
+          </div>
+          <div className="sb-nav-right">
+            <a href="/listings/new" className="sb-btn-sell">+ Sell / Rent</a>
+            <a href="/login" className="sb-btn-login">Sign in</a>
+          </div>
         </nav>
         {children}
       </body>

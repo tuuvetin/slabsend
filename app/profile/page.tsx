@@ -16,7 +16,11 @@ export default function ProfilePage() {
       if (!user) { window.location.href = '/login'; return }
       setUser(user)
       supabase.from('profiles').select('*').eq('user_id', user.id).single().then(({ data }) => {
-        if (data) { setUsername(data.username || ''); setFullName(data.full_name || ''); setLocation(data.location || '') }
+        if (data) {
+          setUsername(data.username || '')
+          setFullName(data.full_name || '')
+          setLocation(data.location || '')
+        }
       })
       supabase.from('listings').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).then(({ data }) => {
         setListings(data || [])
@@ -26,42 +30,101 @@ export default function ProfilePage() {
 
   const handleSave = () => {
     supabase.from('profiles').upsert({ user_id: user.id, username, full_name: fullName, location }).then(({ error }) => {
-      if (error) setMessage('Virhe: ' + error.message)
-      else setMessage('Profiili tallennettu!')
+      if (error) setMessage('Error: ' + error.message)
+      else setMessage('Profile saved!')
     })
   }
 
-  if (!user) return <p style={{ padding: '20px' }}>Ladataan...</p>
+  if (!user) return <p className="listing-loading">Loading...</p>
 
   return (
-    <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px' }}>
-      <h1>Profiili</h1>
-      <p style={{ color: '#888' }}>{user.email}</p>
-      <input placeholder="Kayttajanimi" value={username} onChange={e => setUsername(e.target.value)} style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px', background: '#111', color: 'white', border: '1px solid #333', borderRadius: '4px' }} />
-      <input placeholder="Koko nimi" value={fullName} onChange={e => setFullName(e.target.value)} style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px', background: '#111', color: 'white', border: '1px solid #333', borderRadius: '4px' }} />
-      <input placeholder="Sijainti" value={location} onChange={e => setLocation(e.target.value)} style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px', background: '#111', color: 'white', border: '1px solid #333', borderRadius: '4px' }} />
-      <button onClick={handleSave} style={{ width: '100%', padding: '10px', marginBottom: '10px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Tallenna</button>
-      {message && <p style={{ color: 'green' }}>{message}</p>}
-      <button onClick={() => supabase.auth.signOut().then(() => window.location.href = '/login')} style={{ width: '100%', padding: '10px', marginTop: '10px', background: 'none', border: '1px solid #333', color: 'white', borderRadius: '4px', cursor: 'pointer' }}>Kirjaudu ulos</button>
+    <div className="profile-page">
 
-      <h2 style={{ marginTop: '40px' }}>Omat ilmoitukset</h2>
-      {listings.length === 0 && <p style={{ color: '#888' }}>Ei ilmoituksia vielä.</p>}
-      <div style={{ display: 'grid', gap: '15px', marginTop: '15px' }}>
-        {listings.map(listing => (
-          <a key={listing.id} href={`/listings/${listing.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div style={{ border: '1px solid #333', borderRadius: '8px', padding: '15px', display: 'flex', gap: '15px', alignItems: 'center' }}>
-              {listing.images && listing.images.length > 0 ? (
-                <img src={listing.images[0]} alt={listing.title} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
-              ) : (
-                <div style={{ width: '60px', height: '60px', background: '#222', borderRadius: '4px' }} />
-              )}
-              <div>
-                <p style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>{listing.title}</p>
-                <p style={{ margin: '0', color: '#888', fontSize: '14px' }}>{listing.price} € · {listing.location}</p>
-              </div>
-            </div>
-          </a>
-        ))}
+      <div className="profile-header">
+        <div className="profile-avatar">
+          {(fullName || user.email || '?')[0].toUpperCase()}
+        </div>
+        <div>
+          <h1 className="profile-name">{fullName || username || 'Your profile'}</h1>
+          <p className="profile-email">{user.email}</p>
+        </div>
+      </div>
+
+      <div className="profile-grid">
+
+        {/* SETTINGS */}
+        <div className="profile-section">
+          <h2 className="profile-section-title">Account settings</h2>
+          <input
+            className="form-input"
+            placeholder="Username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+          />
+          <input
+            className="form-input"
+            placeholder="Full name"
+            value={fullName}
+            onChange={e => setFullName(e.target.value)}
+          />
+          <input
+            className="form-input"
+            placeholder="Location"
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+          />
+          <button className="form-submit" onClick={handleSave}>
+            Save changes
+          </button>
+          {message && (
+            <p className={`form-message ${message.startsWith('Error') ? 'error' : 'success'}`}>
+              {message}
+            </p>
+          )}
+          <button
+            className="profile-signout-btn"
+            onClick={() => supabase.auth.signOut().then(() => window.location.href = '/login')}
+          >
+            Sign out
+          </button>
+        </div>
+
+        {/* MY LISTINGS */}
+        <div className="profile-section">
+          <h2 className="profile-section-title">My listings</h2>
+          {listings.length === 0 && (
+            <p className="profile-empty">No listings yet.</p>
+          )}
+          <div className="profile-listings">
+            {listings.map(listing => (
+              <a key={listing.id} href={`/listings/${listing.id}`} className="profile-listing-link">
+                <div className="profile-listing-card">
+                  {listing.images && listing.images.length > 0 ? (
+                    <img
+                      src={listing.images[0]}
+                      alt={listing.title}
+                      className="profile-listing-img"
+                    />
+                  ) : (
+                    <div className="profile-listing-no-img" />
+                  )}
+                  <div className="profile-listing-info">
+                    <p className="profile-listing-title">{listing.title}</p>
+                    <p className="profile-listing-meta">
+                      {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''} · {listing.location}
+                    </p>
+                    {listing.listing_type === 'rent' && (
+                      <span className="listing-rental-badge" style={{ fontSize: '10px', padding: '2px 8px' }}>
+                        For rent
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
       </div>
     </div>
   )

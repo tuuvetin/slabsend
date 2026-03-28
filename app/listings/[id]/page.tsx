@@ -3,6 +3,14 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
+const conditionLabels: Record<string, string> = {
+  'Uusi': 'New',
+  'Erinomainen': 'Excellent',
+  'Hyvä': 'Good',
+  'Tyydyttävä': 'Fair',
+  'Huono': 'Poor',
+}
+
 export default function ListingPage() {
   const params = useParams()
   const [listing, setListing] = useState<any>(null)
@@ -22,7 +30,7 @@ export default function ListingPage() {
   }, [params.id])
 
   const handleDelete = async () => {
-    if (!confirm('Haluatko varmasti poistaa ilmoituksen?')) return
+    if (!confirm('Are you sure you want to delete this listing?')) return
     await supabase.from('listings').delete().eq('id', listing.id)
     window.location.href = '/listings'
   }
@@ -36,56 +44,118 @@ export default function ListingPage() {
       listing_id: listing.id,
       content: message
     })
-    if (error) setMessageSent('Virhe: ' + error.message)
-    else { setMessageSent('Viesti lahetetty!'); setMessage('') }
+    if (error) setMessageSent('Error: ' + error.message)
+    else { setMessageSent('Message sent!'); setMessage('') }
   }
 
-  if (loading) return <p style={{ padding: '20px' }}>Ladataan...</p>
-  if (!listing) return <p style={{ padding: '20px' }}>Ilmoitusta ei loydy.</p>
+  if (loading) return <p className="listing-loading">Loading...</p>
+  if (!listing) return <p className="listing-loading">Listing not found.</p>
+
+  const isRental = listing.listing_type === 'rent'
 
   return (
-    <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px' }}>
-      <a href="/listings" style={{ color: '#888', fontSize: '14px' }}>← Takaisin ilmoituksiin</a>
-      <h1 style={{ marginTop: '20px' }}>{listing.title}</h1>
-      <p style={{ fontSize: '24px', fontWeight: 'bold', margin: '10px 0' }}>{listing.price} €</p>
-      <p style={{ color: '#888', marginBottom: '5px' }}>{listing.location}</p>
-      {listing.category && <p style={{ color: '#888', fontSize: '14px', marginBottom: '5px' }}>{listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}</p>}
-      {listing.condition && <p style={{ color: '#aaa', fontSize: '14px', marginBottom: '20px' }}>Kunto: <strong>{listing.condition}</strong></p>}
-      {listing.images && listing.images.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px', marginBottom: '20px' }}>
-          {listing.images.map((url: string, i: number) => (
-            <img key={i} src={url} alt={listing.title} style={{ width: '100%', borderRadius: '8px', objectFit: 'cover', aspectRatio: '1' }} />
-          ))}
-        </div>
-      )}
-      <p style={{ lineHeight: '1.6', marginBottom: '30px' }}>{listing.description}</p>
+    <div className="listing-detail-page">
+      <a href="/listings" className="listing-back">← Back to listings</a>
 
-      {currentUser && currentUser.id !== listing.user_id && (
-        <div style={{ borderTop: '1px solid #333', paddingTop: '20px' }}>
-          <h3>Ota yhteytta myyjaan</h3>
-          <textarea
-            placeholder="Kirjoita viesti..."
-            value={message}
-            onChange={e => setMessage(e.target.value)}
-            style={{ display: 'block', width: '100%', padding: '8px', marginBottom: '10px', height: '100px', background: '#111', color: 'white', border: '1px solid #333', borderRadius: '4px' }}
-          />
-          <button onClick={handleSendMessage} style={{ padding: '10px 20px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            Laheta viesti
-          </button>
-          {messageSent && <p style={{ color: 'green', marginTop: '10px' }}>{messageSent}</p>}
-        </div>
-      )}
+      <div className="listing-detail-grid">
 
-      {currentUser && currentUser.id === listing.user_id && (
-        <div style={{ marginTop: '30px', display: 'flex', gap: '10px' }}>
-          <button onClick={() => window.location.href = `/listings/${listing.id}/edit`} style={{ padding: '10px 20px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            Muokkaa ilmoitusta
-          </button>
-          <button onClick={handleDelete} style={{ padding: '10px 20px', background: 'red', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            Poista ilmoitus
-          </button>
+        {/* IMAGES */}
+        <div className="listing-detail-images">
+          {listing.images && listing.images.length > 0 ? (
+            <div className="listing-images-grid">
+              {listing.images.map((url: string, i: number) => (
+                <img
+                  key={i}
+                  src={url}
+                  alt={listing.title}
+                  className={`listing-image ${i === 0 ? 'listing-image-main' : ''}`}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="listing-no-image">No photos</div>
+          )}
         </div>
-      )}
+
+        {/* INFO */}
+        <div className="listing-detail-info">
+          {isRental && (
+            <span className="listing-rental-badge">For rent</span>
+          )}
+
+          <h1 className="listing-detail-title">{listing.title}</h1>
+
+          <p className="listing-detail-price">
+            {listing.price} €{isRental ? '/day' : ''}
+          </p>
+
+          <div className="listing-detail-meta">
+            {listing.location && (
+              <span className="listing-meta-item">📍 {listing.location}</span>
+            )}
+            {listing.category && (
+              <span className="listing-meta-item">
+                {listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}
+              </span>
+            )}
+            {listing.condition && (
+              <span className="listing-meta-item listing-meta-cond">
+                {conditionLabels[listing.condition] || listing.condition}
+              </span>
+            )}
+          </div>
+
+          {listing.description && (
+            <p className="listing-detail-desc">{listing.description}</p>
+          )}
+
+          {/* CONTACT SELLER */}
+          {currentUser && currentUser.id !== listing.user_id && (
+            <div className="listing-contact">
+              <h3 className="listing-contact-title">
+                {isRental ? 'Ask about rental' : 'Contact seller'}
+              </h3>
+              <textarea
+                className="form-input form-textarea"
+                placeholder="Write a message..."
+                value={message}
+                onChange={e => setMessage(e.target.value)}
+              />
+              <button className="form-submit" onClick={handleSendMessage}>
+                Send message
+              </button>
+              {messageSent && (
+                <p className={`form-message ${messageSent.startsWith('Error') ? 'error' : 'success'}`}>
+                  {messageSent}
+                </p>
+              )}
+            </div>
+          )}
+
+          {!currentUser && (
+            <div className="listing-contact">
+              <a href="/login" className="form-submit" style={{ display: 'block', textAlign: 'center' }}>
+                Sign in to contact seller
+              </a>
+            </div>
+          )}
+
+          {/* OWNER ACTIONS */}
+          {currentUser && currentUser.id === listing.user_id && (
+            <div className="listing-owner-actions">
+              <button
+                className="listing-edit-btn"
+                onClick={() => window.location.href = `/listings/${listing.id}/edit`}
+              >
+                Edit listing
+              </button>
+              <button className="listing-delete-btn" onClick={handleDelete}>
+                Delete listing
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

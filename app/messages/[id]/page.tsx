@@ -53,7 +53,9 @@ export default function ConversationPage() {
 
   const handleSend = async () => {
     if (!newMessage.trim() || !currentUser || messages.length === 0) return
-    const otherUserId = messages[0].sender_id === currentUser.id ? messages[0].receiver_id : messages[0].sender_id
+    const otherUserId = messages[0].sender_id === currentUser.id
+      ? messages[0].receiver_id
+      : messages[0].sender_id
     await supabase.from('messages').insert({
       sender_id: currentUser.id,
       receiver_id: otherUserId,
@@ -63,33 +65,55 @@ export default function ConversationPage() {
     setNewMessage('')
   }
 
-  if (loading) return <p style={{ padding: '20px' }}>Ladataan...</p>
+  if (loading) return <p className="listing-loading">Loading...</p>
 
   return (
-    <div style={{ maxWidth: '600px', margin: '40px auto', padding: '20px' }}>
-      <a href="/messages" style={{ color: '#888', fontSize: '14px' }}>← Takaisin viesteihin</a>
-      {listing && <h2 style={{ marginTop: '10px' }}>{listing.title}</h2>}
-      <div style={{ border: '1px solid #333', borderRadius: '8px', padding: '15px', marginTop: '20px', height: '400px', overflowY: 'auto', marginBottom: '15px' }}>
+    <div className="conversation-page">
+      <a href="/messages" className="listing-back">← Back to messages</a>
+
+      {listing && (
+        <div className="conversation-listing-header">
+          {listing.images && listing.images.length > 0 && (
+            <img src={listing.images[0]} alt={listing.title} className="conversation-listing-img" />
+          )}
+          <div>
+            <h2 className="conversation-listing-title">{listing.title}</h2>
+            <p className="conversation-listing-price">
+              {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="conversation-messages">
         {messages.map(msg => (
-          <div key={msg.id} style={{ marginBottom: '15px', textAlign: msg.sender_id === currentUser?.id ? 'right' : 'left' }}>
-            <div style={{ display: 'inline-block', padding: '8px 12px', borderRadius: '8px', background: msg.sender_id === currentUser?.id ? '#333' : '#222', maxWidth: '80%' }}>
-              <p style={{ margin: 0 }}>{msg.content}</p>
-              <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#888' }}>{new Date(msg.created_at).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })}</p>
+          <div
+            key={msg.id}
+            className={`message-row ${msg.sender_id === currentUser?.id ? 'mine' : 'theirs'}`}
+          >
+            <div className={`message-bubble ${msg.sender_id === currentUser?.id ? 'mine' : 'theirs'}`}>
+              <p className="message-content">{msg.content}</p>
+              <p className="message-time">
+                {new Date(msg.created_at).toLocaleTimeString('en-GB', {
+                  hour: '2-digit', minute: '2-digit'
+                })}
+              </p>
             </div>
           </div>
         ))}
         <div ref={bottomRef} />
       </div>
-      <div style={{ display: 'flex', gap: '10px' }}>
+
+      <div className="conversation-input-row">
         <input
-          placeholder="Kirjoita viesti..."
+          className="conversation-input"
+          placeholder="Write a message..."
           value={newMessage}
           onChange={e => setNewMessage(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSend()}
-          style={{ flex: 1, padding: '8px', background: '#111', color: 'white', border: '1px solid #333', borderRadius: '4px' }}
         />
-        <button onClick={handleSend} style={{ padding: '8px 16px', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-          Lähetä
+        <button className="conversation-send-btn" onClick={handleSend}>
+          Send
         </button>
       </div>
     </div>

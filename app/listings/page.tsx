@@ -3,10 +3,18 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
 const categories: Record<string, string[]> = {
-  'Vaatteet': ['Paidat', 'Hupparit', 'Housut', 'Shortsit', 'Takit', 'Muut vaatteet'],
-  'Kengät': ['Kiipeilykengät', 'Lähestymis- ja vaelluskengät', 'Vuoristokengät', 'Muut kengät'],
-  'Varusteet': ['Valjaat', 'Köydet', 'Vuorikiipeily', 'Jääkiipeily', 'Kypärät', 'Crashpadit', 'Mankkapussit ja harjat', 'Treenivälineet', 'Muut tarvikkeet'],
-  'Kiipeilyseinätarvikkeet': ['Kiipeilyotteet', 'Turva-alustat', 'Seinämateriaalit'],
+  'Clothing': ['T-Shirts', 'Hoodies', 'Pants', 'Shorts', 'Jackets', 'Other clothing'],
+  'Shoes': ['Climbing shoes', 'Approach shoes', 'Mountain boots', 'Other shoes'],
+  'Gear': ['Harnesses', 'Ropes', 'Alpine climbing', 'Ice climbing', 'Helmets', 'Crash pads', 'Chalk bags & brushes', 'Training equipment', 'Other gear'],
+  'Wall equipment': ['Climbing holds', 'Safety mats', 'Wall materials'],
+}
+
+const conditionLabels: Record<string, string> = {
+  'Uusi': 'New',
+  'Erinomainen': 'Excellent',
+  'Hyvä': 'Good',
+  'Tyydyttävä': 'Fair',
+  'Huono': 'Poor',
 }
 
 export default function ListingsPage() {
@@ -22,11 +30,15 @@ export default function ListingsPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    supabase.from('listings').select('*').order('created_at', { ascending: false }).then(({ data }) => {
-      setListings(data || [])
-      setFiltered(data || [])
-      setLoading(false)
-    })
+    supabase
+      .from('listings')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        setListings(data || [])
+        setFiltered(data || [])
+        setLoading(false)
+      })
   }, [])
 
   useEffect(() => {
@@ -40,44 +52,103 @@ export default function ListingsPage() {
     setFiltered(result)
   }, [search, category, subcategory, minPrice, maxPrice, location, listings])
 
-  if (loading) return <p style={{ padding: '20px' }}>Ladataan...</p>
+  if (loading) return <p className="listings-loading">Loading listings...</p>
 
   return (
-    <div style={{ maxWidth: '900px', margin: '40px auto', padding: '20px' }}>
-      <h1>Ilmoitukset</h1>
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', marginTop: '20px', flexWrap: 'wrap' }}>
-        <input placeholder="Hae ilmoituksia..." value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, minWidth: '200px', padding: '8px', borderRadius: '4px', border: '1px solid #333', background: '#111', color: 'white' }} />
-        <input placeholder="Sijainti" value={location} onChange={e => setLocation(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #333', background: '#111', color: 'white', width: '120px' }} />
+    <div className="listings-page">
+      <h1 className="listings-title">Listings</h1>
+
+      <div className="listings-search-row">
+        <input
+          className="listings-input"
+          placeholder="Search listings..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        <input
+          className="listings-input listings-input-sm"
+          placeholder="Location"
+          value={location}
+          onChange={e => setLocation(e.target.value)}
+        />
       </div>
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
-        <select value={category} onChange={e => { setCategory(e.target.value); setSubcategory('') }} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #333', background: '#111', color: 'white' }}>
-          <option value="">Kaikki kategoriat</option>
-          {Object.keys(categories).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+
+      <div className="listings-filter-row">
+        <select
+          className="listings-select"
+          value={category}
+          onChange={e => { setCategory(e.target.value); setSubcategory('') }}
+        >
+          <option value="">All categories</option>
+          {Object.keys(categories).map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
         </select>
+
         {category && (
-          <select value={subcategory} onChange={e => setSubcategory(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #333', background: '#111', color: 'white' }}>
-            <option value="">Kaikki alakategoriat</option>
-            {categories[category].map(sub => <option key={sub} value={sub}>{sub}</option>)}
+          <select
+            className="listings-select"
+            value={subcategory}
+            onChange={e => setSubcategory(e.target.value)}
+          >
+            <option value="">All subcategories</option>
+            {categories[category].map(sub => (
+              <option key={sub} value={sub}>{sub}</option>
+            ))}
           </select>
         )}
-        <input placeholder="Min hinta €" value={minPrice} onChange={e => setMinPrice(e.target.value)} type="number" style={{ padding: '8px', borderRadius: '4px', border: '1px solid #333', background: '#111', color: 'white', width: '100px' }} />
-        <input placeholder="Max hinta €" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} type="number" style={{ padding: '8px', borderRadius: '4px', border: '1px solid #333', background: '#111', color: 'white', width: '100px' }} />
+
+        <input
+          className="listings-input listings-input-xs"
+          placeholder="Min price €"
+          value={minPrice}
+          onChange={e => setMinPrice(e.target.value)}
+          type="number"
+        />
+        <input
+          className="listings-input listings-input-xs"
+          placeholder="Max price €"
+          value={maxPrice}
+          onChange={e => setMaxPrice(e.target.value)}
+          type="number"
+        />
       </div>
-      {filtered.length === 0 && <p>Ei ilmoituksia.</p>}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px' }}>
+
+      {filtered.length === 0 && (
+        <p className="listings-empty">No listings found.</p>
+      )}
+
+      <div className="listings-grid">
         {filtered.map(listing => (
-          <a key={listing.id} href={`/listings/${listing.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div style={{ border: '1px solid #333', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer' }}>
+          <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
+            <div className="listing-card">
               {listing.images && listing.images.length > 0 ? (
-                <img src={listing.images[0]} alt={listing.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                <img
+                  src={listing.images[0]}
+                  alt={listing.title}
+                  className="listing-card-img"
+                />
               ) : (
-                <div style={{ width: '100%', height: '200px', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>Ei kuvaa</div>
+                <div className="listing-card-no-img">No image</div>
               )}
-              <div style={{ padding: '15px' }}>
-                <h3 style={{ margin: '0 0 8px 0' }}>{listing.title}</h3>
-                {listing.category && <p style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#888' }}>{listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}</p>}
-                <p style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>{listing.price} €</p>
-                <p style={{ margin: '0', fontSize: '12px', color: '#888' }}>{listing.location}</p>
+              <div className="listing-card-body">
+                <h3 className="listing-card-title">{listing.title}</h3>
+                {listing.category && (
+                  <p className="listing-card-cat">
+                    {listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}
+                  </p>
+                )}
+                <p className="listing-card-price">{listing.price} €</p>
+                <p className="listing-card-meta">
+                  {listing.condition && (
+                    <span className="listing-card-cond">
+                      {conditionLabels[listing.condition] || listing.condition}
+                    </span>
+                  )}
+                  {listing.location && (
+                    <span className="listing-card-loc">{listing.location}</span>
+                  )}
+                </p>
               </div>
             </div>
           </a>
