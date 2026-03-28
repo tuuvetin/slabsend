@@ -1179,3 +1179,149 @@ body {
 }
 
 .service-delete-btn:hover { background: #aa2200; color: #f0ead8; }
+/* ── ADMIN PAGE ── */
+.admin-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 32px 60px;
+}
+
+.admin-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1a1408;
+  margin-bottom: 6px;
+}
+
+.admin-subtitle {
+  font-size: 14px;
+  color: #9a9080;
+  margin-bottom: 40px;
+}
+
+.admin-section {
+  margin-bottom: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid rgba(26, 20, 8, 0.1);
+}
+
+.admin-section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1a1408;
+  margin-bottom: 6px;
+}
+
+.admin-section-desc {
+  font-size: 13px;
+  color: #9a9080;
+  margin-bottom: 20px;
+}
+
+.admin-upload-row {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.admin-upload-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.admin-preview {
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(26, 20, 8, 0.1);
+}
+
+.admin-preview-hero {
+  width: 320px;
+  height: 200px;
+}
+
+.admin-preview-cat {
+  width: 100%;
+  aspect-ratio: 3/4;
+}
+
+.admin-preview-placeholder {
+  width: 100%;
+  aspect-ratio: 3/4;
+  background: #ddd6c4;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #9a9080;
+}
+
+.admin-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.admin-cat-card {
+  background: #f0ead8;
+  border: 1px solid rgba(26, 20, 8, 0.08);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.admin-cat-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1a1408;
+  margin-bottom: 12px;
+}
+/* ── HOME HERO IMAGE ── */
+.home-hero-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.home-cat-img-wrap {
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  aspect-ratio: 3/4;
+  position: relative;
+}
+
+.home-cat-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.home-cat-card:hover .home-cat-img {
+  transform: scale(1.03);
+}
+
+.home-cat-img-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  align-items: center;
+  justify-content: center;
+}

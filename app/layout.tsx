@@ -25,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/service" className="sb-nav-link">Service</a>
             <a href="/messages" className="sb-nav-link">Messages</a>
             <a href="/profile" className="sb-nav-link">Profile</a>
+            <a href="/admin" className="sb-nav-link">Admin</a>
           </div>
           <div className="sb-nav-right">
             <a href="/listings/new" className="sb-btn-sell">+ Sell / Rent</a>
