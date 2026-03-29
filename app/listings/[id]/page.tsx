@@ -18,6 +18,7 @@ export default function ListingPage() {
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [message, setMessage] = useState('')
   const [messageSent, setMessageSent] = useState('')
+  const [deleting, setDeleting] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -31,7 +32,31 @@ export default function ListingPage() {
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this listing?')) return
-    await supabase.from('listings').delete().eq('id', listing.id)
+    setDeleting(true)
+
+    // Poistetaan kuvat storagesta ensin
+    if (listing.images && listing.images.length > 0) {
+      const paths = listing.images.map((url: string) => {
+        const parts = url.split('/listing-images/')
+        return parts[1] || ''
+      }).filter(Boolean)
+      if (paths.length > 0) {
+        await supabase.storage.from('listing-images').remove(paths)
+      }
+    }
+
+    const { error } = await supabase
+      .from('listings')
+      .delete()
+      .eq('id', listing.id)
+      .eq('user_id', currentUser.id)
+
+    if (error) {
+      alert('Error deleting listing: ' + error.message)
+      setDeleting(false)
+      return
+    }
+
     window.location.href = '/listings'
   }
 
@@ -59,7 +84,6 @@ export default function ListingPage() {
 
       <div className="listing-detail-grid">
 
-        {/* IMAGES */}
         <div className="listing-detail-images">
           {listing.images && listing.images.length > 0 ? (
             <div className="listing-images-grid">
@@ -77,7 +101,6 @@ export default function ListingPage() {
           )}
         </div>
 
-        {/* INFO */}
         <div className="listing-detail-info">
           {isRental && (
             <span className="listing-rental-badge">For rent</span>
@@ -109,7 +132,6 @@ export default function ListingPage() {
             <p className="listing-detail-desc">{listing.description}</p>
           )}
 
-          {/* CONTACT SELLER */}
           {currentUser && currentUser.id !== listing.user_id && (
             <div className="listing-contact">
               <h3 className="listing-contact-title">
@@ -140,7 +162,6 @@ export default function ListingPage() {
             </div>
           )}
 
-          {/* OWNER ACTIONS */}
           {currentUser && currentUser.id === listing.user_id && (
             <div className="listing-owner-actions">
               <button
@@ -149,8 +170,12 @@ export default function ListingPage() {
               >
                 Edit listing
               </button>
-              <button className="listing-delete-btn" onClick={handleDelete}>
-                Delete listing
+              <button
+                className="listing-delete-btn"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete listing'}
               </button>
             </div>
           )}

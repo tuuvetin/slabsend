@@ -1,12 +1,26 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { createClient } from '@/utils/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Slabsend',
   description: 'The climbing gear marketplace',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient()
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+
+  const logoFormats = ['png', 'svg', 'webp']
+  let logoUrl = ''
+  for (const ext of logoFormats) {
+    const { data } = await supabase.storage.from('logo').list('', { search: `logo.${ext}` })
+    if (data && data.length > 0) {
+      logoUrl = `${supabaseUrl}/storage/v1/object/public/logo/logo.${ext}?t=${Date.now()}`
+      break
+    }
+  }
+
   return (
     <html lang="en">
       <head>
@@ -18,7 +32,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <nav className="sb-nav">
           <a href="/" className="sb-logo">
-            Slab<span>send</span>
+            {logoUrl ? (
+              <img src={logoUrl} alt="Slabsend" className="sb-logo-img" width={180} height={45} />
+            ) : (
+              <>Slab<span>send</span></>
+            )}
           </a>
           <div className="sb-nav-links">
             <a href="/listings" className="sb-nav-link">Listings</a>

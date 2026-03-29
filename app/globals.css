@@ -18,9 +18,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 72px;
 }
-.sb-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1408; text-decoration: none; }
+.sb-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1408; text-decoration: none; display: flex; align-items: center; height: 100%; }
 .sb-logo span { color: #cc4400; }
 .sb-nav-links { display: flex; gap: 32px; }
 .sb-nav-link { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #7a7060; text-decoration: none; transition: color 0.15s; }
@@ -299,3 +299,12 @@ body {
 .admin-cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .admin-cat-card { background: #f0ead8; border: 1px solid rgba(26, 20, 8, 0.08); border-radius: 10px; padding: 16px; }
 .admin-cat-label { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1408; margin-bottom: 12px; }
+/* ── LOGO IMAGE ── */
+.sb-logo-img {
+  height: 36px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  max-width: 180px;
+  max-height: 36px;
+}
