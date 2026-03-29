@@ -79,31 +79,67 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
         </div>
       </div>
 
-      {/* CATEGORIES */}
-      <div className="home-section">
+ {/* CATEGORIES */}
+ <div className="home-section">
         <div className="home-section-header">
           <h2 className="home-section-title">Browse by category</h2>
           <a href="/listings" className="home-see-all">View all →</a>
         </div>
-        <div className="home-cat-grid">
-          {categories.map(cat => (
-            <a key={cat.key} href={cat.href} className="home-cat-card">
-              <div className="home-cat-img-wrap">
-                {!catErrors[cat.key] ? (
-                  <img
-                    src={catImageUrls[cat.key]}
-                    alt={cat.label}
-                    className="home-cat-img"
-                    onError={() => setCatErrors(prev => ({ ...prev, [cat.key]: true }))}
-                  />
-                ) : (
-                  <div className="home-cat-img-fallback" style={{ background: cat.defaultBg }} />
-                )}
-              </div>
-              <div className="home-cat-name">{cat.label}</div>
-              <div className="home-cat-shop-btn">Shop</div>
-            </a>
-          ))}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => {
+              const el = document.getElementById('cat-scroll')
+              if (el) el.scrollBy({ left: -320, behavior: 'smooth' })
+            }}
+            style={{
+              position: 'absolute', left: '-16px', top: '40%', transform: 'translateY(-50%)',
+              zIndex: 10, background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.15)',
+              borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '18px', color: '#1a1408', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}
+          >‹</button>
+          <div id="cat-scroll" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '24px',
+            overflowX: 'auto',
+            scrollSnapType: 'x mandatory',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}>
+            {categories.map(cat => (
+              <a key={cat.key} href={cat.href} className="home-cat-card" style={{ scrollSnapAlign: 'start' }}>
+                <div className="home-cat-img-wrap">
+                  {!catErrors[cat.key] ? (
+                    <img
+                      src={catImageUrls[cat.key]}
+                      alt={cat.label}
+                      className="home-cat-img"
+                      onError={() => setCatErrors(prev => ({ ...prev, [cat.key]: true }))}
+                    />
+                  ) : (
+                    <div className="home-cat-img-fallback" style={{ background: cat.defaultBg }} />
+                  )}
+                </div>
+                <div className="home-cat-name">{cat.label}</div>
+                <div className="home-cat-shop-btn">Shop</div>
+              </a>
+            ))}
+          </div>
+          <button
+            onClick={() => {
+              const el = document.getElementById('cat-scroll')
+              if (el) el.scrollBy({ left: 320, behavior: 'smooth' })
+            }}
+            style={{
+              position: 'absolute', right: '-16px', top: '40%', transform: 'translateY(-50%)',
+              zIndex: 10, background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.15)',
+              borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '18px', color: '#1a1408', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}
+          >›</button>
         </div>
       </div>
 

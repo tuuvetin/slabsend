@@ -250,7 +250,7 @@ body {
 .home-hero-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(245, 243, 230, 0.5); margin-bottom: 10px; }
 .home-hero-title { font-family: 'Barlow Condensed', sans-serif; font-size: 56px; font-weight: 700; text-transform: uppercase; color: #F5F3E6; line-height: 1; letter-spacing: 0.02em; }
 .home-action-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; -webkit-flex-shrink: 0; flex-shrink: 0; -webkit-align-self: flex-end; align-self: flex-end; }
-.home-action-box-sm { background: transparent; border: 1px solid rgba(245, 243, 230, 0.3); display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: flex-start; align-items: flex-start; -webkit-justify-content: center; justify-content: center; padding: 10px 14px; cursor: pointer; -webkit-transition: background 0.15s; transition: background 0.15s; position: relative; text-decoration: none; border-radius: 4px; white-space: nowrap; min-width: 130px; }
+.home-action-box-sm { background: transparent; border: 1px solid #FC7038; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: flex-start; align-items: flex-start; -webkit-justify-content: center; justify-content: center; padding: 10px 14px; cursor: pointer; -webkit-transition: background 0.15s; transition: background 0.15s; position: relative; text-decoration: none; border-radius: 4px; white-space: nowrap; min-width: 130px; }
 .home-action-box-sm:hover { background: rgba(245, 243, 230, 0.1); }
 .home-action-box-sm .home-action-arrow { position: absolute; top: 7px; right: 8px; font-size: 10px; color: rgba(245, 243, 230, 0.3); }
 .home-action-label-sm { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #F5F3E6; line-height: 1; margin-bottom: 3px; }
@@ -262,14 +262,14 @@ body {
 .home-see-all { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #FC7038; text-decoration: none; }
 .home-listings-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
-.home-cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.home-cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
 .home-cat-card { text-decoration: none; color: inherit; cursor: pointer; }
-.home-cat-img-wrap { overflow: hidden; border-radius: 12px; margin-bottom: 12px; aspect-ratio: 1/1; position: relative; }
+.home-cat-img-wrap { overflow: hidden; border-radius: 12px; margin-bottom: 14px; aspect-ratio: 1/1; position: relative; min-height: 280px; }
 .home-cat-img { width: 100%; height: 100%; -o-object-fit: cover; object-fit: cover; display: block; -webkit-transition: -webkit-transform 0.3s ease; transition: transform 0.3s ease; }
 .home-cat-card:hover .home-cat-img { -webkit-transform: scale(1.03); transform: scale(1.03); }
 .home-cat-img-fallback { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; border-radius: 12px; }
 .home-cat-name { font-family: 'Barlow', sans-serif; font-size: 17px; font-weight: 600; color: #1a1408; margin-bottom: 6px; }
-.home-cat-shop-btn { display: inline-block; margin-top: 6px; background: #1a1408; color: #F5F3E6; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 7px 18px; border-radius: 20px; -webkit-transition: background 0.15s; transition: background 0.15s; }
+.home-cat-shop-btn { display: inline-block; margin-top: 6px; background: #1a1408; color: #F5F3E6; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.01em; text-transform: none; padding: 7px 18px; border-radius: 20px; -webkit-transition: background 0.15s; transition: background 0.15s; }
 .home-cat-card:hover .home-cat-shop-btn { background: #FC7038; }
 
 /* ── SERVICE PAGE ── */
