@@ -23,7 +23,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
   return (
     <main>
       {/* HERO — full width */}
-      <div className="home-hero-full">
+      <div className="home-hero-full" style={{height: '640px', minHeight: '640px'}}>
         {!heroError && (
           <img
             src={heroImageUrl}
@@ -33,7 +33,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
           />
         )}
         <svg className="home-topo" viewBox="0 0 1400 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-          <rect width="1400" height="600" fill="#3a5460"/>
+        <rect width="1400" height="640" fill="#3a5460"/>
           <g fill="none" stroke="#c8a84a" strokeWidth="0.9" opacity="0.22">
             <path d="M-10,520 Q160,480 320,500 Q480,520 640,485 Q800,450 960,470 Q1120,490 1280,460 Q1360,445 1420,430"/>
             <path d="M-10,460 Q140,422 310,442 Q480,462 638,428 Q796,394 958,414 Q1120,434 1280,404 Q1360,390 1420,374"/>
