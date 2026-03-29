@@ -1,6 +1,4 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/utils/supabase/server'
 
 const categories: Record<string, string[]> = {
   'Clothing': ['T-Shirts', 'Hoodies', 'Pants', 'Shorts', 'Jackets', 'Other clothing'],
@@ -14,140 +12,67 @@ const conditionLabels: Record<string, string> = {
 }
 
 const europeanCountries = [
-  'All of Europe',
-  'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
+  'All of Europe', 'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
   'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary',
   'Iceland', 'Ireland', 'Italy', 'Latvia', 'Liechtenstein', 'Lithuania',
   'Luxembourg', 'Malta', 'Netherlands', 'Norway', 'Poland', 'Portugal',
-  'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland',
-  'United Kingdom',
+  'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom',
 ]
 
-export default function ListingsPage() {
-  const [listings, setListings] = useState<any[]>([])
-  const [filtered, setFiltered] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('')
-  const [subcategory, setSubcategory] = useState('')
-  const [minPrice, setMinPrice] = useState('')
-  const [maxPrice, setMaxPrice] = useState('')
-  const [country, setCountry] = useState('')
-  const [listingTab, setListingTab] = useState<'sell' | 'rent'>('sell')
-  const supabase = createClient()
+export default async function ListingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; search?: string; category?: string; country?: string }>
+}) {
+  const params = await searchParams
+  const supabase = await createClient()
+  const { data: listings } = await supabase
+    .from('listings')
+    .select('*')
+    .order('created_at', { ascending: false })
 
-  useEffect(() => {
-    supabase.from('listings').select('*').order('created_at', { ascending: false }).then(({ data }) => {
-      setListings(data || [])
-      setFiltered(data || [])
-      setLoading(false)
-    })
-  }, [])
+  const tab = params.tab || 'sell'
+  const search = params.search || ''
+  const category = params.category || ''
+  const country = params.country || ''
 
-  useEffect(() => {
-    let result = listings
-    result = result.filter(l => (l.listing_type || 'sell') === listingTab)
-    if (search) result = result.filter(l => l.title.toLowerCase().includes(search.toLowerCase()))
-    if (category) result = result.filter(l => l.category === category)
-    if (subcategory) result = result.filter(l => l.subcategory === subcategory)
-    if (minPrice) result = result.filter(l => l.price >= parseInt(minPrice))
-    if (maxPrice) result = result.filter(l => l.price <= parseInt(maxPrice))
-    if (country && country !== 'All of Europe') result = result.filter(l => l.country === country)
-    setFiltered(result)
-  }, [search, category, subcategory, minPrice, maxPrice, country, listings, listingTab])
-
-  if (loading) return <p className="listing-loading">Loading listings...</p>
+  let filtered = (listings || []).filter(l => (l.listing_type || 'sell') === tab)
+  if (search) filtered = filtered.filter(l => l.title.toLowerCase().includes(search.toLowerCase()))
+  if (category) filtered = filtered.filter(l => l.category === category)
+  if (country) filtered = filtered.filter(l => l.country === country)
 
   return (
     <div className="listings-page">
-
-      {/* TITLE + TABS */}
       <div className="listings-header-row">
         <h1 className="listings-title">Listings</h1>
         <div className="listings-tab-toggle">
-          <button
-            className={`listings-tab-btn ${listingTab === 'sell' ? 'active' : ''}`}
-            onClick={() => setListingTab('sell')}
-          >
-            For sale
-          </button>
-          <button
-            className={`listings-tab-btn ${listingTab === 'rent' ? 'active rent' : ''}`}
-            onClick={() => setListingTab('rent')}
-          >
-            For rent
-          </button>
+          <a href="/listings?tab=sell" className={`listings-tab-btn ${tab === 'sell' ? 'active' : ''}`}>For sale</a>
+          <a href="/listings?tab=rent" className={`listings-tab-btn ${tab === 'rent' ? 'active rent' : ''}`}>For rent</a>
         </div>
       </div>
 
-      {/* SEARCH ROW */}
-      <div className="listings-search-row">
-        <input
-          className="listings-input"
-          placeholder="Search listings..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-      </div>
-
-      {/* FILTER ROW */}
-      <div className="listings-filter-row">
-        <select
-          className="listings-select"
-          value={category}
-          onChange={e => { setCategory(e.target.value); setSubcategory('') }}
-        >
-          <option value="">All categories</option>
-          {Object.keys(categories).map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
-
-        {category && (
-          <select
-            className="listings-select"
-            value={subcategory}
-            onChange={e => setSubcategory(e.target.value)}
-          >
-            <option value="">All subcategories</option>
-            {categories[category].map(sub => (
-              <option key={sub} value={sub}>{sub}</option>
+      <form method="GET" action="/listings">
+        <input type="hidden" name="tab" value={tab} />
+        <div className="listings-search-row">
+          <input className="listings-input" placeholder="Search listings..." name="search" defaultValue={search} />
+        </div>
+        <div className="listings-filter-row">
+          <select className="listings-select" name="category" defaultValue={category}>
+            <option value="">All categories</option>
+            {Object.keys(categories).map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
-        )}
+          <select className="listings-select listings-select-full" name="country" defaultValue={country}>
+            {europeanCountries.map(c => (
+              <option key={c} value={c === 'All of Europe' ? '' : c}>{c}</option>
+            ))}
+          </select>
+          <button type="submit" className="form-submit" style={{width:'auto', padding:'10px 20px'}}>Filter</button>
+        </div>
+      </form>
 
-        <input
-          className="listings-input listings-input-xs"
-          placeholder="Min €"
-          value={minPrice}
-          onChange={e => setMinPrice(e.target.value)}
-          type="number"
-        />
-        <input
-          className="listings-input listings-input-xs"
-          placeholder="Max €"
-          value={maxPrice}
-          onChange={e => setMaxPrice(e.target.value)}
-          type="number"
-        />
-      </div>
-
-      {/* LOCATION ROW */}
-      <div className="listings-location-row">
-        <select
-          className="listings-select listings-select-full"
-          value={country}
-          onChange={e => setCountry(e.target.value)}
-        >
-          {europeanCountries.map(c => (
-            <option key={c} value={c === 'All of Europe' ? '' : c}>{c}</option>
-          ))}
-        </select>
-      </div>
-
-      {filtered.length === 0 && (
-        <p className="listings-empty">No listings found.</p>
-      )}
+      {filtered.length === 0 && <p className="listings-empty">No listings found.</p>}
 
       <div className="listings-grid">
         {filtered.map(listing => (
@@ -174,9 +99,7 @@ export default function ListingsPage() {
                       {conditionLabels[listing.condition] || listing.condition}
                     </span>
                   )}
-                  {listing.location && (
-                    <span className="listing-card-loc">{listing.location}</span>
-                  )}
+                  {listing.location && <span className="listing-card-loc">{listing.location}</span>}
                 </p>
               </div>
             </div>

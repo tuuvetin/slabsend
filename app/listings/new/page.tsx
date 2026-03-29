@@ -44,8 +44,25 @@ export default function NewListingPage() {
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
 
-  const handleImages = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) setImages(Array.from(e.target.files).slice(0, 5))
+  const handleImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    const files = Array.from(e.target.files).slice(0, 5)
+    const converted: File[] = []
+    for (const file of files) {
+      if (file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic')) {
+        try {
+          const heic2any = (await import('heic2any')).default
+          const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 }) as Blob
+          const newFile = new File([blob], file.name.replace(/\.heic$/i, '.jpg'), { type: 'image/jpeg' })
+          converted.push(newFile)
+        } catch {
+          converted.push(file)
+        }
+      } else {
+        converted.push(file)
+      }
+    }
+    setImages(converted)
   }
 
   const handleSubmit = async () => {
