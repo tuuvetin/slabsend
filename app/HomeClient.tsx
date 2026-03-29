@@ -79,8 +79,8 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
         </div>
       </div>
 
- {/* CATEGORIES */}
- <div className="home-section">
+{/* CATEGORIES */}
+<div className="home-section full-bleed">
         <div className="home-section-header">
           <h2 className="home-section-title">Browse by category</h2>
           <a href="/listings" className="home-see-all">View all →</a>
@@ -102,11 +102,12 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
           <div id="cat-scroll" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '24px',
+            gap: '13px',
             overflowX: 'auto',
             scrollSnapType: 'x mandatory',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
+            paddingLeft: '0',
           }}>
             {categories.map(cat => (
               <a key={cat.key} href={cat.href} className="home-cat-card" style={{ scrollSnapAlign: 'start' }}>
