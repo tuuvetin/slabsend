@@ -51,8 +51,8 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
         <div className="home-hero-dim-full" />
         <div className="home-hero-content-full">
           <div className="home-hero-text">
-            <p className="home-hero-eyebrow">Slabsend — The climbing gear marketplace</p>
-            <h1 className="home-hero-title">Buy. Sell.<br/>Climb.</h1>
+            <p className="home-hero-eyebrow">Slabsend — Pre-owned climbing gear</p>
+            <h1 className="home-hero-title">Buy. Sell.<br/>Rent. Climb.</h1>
           </div>
           <div className="home-action-boxes">
             <a href="/listings/new?type=sell" className="home-action-box-sm accent">
