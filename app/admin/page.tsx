@@ -64,10 +64,10 @@ export default function AdminPage() {
     setShowCropper(true)
   }
 
-  const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget
     setCrop(centerAspectCrop(width, height, cropAspect))
-  }, [cropAspect])
+  }
 
   const handleCropConfirm = async () => {
     if (!imgRef.current || !completedCrop) return
@@ -119,9 +119,11 @@ export default function AdminPage() {
     const file = new File([blob], 'hero.jpg', { type: 'image/jpeg' })
     const { error } = await supabase.storage.from('hero-image').upload('hero.jpg', file, { upsert: true })
     setHeroUploading(false)
-    setHeroMessage(error ? 'Error: ' + error.message : 'Hero image updated!')
+    if (error) { setHeroMessage('Error: ' + error.message); return }
+    setHeroMessage('Hero image updated! Refresh the front page to see it.')
   }
 
+  
   const uploadCat = async (key: string) => {
     const blob = croppedBlobs[key]
     if (!blob) return
@@ -130,7 +132,7 @@ export default function AdminPage() {
     const file = new File([blob], `${key}.jpg`, { type: 'image/jpeg' })
     const { error } = await supabase.storage.from('category-images').upload(`${key}.jpg`, file, { upsert: true })
     setCatUploading(prev => ({ ...prev, [key]: false }))
-    setCatMessages(prev => ({ ...prev, [key]: error ? 'Error: ' + error.message : 'Updated!' }))
+    setCatMessages(prev => ({ ...prev, [key]: error ? 'Error: ' + error.message : 'Updated! Refresh the front page to see it.' }))
   }
 
   if (authorized === null) return <p className="listing-loading">Loading...</p>

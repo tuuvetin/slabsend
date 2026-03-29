@@ -8,9 +8,12 @@ const categories = [
   { key: 'wall', label: 'Wall equipment', subcategories: ['Climbing holds', 'Safety mats', 'Wall materials'], defaultBg: '#7a8a9a', href: '/listings?category=Wall+equipment' },
 ]
 
+export const revalidate = 0
+
 export default async function Home() {
   const supabase = await createClient()
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const t = Date.now()
 
   const { data: listings } = await supabase
     .from('listings')
@@ -19,10 +22,10 @@ export default async function Home() {
     .order('created_at', { ascending: false })
     .limit(4)
 
-  const heroImageUrl = `${supabaseUrl}/storage/v1/object/public/hero-image/hero.jpg`
+  const heroImageUrl = `${supabaseUrl}/storage/v1/object/public/hero-image/hero.jpg?t=${t}`
   const catImageUrls: Record<string, string> = {}
   categories.forEach(cat => {
-    catImageUrls[cat.key] = `${supabaseUrl}/storage/v1/object/public/category-images/${cat.key}.jpg`
+    catImageUrls[cat.key] = `${supabaseUrl}/storage/v1/object/public/category-images/${cat.key}.jpg?t=${t}`
   })
 
   return (
