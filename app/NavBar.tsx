@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
-const ADMIN_EMAIL = 'samuel.trimarchi@icloud.com'
+const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com']
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 
 export default function NavBar() {
@@ -26,7 +26,7 @@ export default function NavBar() {
     tryLogo()
   }, [])
 
-  const isAdmin = user?.email === ADMIN_EMAIL
+  const isAdmin = ADMIN_EMAILS.includes(user?.email || '')
 
   return (
     <nav className="sb-nav">
