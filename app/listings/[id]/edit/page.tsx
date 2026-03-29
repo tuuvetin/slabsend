@@ -36,15 +36,19 @@ function centerAspectCrop(width: number, height: number) {
 }
 
 async function getCroppedBlob(imgEl: HTMLImageElement, crop: PixelCrop): Promise<Blob> {
-  const canvas = document.createElement('canvas')
-  const scaleX = imgEl.naturalWidth / imgEl.width
-  const scaleY = imgEl.naturalHeight / imgEl.height
-  canvas.width = crop.width
-  canvas.height = crop.height
-  const ctx = canvas.getContext('2d')!
-  ctx.drawImage(imgEl, crop.x * scaleX, crop.y * scaleY, crop.width * scaleX, crop.height * scaleY, 0, 0, crop.width, crop.height)
-  return new Promise(resolve => canvas.toBlob(blob => resolve(blob!), 'image/jpeg', 0.9))
-}
+    const canvas = document.createElement('canvas')
+    const scaleX = imgEl.naturalWidth / imgEl.width
+    const scaleY = imgEl.naturalHeight / imgEl.height
+    const srcWidth = crop.width * scaleX
+    const srcHeight = crop.height * scaleY
+    const minSize = 1400
+    const scale = srcWidth < minSize ? minSize / srcWidth : 1
+    canvas.width = Math.round(srcWidth * scale)
+    canvas.height = Math.round(srcHeight * scale)
+    const ctx = canvas.getContext('2d')!
+    ctx.drawImage(imgEl, crop.x * scaleX, crop.y * scaleY, srcWidth, srcHeight, 0, 0, canvas.width, canvas.height)
+    return new Promise(resolve => canvas.toBlob(blob => resolve(blob!), 'image/jpeg', 0.95))
+  }
 
 export default function EditListingPage() {
   const params = useParams()
