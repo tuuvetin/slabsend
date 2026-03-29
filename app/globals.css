@@ -309,3 +309,42 @@ body {
 .admin-cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .admin-cat-card { background: #f0ead8; border: 1px solid rgba(26, 20, 8, 0.08); border-radius: 10px; padding: 16px; }
 .admin-cat-label { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1408; margin-bottom: 12px; }
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  .sb-nav { padding: 0 16px; }
+  .sb-nav-links { display: none; }
+  .sb-btn-sell { padding: 8px 14px; font-size: 10px; }
+  .sb-btn-login { padding: 8px 12px; font-size: 10px; }
+
+  .home-hero-full { height: 520px !important; min-height: 520px !important; }
+  .home-hero-content-full { padding: 28px 20px; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: flex-start; align-items: flex-start; gap: 20px; }
+  .home-hero-title { font-size: 40px; }
+  .home-action-boxes { width: 100%; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .home-action-box-sm { min-width: 0; padding: 8px 10px; }
+  .home-action-label-sm { font-size: 13px; }
+  .home-action-desc-sm { font-size: 10px; }
+
+  .home-section { padding: 32px 16px 40px; }
+  .home-cat-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .home-cat-name { font-size: 15px; }
+  .home-listings-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+  .listings-page { padding: 24px 16px; }
+  .listings-header-row { -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: flex-start; align-items: flex-start; gap: 12px; }
+  .listings-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+  .listing-detail-grid { grid-template-columns: 1fr; gap: 24px; }
+  .listing-detail-page { padding: 20px 16px 40px; }
+
+  .profile-grid { grid-template-columns: 1fr; gap: 32px; }
+  .profile-page { padding: 24px 16px 40px; }
+
+  .service-grid { grid-template-columns: 1fr; }
+  .service-page { padding: 24px 16px 40px; }
+
+  .new-listing-page { margin: 24px auto; padding: 0 16px 40px; }
+
+  .admin-cat-grid { grid-template-columns: repeat(2, 1fr); }
+  .admin-page { padding: 24px 16px 40px; }
+  .admin-upload-row { -webkit-flex-direction: column; flex-direction: column; }
+}
