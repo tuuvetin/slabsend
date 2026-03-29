@@ -22,7 +22,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
 
   return (
     <main>
-      {/* HERO — full width */}
+      {/* HERO */}
       <div className="home-hero-full" style={{height: '640px', minHeight: '640px'}}>
         {!heroError && (
           <img
@@ -32,8 +32,8 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             onError={() => setHeroError(true)}
           />
         )}
-        <svg className="home-topo" viewBox="0 0 1400 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1400" height="640" fill="#3a5460"/>
+        <svg className="home-topo" viewBox="0 0 1400 640" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <rect width="1400" height="640" fill="#3a5460"/>
           <g fill="none" stroke="#c8a84a" strokeWidth="0.9" opacity="0.22">
             <path d="M-10,520 Q160,480 320,500 Q480,520 640,485 Q800,450 960,470 Q1120,490 1280,460 Q1360,445 1420,430"/>
             <path d="M-10,460 Q140,422 310,442 Q480,462 638,428 Q796,394 958,414 Q1120,434 1280,404 Q1360,390 1420,374"/>
@@ -42,10 +42,10 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             <path d="M-10,285 Q150,252 320,268 Q490,284 645,253 Q800,222 963,239 Q1126,256 1280,229 Q1362,216 1420,205"/>
             <path d="M-10,228 Q152,197 322,212 Q492,227 646,197 Q800,167 964,183 Q1128,199 1280,173 Q1362,160 1420,150"/>
             <path d="M-10,173 Q154,144 324,158 Q494,172 648,143 Q802,114 966,129 Q1130,144 1280,119 Q1362,106 1420,97"/>
-            <path d="M240,-10 Q232,80 244,172 Q256,264 244,356 Q232,424 236,610"/>
-            <path d="M520,-10 Q512,78 523,170 Q534,262 522,354 Q510,422 514,610"/>
-            <path d="M800,-10 Q792,76 803,168 Q814,260 802,352 Q790,420 794,610"/>
-            <path d="M1080,-10 Q1072,74 1083,166 Q1094,258 1082,350 Q1070,418 1074,610"/>
+            <path d="M240,-10 Q232,80 244,172 Q256,264 244,356 Q232,424 236,640"/>
+            <path d="M520,-10 Q512,78 523,170 Q534,262 522,354 Q510,422 514,640"/>
+            <path d="M800,-10 Q792,76 803,168 Q814,260 802,352 Q790,420 794,640"/>
+            <path d="M1080,-10 Q1072,74 1083,166 Q1094,258 1082,350 Q1070,418 1074,640"/>
           </g>
         </svg>
         <div className="home-hero-dim-full" />
@@ -101,11 +101,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
                 )}
               </div>
               <div className="home-cat-name">{cat.label}</div>
-              <div className="home-cat-links">
-                {cat.subcategories.map(sub => (
-                  <span key={sub} className="home-cat-link">{sub}</span>
-                ))}
-              </div>
+              <div className="home-cat-shop-btn">Shop</div>
             </a>
           ))}
         </div>
