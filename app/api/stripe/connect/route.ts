@@ -20,7 +20,7 @@ export async function POST() {
   })
 
   await supabase.from('profiles').upsert({
-    id: user.id,
+    user_id: user.id,
     stripe_account_id: account.id,
   })
 

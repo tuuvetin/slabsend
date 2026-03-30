@@ -18,7 +18,7 @@ export default function ProfilePage() {
       if (!user) { window.location.href = '/login'; return }
       setUser(user)
 
-      supabase.from('profiles').select('*').eq('id', user.id).single().then(({ data }) => {
+      supabase.from('profiles').select('*').eq('user_id', user.id).single().then(({ data }) => {
         if (data) {
           setUsername(data.username || '')
           setFullName(data.full_name || '')
@@ -43,11 +43,11 @@ export default function ProfilePage() {
 
   const handleSave = () => {
     supabase.from('profiles').upsert({
-      id: user.id,
-      username,
-      full_name: fullName,
-      location
-    }).then(({ error }) => {
+        user_id: user.id,
+        username,
+        full_name: fullName,
+        location
+      }).then(({ error }) => {
       if (error) setMessage('Error: ' + error.message)
       else setMessage('Profile saved!')
     })

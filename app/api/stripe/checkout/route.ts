@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const { data: sellerProfile } = await supabase
     .from('profiles')
     .select('stripe_account_id')
-    .eq('id', listing.user_id)
+        .eq('user_id', listing.user_id)
     .single()
 
   if (!sellerProfile?.stripe_account_id) {
