@@ -13,14 +13,21 @@ export async function POST(req: Request) {
 
   const { data: listing } = await supabase
     .from('listings')
-    .select('*, profiles(stripe_account_id)')
+    .select('*')
     .eq('id', listingId)
     .single()
 
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
 
-  const sellerStripeId = listing.profiles?.stripe_account_id
-  if (!sellerStripeId) return NextResponse.json({ error: 'Seller has not connected Stripe' }, { status: 400 })
+  const { data: sellerProfile } = await supabase
+    .from('profiles')
+    .select('stripe_account_id')
+    .eq('id', listing.user_id)
+    .single()
+
+  if (!sellerProfile?.stripe_account_id) {
+    return NextResponse.json({ error: 'Seller has not connected Stripe' }, { status: 400 })
+  }
 
   const commissionRate = parseFloat(process.env.NEXT_PUBLIC_COMMISSION_RATE || '0.08')
   const amountInCents = Math.round(amount * 100)
@@ -41,7 +48,7 @@ export async function POST(req: Request) {
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listingId}?payment=cancelled`,
     payment_intent_data: {
       application_fee_amount: commissionInCents,
-      transfer_data: { destination: sellerStripeId },
+      transfer_data: { destination: sellerProfile.stripe_account_id },
     },
   })
 
