@@ -42,13 +42,13 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <div className="login-logo">
-          {logoReady && (
-            logoUrl
-              ? <img src={logoUrl} alt="Slabsend" style={{ width: '160px', height: 'auto', marginBottom: '8px' }} />
-              : <>Slab<span>send</span></>
-          )}
-        </div>
+      <div className="login-logo" style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+  {logoReady && (
+    logoUrl
+      ? <img src={logoUrl} alt="Slabsend" style={{ width: '220px', height: 'auto' }} />
+      : <>Slab<span>send</span></>
+  )}
+</div>
         <h1 className="login-title">
           {isSignUp ? 'Create account' : 'Sign in'}
         </h1>
