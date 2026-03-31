@@ -32,7 +32,6 @@ export default function ProfilePage() {
       })
     })
 
-    // Tarkistetaan Stripe-paluuparametrit
     const params = new URLSearchParams(window.location.search)
     if (params.get('stripe') === 'success') {
       setMessage('Stripe connected successfully!')
@@ -41,16 +40,14 @@ export default function ProfilePage() {
     }
   }, [])
 
-  const handleSave = () => {
-    supabase.from('profiles').upsert({
-        user_id: user.id,
-        username,
-        full_name: fullName,
-        location
-      }).then(({ error }) => {
-      if (error) setMessage('Error: ' + error.message)
-      else setMessage('Profile saved!')
-    })
+  const handleSave = async () => {
+    if (!user) return
+    const { error } = await supabase.from('profiles').upsert(
+      { user_id: user.id, username, full_name: fullName, location },
+      { onConflict: 'user_id' }
+    )
+    if (error) setMessage('Error: ' + error.message)
+    else setMessage('Profile saved!')
   }
 
   const handleConnectStripe = async () => {
