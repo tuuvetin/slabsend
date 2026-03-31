@@ -8,6 +8,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 export default function NavBar() {
   const [user, setUser] = useState<any>(null)
   const [logoUrl, setLogoUrl] = useState<string>('')
+  const [logoReady, setLogoReady] = useState(false)
   const [hasUnread, setHasUnread] = useState(false)
   const supabase = createClient()
 
@@ -29,12 +30,12 @@ export default function NavBar() {
           break
         }
       }
+      setLogoReady(true)
     }
     tryLogo()
   }, [])
 
   const checkUnread = async (userId: string) => {
-    // Lukemattomat viestit tai avoimet tarjoukset joissa käyttäjä on vastaanottaja
     const { data } = await supabase
       .from('messages')
       .select('id')
@@ -42,12 +43,8 @@ export default function NavBar() {
       .eq('read', false)
       .limit(1)
 
-    if (data && data.length > 0) {
-      setHasUnread(true)
-      return
-    }
+    if (data && data.length > 0) { setHasUnread(true); return }
 
-    // Avoimet tarjoukset joissa käyttäjä on myyjä (receiver) ja status on pending
     const { data: offers } = await supabase
       .from('messages')
       .select('id')
@@ -64,10 +61,11 @@ export default function NavBar() {
   return (
     <nav className="sb-nav">
       <a href="/" className="sb-logo">
-        {logoUrl
-          ? <img src={logoUrl} alt="Slabsend" className="sb-logo-img" width={180} height={45} />
-          : <>Slab<span>send</span></>
-        }
+        {logoReady && (
+          logoUrl
+            ? <img src={logoUrl} alt="Slabsend" className="sb-logo-img" width={180} height={45} />
+            : <>Slab<span>send</span></>
+        )}
       </a>
 
       <div className="sb-nav-links">
@@ -77,14 +75,9 @@ export default function NavBar() {
           Messages
           {hasUnread && user && (
             <span style={{
-              position: 'absolute',
-              top: '-4px',
-              right: '-10px',
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              background: '#FC7038',
-              display: 'inline-block',
+              position: 'absolute', top: '-4px', right: '-10px',
+              width: '8px', height: '8px', borderRadius: '50%',
+              background: '#FC7038', display: 'inline-block',
             }} />
           )}
         </a>

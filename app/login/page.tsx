@@ -1,13 +1,31 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
   const [message, setMessage] = useState('')
+  const [logoUrl, setLogoUrl] = useState<string>('')
+  const [logoReady, setLogoReady] = useState(false)
   const supabase = createClient()
+
+  useEffect(() => {
+    const tryLogo = async () => {
+      for (const ext of ['png', 'svg', 'webp']) {
+        const { data } = await supabase.storage.from('logo').list('', { search: `logo.${ext}` })
+        if (data && data.length > 0) {
+          setLogoUrl(`${SUPABASE_URL}/storage/v1/object/public/logo/logo.${ext}?t=${Date.now()}`)
+          break
+        }
+      }
+      setLogoReady(true)
+    }
+    tryLogo()
+  }, [])
 
   const handleSubmit = async () => {
     if (isSignUp) {
@@ -24,7 +42,13 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <div className="login-logo">Slab<span>send</span></div>
+        <div className="login-logo">
+          {logoReady && (
+            logoUrl
+              ? <img src={logoUrl} alt="Slabsend" style={{ width: '160px', height: 'auto', marginBottom: '8px' }} />
+              : <>Slab<span>send</span></>
+          )}
+        </div>
         <h1 className="login-title">
           {isSignUp ? 'Create account' : 'Sign in'}
         </h1>
