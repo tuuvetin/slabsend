@@ -1,5 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop'
+import 'react-image-crop/dist/ReactCrop.css'
 import { createClient } from '@/utils/supabase/client'
 
 export default function ProfilePage() {
@@ -7,10 +9,20 @@ export default function ProfilePage() {
   const [username, setUsername] = useState('')
   const [fullName, setFullName] = useState('')
   const [location, setLocation] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState('')
   const [message, setMessage] = useState('')
   const [listings, setListings] = useState<any[]>([])
   const [stripeOnboarded, setStripeOnboarded] = useState(false)
   const [stripeLoading, setStripeLoading] = useState(false)
+
+  // Crop
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
+  const [crop, setCrop] = useState<Crop>()
+  const [completedCrop, setCompletedCrop] = useState<any>(null)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const imgRef = useRef<HTMLImageElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const supabase = createClient()
 
   useEffect(() => {
@@ -23,6 +35,7 @@ export default function ProfilePage() {
           setUsername(data.username || '')
           setFullName(data.full_name || '')
           setLocation(data.location || '')
+          setAvatarUrl(data.avatar_url || '')
           setStripeOnboarded(data.stripe_onboarded || false)
         }
       })
@@ -33,11 +46,8 @@ export default function ProfilePage() {
     })
 
     const params = new URLSearchParams(window.location.search)
-    if (params.get('stripe') === 'success') {
-      setMessage('Stripe connected successfully!')
-    } else if (params.get('stripe') === 'refresh') {
-      setMessage('Stripe connection was interrupted. Please try again.')
-    }
+    if (params.get('stripe') === 'success') setMessage('Stripe connected successfully!')
+    else if (params.get('stripe') === 'refresh') setMessage('Stripe connection was interrupted. Please try again.')
   }, [])
 
   const handleSave = async () => {
@@ -50,16 +60,84 @@ export default function ProfilePage() {
     else setMessage('Profile saved!')
   }
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => setCropSrc(reader.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth: width, naturalHeight: height } = e.currentTarget
+    const c = centerCrop(
+      makeAspectCrop({ unit: '%', width: 80 }, 1, width, height),
+      width, height
+    )
+    setCrop(c)
+  }
+
+  const getCroppedBlob = (): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const image = imgRef.current
+      if (!image || !completedCrop) return reject('No crop')
+      const canvas = document.createElement('canvas')
+      const size = 400
+      canvas.width = size
+      canvas.height = size
+      const ctx = canvas.getContext('2d')!
+      const scaleX = image.naturalWidth / image.width
+      const scaleY = image.naturalHeight / image.height
+      ctx.beginPath()
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
+      ctx.clip()
+      ctx.drawImage(
+        image,
+        completedCrop.x * scaleX,
+        completedCrop.y * scaleY,
+        completedCrop.width * scaleX,
+        completedCrop.height * scaleY,
+        0, 0, size, size
+      )
+      canvas.toBlob(blob => blob ? resolve(blob) : reject('Canvas empty'), 'image/jpeg', 0.9)
+    })
+  }
+
+  const handleAvatarUpload = async () => {
+    if (!user || !completedCrop) return
+    setAvatarUploading(true)
+    try {
+      const blob = await getCroppedBlob()
+      const path = `avatars/${user.id}.jpg`
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+      const urlWithCache = `${publicUrl}?t=${Date.now()}`
+
+      const { error: updateError } = await supabase.from('profiles').upsert(
+        { user_id: user.id, avatar_url: urlWithCache },
+        { onConflict: 'user_id' }
+      )
+      if (updateError) throw updateError
+
+      setAvatarUrl(urlWithCache)
+      setCropSrc(null)
+      setMessage('Profile picture updated!')
+    } catch (err: any) {
+      setMessage('Error uploading avatar: ' + (err.message || err))
+    }
+    setAvatarUploading(false)
+  }
+
   const handleConnectStripe = async () => {
     setStripeLoading(true)
     const res = await fetch('/api/stripe/connect', { method: 'POST' })
     const data = await res.json()
-    if (data.url) {
-      window.location.href = data.url
-    } else {
-      setMessage('Error connecting Stripe: ' + data.error)
-      setStripeLoading(false)
-    }
+    if (data.url) window.location.href = data.url
+    else { setMessage('Error connecting Stripe: ' + data.error); setStripeLoading(false) }
   }
 
   if (!user) return <p className="listing-loading">Loading...</p>
@@ -68,14 +146,63 @@ export default function ProfilePage() {
     <div className="profile-page">
 
       <div className="profile-header">
-        <div className="profile-avatar">
-          {(fullName || user.email || '?')[0].toUpperCase()}
+        {/* Avatar */}
+        <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => fileInputRef.current?.click()}>
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Avatar"
+              style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(26,20,8,0.1)' }}
+            />
+          ) : (
+            <div className="profile-avatar">
+              {(fullName || user.email || '?')[0].toUpperCase()}
+            </div>
+          )}
+          <div style={{
+            position: 'absolute', bottom: 0, right: 0,
+            background: '#FC7038', borderRadius: '50%',
+            width: '22px', height: '22px', display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+            border: '2px solid #F5F3E6', fontSize: '11px'
+          }}>✏️</div>
         </div>
+        <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileSelect} />
+
         <div>
           <h1 className="profile-name">{fullName || username || 'Your profile'}</h1>
           <p className="profile-email">{user.email}</p>
         </div>
       </div>
+
+      {/* CROP-TYÖKALU */}
+      {cropSrc && (
+        <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '12px', padding: '20px', marginBottom: '24px', maxWidth: '480px' }}>
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+            Crop profile picture
+          </p>
+          <ReactCrop
+            crop={crop}
+            onChange={c => setCrop(c)}
+            onComplete={c => setCompletedCrop(c)}
+            aspect={1}
+            circularCrop
+          >
+            <img ref={imgRef} src={cropSrc} onLoad={onImageLoad} style={{ maxWidth: '100%', maxHeight: '340px', objectFit: 'contain' }} alt="crop" />
+          </ReactCrop>
+          <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
+            <button className="form-submit" onClick={handleAvatarUpload} disabled={avatarUploading} style={{ flex: 1 }}>
+              {avatarUploading ? 'Uploading...' : 'Save picture'}
+            </button>
+            <button onClick={() => setCropSrc(null)} style={{
+              flex: 1, fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700,
+              letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
+              background: 'transparent', color: '#7a7060', border: '1px solid rgba(26,20,8,0.15)',
+              borderRadius: '8px', padding: '14px'
+            }}>Cancel</button>
+          </div>
+        </div>
+      )}
 
       <div className="profile-grid">
 
@@ -94,30 +221,20 @@ export default function ProfilePage() {
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
             <h2 className="profile-section-title">Payments</h2>
             {stripeOnboarded ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
-                <span style={{ color: '#2a6a2a', fontSize: '14px' }}>✓ Stripe connected — you can receive payments</span>
-              </div>
+              <span style={{ color: '#2a6a2a', fontSize: '14px' }}>✓ Stripe connected — you can receive payments</span>
             ) : (
               <div>
                 <p style={{ fontSize: '13px', color: '#7a7060', marginBottom: '12px', lineHeight: '1.5' }}>
                   Connect your Stripe account to receive payments from buyers directly to your bank account.
                 </p>
-                <button
-                  className="form-submit"
-                  onClick={handleConnectStripe}
-                  disabled={stripeLoading}
-                  style={{ background: '#635BFF' }}
-                >
+                <button className="form-submit" onClick={handleConnectStripe} disabled={stripeLoading} style={{ background: '#635BFF' }}>
                   {stripeLoading ? 'Connecting...' : 'Connect Stripe'}
                 </button>
               </div>
             )}
           </div>
 
-          <button
-            className="profile-signout-btn"
-            onClick={() => supabase.auth.signOut().then(() => window.location.href = '/login')}
-          >
+          <button className="profile-signout-btn" onClick={() => supabase.auth.signOut().then(() => window.location.href = '/login')}>
             Sign out
           </button>
         </div>
