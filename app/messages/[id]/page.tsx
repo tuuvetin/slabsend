@@ -12,41 +12,53 @@ export default function ConversationPage() {
   const [loading, setLoading] = useState(true)
   const [counterAmount, setCounterAmount] = useState('')
   const [showCounter, setShowCounter] = useState<string | null>(null)
+  const [profiles, setProfiles] = useState<Record<string, any>>({})
   const bottomRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { window.location.href = '/login'; return }
       setCurrentUser(user)
 
-      supabase.from('messages')
+      const { data: msgs } = await supabase
+        .from('messages')
         .select('*')
         .eq('listing_id', params.id)
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: true })
-        .then(({ data }) => {
-          setMessages(data || [])
-          if (data && data.length > 0) {
-            supabase.from('listings').select('*').eq('id', data[0].listing_id).single().then(({ data: l }) => setListing(l))
-          }
-          setLoading(false)
-        })
+
+      setMessages(msgs || [])
+
+      if (msgs && msgs.length > 0) {
+        // Haetaan listing
+        const { data: l } = await supabase.from('listings').select('*').eq('id', msgs[0].listing_id).single()
+        setListing(l)
+
+        // Haetaan kaikkien osallistujien profiilit
+        const userIds = [...new Set(msgs.flatMap(m => [m.sender_id, m.receiver_id]))]
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('user_id, username, full_name, avatar_url')
+          .in('user_id', userIds)
+
+        const profileMap: Record<string, any> = {}
+        for (const p of profileData || []) profileMap[p.user_id] = p
+        setProfiles(profileMap)
+      }
+
+      setLoading(false)
 
       const channel = supabase
         .channel('messages')
         .on('postgres_changes', {
           event: 'INSERT', schema: 'public', table: 'messages',
           filter: `listing_id=eq.${params.id}`
-        }, (payload) => {
-          setMessages(prev => [...prev, payload.new])
-        })
+        }, (payload) => setMessages(prev => [...prev, payload.new]))
         .on('postgres_changes', {
           event: 'UPDATE', schema: 'public', table: 'messages',
           filter: `listing_id=eq.${params.id}`
-        }, (payload) => {
-          setMessages(prev => prev.map(m => m.id === payload.new.id ? payload.new : m))
-        })
+        }, (payload) => setMessages(prev => prev.map(m => m.id === payload.new.id ? payload.new : m)))
         .subscribe()
 
       return () => { supabase.removeChannel(channel) }
@@ -72,14 +84,10 @@ export default function ConversationPage() {
   }
 
   const handleAcceptAndPay = async (msg: any) => {
-    // Ostaja maksaa hyväksytyn tarjouksen
     const res = await fetch('/api/stripe/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        listingId: listing.id,
-        amount: msg.offer_amount
-      }),
+      body: JSON.stringify({ listingId: listing.id, amount: msg.offer_amount }),
     })
     const data = await res.json()
     if (data.url) window.location.href = data.url
@@ -104,6 +112,19 @@ export default function ConversationPage() {
     })
     setShowCounter(null)
     setCounterAmount('')
+  }
+
+  const Avatar = ({ userId, size = 32 }: { userId: string, size?: number }) => {
+    const p = profiles[userId]
+    const name = p?.username || p?.full_name || '?'
+    if (p?.avatar_url) return (
+      <img src={p.avatar_url} alt={name} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+    )
+    return (
+      <div style={{ width: size, height: size, borderRadius: '50%', background: '#FC7038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Barlow Condensed', fontSize: size * 0.45, fontWeight: 700, color: '#F5F3E6', flexShrink: 0 }}>
+        {name[0].toUpperCase()}
+      </div>
+    )
   }
 
   if (loading) return <p className="listing-loading">Loading...</p>
@@ -132,14 +153,25 @@ export default function ConversationPage() {
           const isOffer = msg.is_offer
           const isPending = msg.offer_status === 'pending'
           const isAccepted = msg.offer_status === 'accepted'
-
-          // Myyjä = ilmoituksen omistaja
           const isSeller = listing && currentUser && listing.user_id === currentUser.id
-          // Ostaja = tarjouksen lähettäjä
           const isBuyer = msg.sender_id === currentUser?.id
+          const senderProfile = profiles[msg.sender_id]
+          const senderName = senderProfile?.username || senderProfile?.full_name || ''
 
           return (
             <div key={msg.id} className={`message-row ${isMine ? 'mine' : 'theirs'}`}>
+              {/* Avatar vastapuolelle */}
+              {!isMine && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', marginRight: '8px' }}>
+                  <Avatar userId={msg.sender_id} size={32} />
+                  {senderName && (
+                    <span style={{ fontSize: '10px', fontFamily: 'Barlow Condensed', color: '#9a9080', letterSpacing: '0.05em', maxWidth: '48px', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {senderName}
+                    </span>
+                  )}
+                </div>
+              )}
+
               {isOffer ? (
                 <div style={{
                   background: isMine ? '#FC7038' : '#F5F3E6',
@@ -159,46 +191,22 @@ export default function ConversationPage() {
                     {msg.offer_amount} €
                   </p>
 
-                  {/* MYYJÄN NAPIT: Accept, Counter, Decline — vain pending-tarjouksiin jotka ostaja lähetti */}
                   {isSeller && isPending && !isBuyer && (
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      <button
-                        onClick={() => handleOfferAction(msg.id, 'accepted')}
-                        style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}
-                      >Accept</button>
-                      <button
-                        onClick={() => setShowCounter(showCounter === msg.id ? null : msg.id)}
-                        style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}
-                      >Counter</button>
-                      <button
-                        onClick={() => handleOfferAction(msg.id, 'declined')}
-                        style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#aa2200', border: '1px solid #aa2200', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}
-                      >Decline</button>
+                      <button onClick={() => handleOfferAction(msg.id, 'accepted')} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept</button>
+                      <button onClick={() => setShowCounter(showCounter === msg.id ? null : msg.id)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Counter</button>
+                      <button onClick={() => handleOfferAction(msg.id, 'declined')} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#aa2200', border: '1px solid #aa2200', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Decline</button>
                     </div>
                   )}
 
-                  {/* OSTAJAN NAPPI: Accept & Pay — vain kun myyjä on hyväksynyt */}
                   {isBuyer && isAccepted && (
-                    <button
-                      onClick={() => handleAcceptAndPay(msg)}
-                      style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}
-                    >Accept & Pay</button>
+                    <button onClick={() => handleAcceptAndPay(msg)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept & Pay</button>
                   )}
 
-                  {/* Counter offer -lomake */}
                   {showCounter === msg.id && (
                     <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
-                      <input
-                        type="number"
-                        placeholder="Your counter offer €"
-                        value={counterAmount}
-                        onChange={e => setCounterAmount(e.target.value)}
-                        style={{ fontFamily: 'Barlow', fontSize: '13px', padding: '6px 10px', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', background: '#F5F3E6', color: '#1a1408', flex: 1 }}
-                      />
-                      <button
-                        onClick={() => handleCounterOffer(msg)}
-                        style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#FC7038', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', whiteSpace: 'nowrap' }}
-                      >Send</button>
+                      <input type="number" placeholder="Your counter offer €" value={counterAmount} onChange={e => setCounterAmount(e.target.value)} style={{ fontFamily: 'Barlow', fontSize: '13px', padding: '6px 10px', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', background: '#F5F3E6', color: '#1a1408', flex: 1 }} />
+                      <button onClick={() => handleCounterOffer(msg)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#FC7038', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', whiteSpace: 'nowrap' }}>Send</button>
                     </div>
                   )}
 
@@ -212,6 +220,13 @@ export default function ConversationPage() {
                   <p className="message-time">
                     {new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                   </p>
+                </div>
+              )}
+
+              {/* Oma avatar oikealle */}
+              {isMine && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', marginLeft: '8px' }}>
+                  <Avatar userId={currentUser.id} size={32} />
                 </div>
               )}
             </div>
