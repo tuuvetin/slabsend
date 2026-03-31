@@ -372,7 +372,11 @@ body {
   color: #1a1408;
   line-height: 1;
 }
-
+.sb-nav-mobile-right {
+  display: none;
+  align-items: center;
+  gap: 16px;
+}
 @media (max-width: 768px) {
   .sb-nav { padding: 0 16px; }
   .sb-nav-links { display: none; }
@@ -408,4 +412,6 @@ body {
   .admin-cat-grid { grid-template-columns: repeat(2, 1fr); }
   .admin-page { padding: 24px 16px 40px; }
   .admin-upload-row { -webkit-flex-direction: column; flex-direction: column; }
+  .sb-nav-mobile-right { display: flex; }
+.sb-nav-right { display: none; }
 }

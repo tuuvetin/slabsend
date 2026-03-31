@@ -44,7 +44,6 @@ export default function NavBar() {
       .eq('is_offer', true)
       .eq('offer_status', 'pending')
       .limit(1)
-  
     setHasUnread(!!(offers && offers.length > 0))
   }
 
@@ -61,6 +60,7 @@ export default function NavBar() {
           )}
         </a>
 
+        {/* DESKTOP LINKS */}
         <div className="sb-nav-links">
           <a href="/listings" className="sb-nav-link">Listings</a>
           <a href="/service" className="sb-nav-link">Service</a>
@@ -77,12 +77,31 @@ export default function NavBar() {
           {isAdmin && <a href="/admin" className="sb-nav-link">Admin</a>}
         </div>
 
+        {/* DESKTOP RIGHT */}
         <div className="sb-nav-right">
           <a href="/listings/new" className="sb-btn-sell">+ Sell / Rent</a>
           {user
             ? <a href="/profile" className="sb-btn-login">Profile</a>
             : <a href="/login" className="sb-btn-login">Sign in</a>
           }
+          <button className="sb-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+            <span /><span /><span />
+          </button>
+        </div>
+
+        {/* MOBILE RIGHT — logo + listings + messages + hamburger */}
+        <div className="sb-nav-mobile-right">
+          <a href="/listings" className="sb-nav-link">Listings</a>
+          <a href="/messages" className="sb-nav-link" style={{ position: 'relative' }}>
+            Messages
+            {hasUnread && user && (
+              <span style={{
+                position: 'absolute', top: '-4px', right: '-10px',
+                width: '8px', height: '8px', borderRadius: '50%',
+                background: '#FC7038', display: 'inline-block',
+              }} />
+            )}
+          </a>
           <button className="sb-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
             <span /><span /><span />
           </button>
