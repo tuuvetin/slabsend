@@ -376,7 +376,9 @@ body {
   display: none;
   align-items: center;
   gap: 16px;
+  margin-right: 4px;
 }
+
 @media (max-width: 768px) {
   .sb-nav { padding: 0 16px; }
   .sb-nav-links { display: none; }
