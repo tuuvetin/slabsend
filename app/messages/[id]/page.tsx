@@ -134,18 +134,30 @@ export default function ConversationPage() {
       <a href="/messages" className="listing-back">← Back to messages</a>
 
       {listing && (
-        <div className="conversation-listing-header">
-          {listing.images && listing.images.length > 0 && (
-            <img src={listing.images[0]} alt={listing.title} className="conversation-listing-img" />
-          )}
-          <div>
-            <h2 className="conversation-listing-title">{listing.title}</h2>
-            <p className="conversation-listing-price">
-              {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''}
-            </p>
-          </div>
-        </div>
-      )}
+  <div className="conversation-listing-header">
+    {listing.images && listing.images.length > 0 && (
+      <img src={listing.images[0]} alt={listing.title} className="conversation-listing-img" />
+    )}
+    <div>
+      <h2 className="conversation-listing-title">{listing.title}</h2>
+      <p className="conversation-listing-price">
+        {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''}
+      </p>
+      {messages.length > 0 && (() => {
+        const otherUserId = messages[0].sender_id === currentUser?.id
+          ? messages[0].receiver_id
+          : messages[0].sender_id
+        const otherProfile = profiles[otherUserId]
+        const otherName = otherProfile?.username || otherProfile?.full_name || null
+        return otherName ? (
+          <p style={{ fontSize: '12px', color: '#9a9080', marginTop: '2px', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>
+            Conversation with {otherName}
+          </p>
+        ) : null
+      })()}
+    </div>
+  </div>
+)}
 
       <div className="conversation-messages">
         {messages.map(msg => {
