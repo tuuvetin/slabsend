@@ -19,36 +19,39 @@ export async function POST(req: Request) {
 
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
 
-  const { data: sellerProfile } = await supabase
-    .from('profiles')
-    .select('stripe_account_id')
-        .eq('user_id', listing.user_id)
-    .single()
-
-  if (!sellerProfile?.stripe_account_id) {
-    return NextResponse.json({ error: 'Seller has not connected Stripe' }, { status: 400 })
-  }
-
   const commissionRate = parseFloat(process.env.NEXT_PUBLIC_COMMISSION_RATE || '0.08')
-  const amountInCents = Math.round(amount * 100)
-  const commissionInCents = Math.round(amountInCents * commissionRate)
+  const baseAmount = Math.round(amount * 100) // senttiä
+  const serviceFee = Math.round(baseAmount * commissionRate)
+  const totalAmount = baseAmount + serviceFee
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
-    line_items: [{
-      price_data: {
-        currency: 'eur',
-        product_data: { name: listing.title },
-        unit_amount: amountInCents,
+    line_items: [
+      {
+        price_data: {
+          currency: 'eur',
+          product_data: { name: listing.title },
+          unit_amount: baseAmount,
+        },
+        quantity: 1,
       },
-      quantity: 1,
-    }],
+      {
+        price_data: {
+          currency: 'eur',
+          product_data: { name: 'Slabsend service fee' },
+          unit_amount: serviceFee,
+        },
+        quantity: 1,
+      },
+    ],
     mode: 'payment',
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listingId}?payment=success`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listingId}?payment=cancelled`,
-    payment_intent_data: {
-      application_fee_amount: commissionInCents,
-      transfer_data: { destination: sellerProfile.stripe_account_id },
+    metadata: {
+      listing_id: listingId,
+      seller_user_id: listing.user_id,
+      base_amount: baseAmount.toString(),
+      service_fee: serviceFee.toString(),
     },
   })
 
