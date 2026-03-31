@@ -185,7 +185,7 @@ export default function ListingPage() {
                     disabled={buyLoading}
                     style={{ flex: 1 }}
                   >
-                    {buyLoading ? 'Loading...' : `Buy now — ${listing.price} €`}
+                   {buyLoading ? 'Loading...' : `Buy now — ${Math.round(listing.price * 1.08)} €`}
                   </button>
                   <button
                     onClick={() => setShowOffer(!showOffer)}
