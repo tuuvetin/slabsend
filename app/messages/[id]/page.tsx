@@ -71,21 +71,22 @@ export default function ConversationPage() {
     setNewMessage('')
   }
 
+  const handleAcceptAndPay = async (msg: any) => {
+    // Ostaja maksaa hyväksytyn tarjouksen
+    const res = await fetch('/api/stripe/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        listingId: listing.id,
+        amount: msg.offer_amount
+      }),
+    })
+    const data = await res.json()
+    if (data.url) window.location.href = data.url
+  }
+
   const handleOfferAction = async (msgId: string, action: 'accepted' | 'declined') => {
     await supabase.from('messages').update({ offer_status: action }).eq('id', msgId)
-    if (action === 'accepted' && listing) {
-      // Käynnistetään maksu
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          listingId: listing.id,
-          amount: messages.find(m => m.id === msgId)?.offer_amount
-        }),
-      })
-      const data = await res.json()
-      if (data.url) window.location.href = data.url
-    }
   }
 
   const handleCounterOffer = async (msg: any) => {
@@ -130,7 +131,12 @@ export default function ConversationPage() {
           const isMine = msg.sender_id === currentUser?.id
           const isOffer = msg.is_offer
           const isPending = msg.offer_status === 'pending'
-          const isReceiver = msg.receiver_id === currentUser?.id
+          const isAccepted = msg.offer_status === 'accepted'
+
+          // Myyjä = ilmoituksen omistaja
+          const isSeller = listing && currentUser && listing.user_id === currentUser.id
+          // Ostaja = tarjouksen lähettäjä
+          const isBuyer = msg.sender_id === currentUser?.id
 
           return (
             <div key={msg.id} className={`message-row ${isMine ? 'mine' : 'theirs'}`}>
@@ -153,22 +159,30 @@ export default function ConversationPage() {
                     {msg.offer_amount} €
                   </p>
 
-                  {/* Vastaanottajan napit pending-tarjoukseen */}
-                  {isReceiver && isPending && (
+                  {/* MYYJÄN NAPIT: Accept, Counter, Decline — vain pending-tarjouksiin jotka ostaja lähetti */}
+                  {isSeller && isPending && !isBuyer && (
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       <button
                         onClick={() => handleOfferAction(msg.id, 'accepted')}
                         style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}
-                      >Accept & Pay</button>
+                      >Accept</button>
                       <button
                         onClick={() => setShowCounter(showCounter === msg.id ? null : msg.id)}
-                        style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: isMine ? '#F5F3E6' : '#FC7038', border: `1px solid ${isMine ? 'rgba(245,243,230,0.4)' : '#FC7038'}`, padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}
+                        style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}
                       >Counter</button>
                       <button
                         onClick={() => handleOfferAction(msg.id, 'declined')}
                         style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#aa2200', border: '1px solid #aa2200', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}
                       >Decline</button>
                     </div>
+                  )}
+
+                  {/* OSTAJAN NAPPI: Accept & Pay — vain kun myyjä on hyväksynyt */}
+                  {isBuyer && isAccepted && (
+                    <button
+                      onClick={() => handleAcceptAndPay(msg)}
+                      style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}
+                    >Accept & Pay</button>
                   )}
 
                   {/* Counter offer -lomake */}
