@@ -9,7 +9,6 @@ export async function POST() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Tarkista onko jo olemassa
   const { data: profile } = await supabase
     .from('profiles')
     .select('stripe_account_id')
@@ -18,13 +17,22 @@ export async function POST() {
 
   let accountId = profile?.stripe_account_id
 
-  // Luo uusi vain jos ei ole
   if (!accountId) {
     const account = await stripe.accounts.create({
       type: 'express',
       country: 'FI',
       email: user.email,
       business_type: 'individual',
+      individual: {
+        email: user.email,
+      },
+      settings: {
+        payouts: {
+          schedule: {
+            interval: 'manual',
+          },
+        },
+      },
       capabilities: {
         card_payments: { requested: true },
         transfers: { requested: true },
