@@ -177,30 +177,38 @@ export default function ListingPage() {
             <div className="listing-contact">
 
               {/* BUY NOW + MAKE OFFER */}
-              {!isRental && (
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-                  <button
-                    className="form-submit"
-                    onClick={handleBuyNow}
-                    disabled={buyLoading}
-                    style={{ flex: 1 }}
-                  >
-                   {buyLoading ? 'Loading...' : `Buy now — ${Math.round(listing.price * 1.08)} €`}
-                  </button>
-                  <button
-                    onClick={() => setShowOffer(!showOffer)}
-                    style={{
-                      flex: 1, fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700,
-                      letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
-                      background: 'transparent', color: '#FC7038', border: '1px solid #FC7038',
-                      borderRadius: '8px', padding: '14px',
-                      transition: 'all 0.15s'
-                    }}
-                  >
-                    Make an offer
-                  </button>
-                </div>
-              )}
+{!isRental && (
+  <div style={{ marginBottom: '16px' }}>
+    <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
+      <button
+        className="form-submit"
+        onClick={handleBuyNow}
+        disabled={buyLoading}
+        style={{ flex: 1 }}
+      >
+        {buyLoading ? 'Loading...' : `Buy now — ${(listing.price * 1.08).toFixed(2)} €`}
+      </button>
+      <button
+        onClick={() => setShowOffer(!showOffer)}
+        style={{
+          flex: 1, fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700,
+          letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
+          background: 'transparent', color: '#FC7038', border: '1px solid #FC7038',
+          borderRadius: '8px', padding: '14px', transition: 'all 0.15s'
+        }}
+      >
+        Make an offer
+      </button>
+    </div>
+    {/* OSTAJAN TURVA */}
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)' }}>
+      <span style={{ fontSize: '14px' }}>🛡️</span>
+      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em' }}>
+        Buyer protection included — {(listing.price * 0.08).toFixed(2)} €
+      </span>
+    </div>
+  </div>
+)}
 
               {/* OFFER FORM */}
               {showOffer && (
