@@ -217,22 +217,13 @@ export default function ProfilePage() {
             <p className={`form-message ${message.startsWith('Error') ? 'error' : 'success'}`}>{message}</p>
           )}
 
-          {/* STRIPE */}
-          <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
-            <h2 className="profile-section-title">Payments</h2>
-            {stripeOnboarded ? (
-              <span style={{ color: '#2a6a2a', fontSize: '14px' }}>✓ Stripe connected — you can receive payments</span>
-            ) : (
-              <div>
-                <p style={{ fontSize: '13px', color: '#7a7060', marginBottom: '12px', lineHeight: '1.5' }}>
-                  Connect your Stripe account to receive payments from buyers directly to your bank account.
-                </p>
-                <button className="form-submit" onClick={handleConnectStripe} disabled={stripeLoading} style={{ background: '#635BFF' }}>
-                  {stripeLoading ? 'Connecting...' : 'Connect Stripe'}
-                </button>
-              </div>
-            )}
-          </div>
+         {/* PAYMENTS INFO */}
+<div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
+  <h2 className="profile-section-title">Payments</h2>
+  <p style={{ fontSize: '13px', color: '#7a7060', lineHeight: '1.5' }}>
+    Payments are handled securely by Slabsend. When your item sells, we'll transfer the payment directly to your bank account.
+  </p>
+</div>
 
           <button className="profile-signout-btn" onClick={() => supabase.auth.signOut().then(() => window.location.href = '/login')}>
             Sign out
