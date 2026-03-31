@@ -37,15 +37,6 @@ export default function NavBar() {
   }, [])
 
   const checkUnread = async (userId: string) => {
-    const { data } = await supabase
-      .from('messages')
-      .select('id')
-      .eq('receiver_id', userId)
-      .eq('read', false)
-      .limit(1)
-
-    if (data && data.length > 0) { setHasUnread(true); return }
-
     const { data: offers } = await supabase
       .from('messages')
       .select('id')
@@ -53,7 +44,7 @@ export default function NavBar() {
       .eq('is_offer', true)
       .eq('offer_status', 'pending')
       .limit(1)
-
+  
     setHasUnread(!!(offers && offers.length > 0))
   }
 

@@ -375,7 +375,11 @@ body {
 
 @media (max-width: 768px) {
   .sb-nav { padding: 0 16px; }
-  sb-nav-links { display: none; }
+  .sb-nav-links { display: none; }
+.sb-btn-sell { display: none; }
+.sb-btn-login { display: none; }
+.sb-hamburger { display: flex; }
+.sb-nav { justify-content: space-between; }
 .sb-btn-sell { display: none; }
 .sb-btn-login { display: none; }
 .sb-hamburger { display: flex; }
