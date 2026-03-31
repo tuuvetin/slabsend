@@ -10,6 +10,7 @@ export default function NavBar() {
   const [logoUrl, setLogoUrl] = useState<string>('')
   const [logoReady, setLogoReady] = useState(false)
   const [hasUnread, setHasUnread] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -59,38 +60,66 @@ export default function NavBar() {
   const isAdmin = ADMIN_EMAILS.includes(user?.email || '')
 
   return (
-    <nav className="sb-nav">
-      <a href="/" className="sb-logo">
-        {logoReady && (
-          logoUrl
-            ? <img src={logoUrl} alt="Slabsend" className="sb-logo-img" width={180} height={45} />
-            : <>Slab<span>send</span></>
-        )}
-      </a>
+    <>
+      <nav className="sb-nav">
+        <a href="/" className="sb-logo">
+          {logoReady && (
+            logoUrl
+              ? <img src={logoUrl} alt="Slabsend" className="sb-logo-img" width={180} height={45} />
+              : <>Slab<span>send</span></>
+          )}
+        </a>
 
-      <div className="sb-nav-links">
-        <a href="/listings" className="sb-nav-link">Listings</a>
-        <a href="/service" className="sb-nav-link">Service</a>
-        <a href="/messages" className="sb-nav-link" style={{ position: 'relative' }}>
+        <div className="sb-nav-links">
+          <a href="/listings" className="sb-nav-link">Listings</a>
+          <a href="/service" className="sb-nav-link">Service</a>
+          <a href="/messages" className="sb-nav-link" style={{ position: 'relative' }}>
+            Messages
+            {hasUnread && user && (
+              <span style={{
+                position: 'absolute', top: '-4px', right: '-10px',
+                width: '8px', height: '8px', borderRadius: '50%',
+                background: '#FC7038', display: 'inline-block',
+              }} />
+            )}
+          </a>
+          {isAdmin && <a href="/admin" className="sb-nav-link">Admin</a>}
+        </div>
+
+        <div className="sb-nav-right">
+          <a href="/listings/new" className="sb-btn-sell">+ Sell / Rent</a>
+          {user
+            ? <a href="/profile" className="sb-btn-login">Profile</a>
+            : <a href="/login" className="sb-btn-login">Sign in</a>
+          }
+          <button className="sb-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+            <span /><span /><span />
+          </button>
+        </div>
+      </nav>
+
+      {/* MOBILE MENU */}
+      <div className={`sb-mobile-menu ${menuOpen ? 'open' : ''}`}>
+        <button className="sb-mobile-close" onClick={() => setMenuOpen(false)}>×</button>
+        <a href="/listings" onClick={() => setMenuOpen(false)}>Listings</a>
+        <a href="/service" onClick={() => setMenuOpen(false)}>Service</a>
+        <a href="/messages" onClick={() => setMenuOpen(false)} style={{ position: 'relative' }}>
           Messages
           {hasUnread && user && (
             <span style={{
-              position: 'absolute', top: '-4px', right: '-10px',
-              width: '8px', height: '8px', borderRadius: '50%',
-              background: '#FC7038', display: 'inline-block',
+              display: 'inline-block', width: '10px', height: '10px',
+              borderRadius: '50%', background: '#FC7038',
+              marginLeft: '8px', verticalAlign: 'middle'
             }} />
           )}
         </a>
-        {isAdmin && <a href="/admin" className="sb-nav-link">Admin</a>}
-      </div>
-
-      <div className="sb-nav-right">
-        <a href="/listings/new" className="sb-btn-sell">+ Sell / Rent</a>
+        {isAdmin && <a href="/admin" onClick={() => setMenuOpen(false)}>Admin</a>}
+        <a href="/listings/new" onClick={() => setMenuOpen(false)} style={{ color: '#FC7038' }}>+ Sell / Rent</a>
         {user
-          ? <a href="/profile" className="sb-btn-login">Profile</a>
-          : <a href="/login" className="sb-btn-login">Sign in</a>
+          ? <a href="/profile" onClick={() => setMenuOpen(false)}>Profile</a>
+          : <a href="/login" onClick={() => setMenuOpen(false)}>Sign in</a>
         }
       </div>
-    </nav>
+    </>
   )
 }
