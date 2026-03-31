@@ -92,7 +92,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               if (el) el.scrollBy({ left: -320, behavior: 'smooth' })
             }}
             style={{
-              position: 'absolute', left: '-16px', top: '40%', transform: 'translateY(-50%)',
+              position: 'absolute', left: '0px', top: '40%', transform: 'translateY(-50%)',
               zIndex: 10, background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.15)',
               borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -134,7 +134,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               if (el) el.scrollBy({ left: 320, behavior: 'smooth' })
             }}
             style={{
-              position: 'absolute', right: '-16px', top: '40%', transform: 'translateY(-50%)',
+              position: 'absolute', right: '0px', top: '40%', transform: 'translateY(-50%)',
               zIndex: 10, background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.15)',
               borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
