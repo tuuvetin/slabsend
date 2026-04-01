@@ -237,12 +237,12 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
                 <span>To</span><span style={{ fontWeight: 600, color: '#1a1408' }}>{selectedEnd}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', position: 'relative' }} className="info-tooltip-wrap">
   🛡️ Buyer protection (8%)
-  <span
-    title="Rental protection covers: item not as described, item not delivered, significant damage during rental. Does not cover: normal wear and tear, theft by renter, or accidents during use."
-    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '14px', height: '14px', borderRadius: '50%', background: '#2a6a2a', color: '#fff', fontSize: '9px', fontWeight: 700, cursor: 'help', flexShrink: 0 }}
-  >i</span>
+  <button className="info-btn">i</button>
+  <div className="info-tooltip">
+    Rental is protected if item is not as described, not delivered, or significantly damaged on arrival. Does not cover wear and tear or accidents during use.
+  </div>
 </span>
                 <span>{(calculatePrice() * 0.08).toFixed(2)} €</span>
               </div>

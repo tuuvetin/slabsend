@@ -378,6 +378,51 @@ body {
   gap: 16px;
   margin-right: 4px;
 }
+.info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2a6a2a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  flex-shrink: 0;
+}
+.info-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1408;
+  color: #F5F3E6;
+  font-size: 12px;
+  font-family: 'Barlow', sans-serif;
+  line-height: 1.5;
+  padding: 10px 14px;
+  border-radius: 8px;
+  width: 240px;
+  z-index: 100;
+  pointer-events: none;
+}
+.info-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1a1408;
+}
+.info-tooltip-wrap:hover .info-tooltip,
+.info-tooltip-wrap:focus-within .info-tooltip {
+  display: block;
+}
 
 @media (max-width: 768px) {
   body { overflow-x: hidden; }
