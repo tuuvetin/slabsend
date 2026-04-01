@@ -31,11 +31,11 @@ const europeanCountries = [
 ]
 
 const packageSizes = [
-  { value: 'XS', label: 'XS', desc: 'Max 1kg · kirjekoko' },
-  { value: 'S', label: 'S', desc: 'Max 5kg · pieni paketti' },
-  { value: 'M', label: 'M', desc: 'Max 10kg · keskikokoinen' },
-  { value: 'L', label: 'L', desc: 'Max 20kg · iso paketti' },
-]
+    { value: 'XS', label: 'XS', desc: 'Max 1kg · letter size' },
+    { value: 'S', label: 'S', desc: 'Max 5kg · small parcel' },
+    { value: 'M', label: 'M', desc: 'Max 10kg · medium parcel' },
+    { value: 'L', label: 'L', desc: 'Max 20kg · large parcel' },
+  ]
 
 function centerAspectCrop(width: number, height: number) {
   return centerCrop(makeAspectCrop({ unit: '%', width: 90 }, 1, width, height), width, height)
