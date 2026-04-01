@@ -172,103 +172,82 @@ export default function ListingPage() {
             {listing.condition && <span className="listing-meta-item listing-meta-cond">{conditionLabels[listing.condition] || listing.condition}</span>}
           </div>
           {listing.description && <p className="listing-detail-desc">{listing.description}</p>}
+
           {isRental && (
-  <RentalCalendar
-    listingId={listing.id}
-    pricePerDay={listing.price}
-    rentalPeriod={listing.rental_period || 'day'}
-    isOwner={currentUser?.id === listing.user_id}
-    currentUserId={currentUser?.id}
-  />
-)}
+            <RentalCalendar
+              listingId={listing.id}
+              pricePerDay={listing.price}
+              rentalPeriod={listing.rental_period || 'day'}
+              isOwner={currentUser?.id === listing.user_id}
+              currentUserId={currentUser?.id}
+            />
+          )}
 
           {/* BUYER ACTIONS */}
           {currentUser && currentUser.id !== listing.user_id && (
             <div className="listing-contact">
 
               {/* BUY NOW + MAKE OFFER */}
-{!isRental && (
-  <div style={{ marginBottom: '16px' }}>
-    <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
-      <button
-        className="form-submit"
-        onClick={handleBuyNow}
-        disabled={buyLoading}
-        style={{ flex: 1 }}
-      >
-        {buyLoading ? 'Loading...' : `Buy now — ${(listing.price * 1.08).toFixed(2)} €`}
-      </button>
-      <button
-        onClick={() => setShowOffer(!showOffer)}
-        style={{
-          flex: 1, fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700,
-          letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
-          background: 'transparent', color: '#FC7038', border: '1px solid #FC7038',
-          borderRadius: '8px', padding: '14px', transition: 'all 0.15s'
-        }}
-      >
-        Make an offer
-      </button>
-    </div>
-    {/* OSTAJAN TURVA */}
-    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)' }}>
-      <span style={{ fontSize: '14px' }}>🛡️</span>
-      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em' }}>
-      Buyer protection included — {(listing.price * 0.08).toFixed(2)} €
-<span
-  title="Purchase protection covers: item not as described, item not delivered, or item significantly different from listing. Slabsend will mediate disputes and refund if seller is at fault."
-  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '14px', height: '14px', borderRadius: '50%', background: '#2a6a2a', color: '#fff', fontSize: '9px', fontWeight: 700, cursor: 'help', marginLeft: '6px', flexShrink: 0 }}
->i</span>
-      </span>
-    </div>
-  </div>
-)}
+              {!isRental && (
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
+                    <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ flex: 1 }}>
+                      {buyLoading ? 'Loading...' : `Buy now — ${(listing.price * 1.08).toFixed(2)} €`}
+                    </button>
+                    <button
+                      onClick={() => setShowOffer(!showOffer)}
+                      style={{ flex: 1, fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', borderRadius: '8px', padding: '14px', transition: 'all 0.15s' }}
+                    >
+                      Make an offer
+                    </button>
+                  </div>
 
-{showOffer && (
-  <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '8px', padding: '16px', marginBottom: '16px' }}>
-    <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
-      Your offer (asking price: {listing.price} €)
-    </p>
-    <div style={{ display: 'flex', gap: '10px' }}>
-      <input
-        className="form-input"
-        type="number"
-        placeholder={`Max ${listing.price} €`}
-        value={offerAmount}
-        onChange={e => setOfferAmount(e.target.value)}
-        style={{ marginBottom: 0 }}
-      />
-      <button
-        className="form-submit"
-        onClick={handleSendOffer}
-        disabled={offerLoading}
-        style={{ width: 'auto', padding: '0 20px', whiteSpace: 'nowrap' }}
-      >
-        {offerLoading ? 'Sending...' : 'Send offer'}
-      </button>
-    </div>
-    {offerAmount && !isNaN(Number(offerAmount)) && Number(offerAmount) > 0 && (
-      <div style={{ marginTop: '10px', padding: '10px 12px', background: '#fff', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.08)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}>
-          <span>Your offer</span>
-          <span>{Number(offerAmount).toFixed(2)} €</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}>
-          <span>🛡️ Buyer protection</span>
-          <span>{(Number(offerAmount) * 0.08).toFixed(2)} €</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 700, color: '#1a1408', borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '6px', marginTop: '4px' }}>
-          <span>Total you pay</span>
-          <span>{(Number(offerAmount) * 1.08).toFixed(2)} €</span>
-        </div>
-      </div>
-    )}
-  </div>
-)}
+                  {/* OSTAJAN TURVA */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)', position: 'relative' }}>
+                    <span style={{ fontSize: '14px' }}>🛡️</span>
+                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em' }}>
+                      Buyer protection included — {(listing.price * 0.08).toFixed(2)} €
+                    </span>
+                    <div style={{ marginLeft: 'auto', position: 'relative' }} className="info-tooltip-wrap">
+                      <button className="info-btn">i</button>
+                      <div className="info-tooltip">
+                        Your purchase is protected. We'll mediate if the item is not as described, not delivered, or significantly damaged. Contact info@slabsend.com within 48h of receiving the item.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* OFFER FORM */}
+              {showOffer && (
+                <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '8px', padding: '16px', marginBottom: '16px' }}>
+                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
+                    Your offer (asking price: {listing.price} €)
+                  </p>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <input className="form-input" type="number" placeholder={`Max ${listing.price} €`} value={offerAmount} onChange={e => setOfferAmount(e.target.value)} style={{ marginBottom: 0 }} />
+                    <button className="form-submit" onClick={handleSendOffer} disabled={offerLoading} style={{ width: 'auto', padding: '0 20px', whiteSpace: 'nowrap' }}>
+                      {offerLoading ? 'Sending...' : 'Send offer'}
+                    </button>
+                  </div>
+                  {offerAmount && !isNaN(Number(offerAmount)) && Number(offerAmount) > 0 && (
+                    <div style={{ marginTop: '10px', padding: '10px 12px', background: '#fff', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.08)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}>
+                        <span>Your offer</span><span>{Number(offerAmount).toFixed(2)} €</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}>
+                        <span>🛡️ Buyer protection</span><span>{(Number(offerAmount) * 0.08).toFixed(2)} €</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 700, color: '#1a1408', borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '6px', marginTop: '4px' }}>
+                        <span>Total you pay</span><span>{(Number(offerAmount) * 1.08).toFixed(2)} €</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {messageSent && <p className={`form-message ${messageSent.startsWith('Error') ? 'error' : 'success'}`}>{messageSent}</p>}
 
-              {/* MESSAGE */}
               <h3 className="listing-contact-title">{isRental ? 'Ask about rental' : 'Contact seller'}</h3>
               <textarea className="form-input form-textarea" placeholder="Write a message..." value={message} onChange={e => setMessage(e.target.value)} />
               <button className="form-submit" onClick={handleSendMessage}>Send message</button>
