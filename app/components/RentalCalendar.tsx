@@ -35,6 +35,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
   const [selectedEnd, setSelectedEnd] = useState<string | null>(null)
   const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [showRentalInfo, setShowRentalInfo] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -117,7 +118,8 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
     if (!selectedStart || !selectedEnd || !currentUserId) return
     setLoading(true)
     const total = calculatePrice()
-    await supabase.from('rental_bookings').insert({
+
+    const { error } = await supabase.from('rental_bookings').insert({
       listing_id: listingId,
       renter_id: currentUserId,
       start_date: selectedStart,
@@ -125,10 +127,23 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
       total_price: total,
       status: 'pending'
     })
-    setLoading(false)
-    setSelectedStart(null)
-    setSelectedEnd(null)
-    loadData()
+
+    if (error) {
+      setLoading(false)
+      return
+    }
+
+    const res = await fetch('/api/stripe/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ listingId, amount: total }),
+    })
+    const data = await res.json()
+    if (data.url) {
+      window.location.href = data.url
+    } else {
+      setLoading(false)
+    }
   }
 
   const daysInMonth = getDaysInMonth(year, month)
@@ -193,12 +208,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
               key={date}
               onClick={() => isOwner ? handleOwnerClick(date) : handleRenterClick(date)}
               disabled={isPast}
-              style={{
-                background: bg, color, border, borderRadius: '6px',
-                padding: '8px 4px', textAlign: 'center', cursor,
-                fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: isStart || isEnd ? 700 : 400,
-                opacity, transition: 'all 0.1s'
-              }}
+              style={{ background: bg, color, border, borderRadius: '6px', padding: '8px 4px', textAlign: 'center', cursor, fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: isStart || isEnd ? 700 : 400, opacity, transition: 'all 0.1s' }}
             >
               {day}
             </button>
@@ -237,13 +247,13 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
                 <span>To</span><span style={{ fontWeight: 600, color: '#1a1408' }}>{selectedEnd}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', position: 'relative' }} className="info-tooltip-wrap">
-  🛡️ Buyer protection (8%)
-  <button className="info-btn">i</button>
-  <div className="info-tooltip">
-    Rental is protected if item is not as described, not delivered, or significantly damaged on arrival. Does not cover wear and tear or accidents during use.
-  </div>
-</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', position: 'relative' }} className="info-tooltip-wrap">
+                  🛡️ Rental protection (8%)
+                  <button className="info-btn">i</button>
+                  <div className="info-tooltip">
+                    Rental is protected if item is not as described, not delivered, or significantly damaged on arrival. Does not cover wear and tear or accidents during use. Contact info@slabsend.com within 48h.
+                  </div>
+                </span>
                 <span>{(calculatePrice() * 0.08).toFixed(2)} €</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 700, color: '#1a1408', borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '8px', marginTop: '4px' }}>
