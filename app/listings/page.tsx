@@ -26,10 +26,21 @@ export default async function ListingsPage({
 }) {
   const params = await searchParams
   const supabase = await createClient()
+
   const { data: listings } = await supabase
     .from('listings')
     .select('*')
     .order('created_at', { ascending: false })
+
+  // Haetaan kaikkien myyjien profiilit
+  const userIds = [...new Set((listings || []).map(l => l.user_id))]
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('user_id, username, full_name, avatar_url')
+    .in('user_id', userIds)
+
+  const profileMap: Record<string, any> = {}
+  for (const p of profiles || []) profileMap[p.user_id] = p
 
   const tab = params.tab || 'sell'
   const search = params.search || ''
@@ -68,43 +79,64 @@ export default async function ListingsPage({
               <option key={c} value={c === 'All of Europe' ? '' : c}>{c}</option>
             ))}
           </select>
-          <button type="submit" className="form-submit" style={{width:'auto', padding:'10px 20px'}}>Filter</button>
+          <button type="submit" className="form-submit" style={{ width: 'auto', padding: '10px 20px' }}>Filter</button>
         </div>
       </form>
 
       {filtered.length === 0 && <p className="listings-empty">No listings found.</p>}
 
       <div className="listings-grid">
-        {filtered.map(listing => (
-          <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
-            <div className="listing-card">
-              {listing.images && listing.images.length > 0 ? (
-                <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
-              ) : (
-                <div className="listing-card-no-img">No image</div>
-              )}
-              <div className="listing-card-body">
-                <h3 className="listing-card-title">{listing.title}</h3>
-                {listing.category && (
-                  <p className="listing-card-cat">
-                    {listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}
-                  </p>
+        {filtered.map(listing => {
+          const profile = profileMap[listing.user_id]
+          const displayName = profile?.username || profile?.full_name || ''
+          const avatarUrl = profile?.avatar_url
+
+          return (
+            <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
+              <div className="listing-card">
+                {listing.images && listing.images.length > 0 ? (
+                  <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
+                ) : (
+                  <div className="listing-card-no-img">No image</div>
                 )}
-                <p className="listing-card-price">
-                  {listing.price} €{listing.listing_type === 'rent' && listing.rental_period ? `/${listing.rental_period}` : ''}
-                </p>
-                <p className="listing-card-meta">
-                  {listing.condition && (
-                    <span className="listing-card-cond">
-                      {conditionLabels[listing.condition] || listing.condition}
-                    </span>
+                <div className="listing-card-body">
+                  <h3 className="listing-card-title">{listing.title}</h3>
+                  {listing.category && (
+                    <p className="listing-card-cat">
+                      {listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}
+                    </p>
                   )}
-                  {listing.location && <span className="listing-card-loc">{listing.location}</span>}
-                </p>
+                  <p className="listing-card-price">
+                    {listing.price} €{listing.listing_type === 'rent' && listing.rental_period ? `/${listing.rental_period}` : ''}
+                  </p>
+                  <p className="listing-card-meta">
+                    {listing.condition && (
+                      <span className="listing-card-cond">
+                        {conditionLabels[listing.condition] || listing.condition}
+                      </span>
+                    )}
+                    {listing.location && <span className="listing-card-loc">{listing.location}</span>}
+                  </p>
+                  {/* MYYJÄN TIEDOT */}
+                  {displayName && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(26,20,8,0.06)' }}>
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt={displayName} style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#FC7038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 700, color: '#F5F3E6', flexShrink: 0 }}>
+                          {displayName[0].toUpperCase()}
+                        </div>
+                      )}
+                      <span style={{ fontSize: '11px', color: '#7a7060', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {displayName}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </a>
-        ))}
+            </a>
+          )
+        })}
       </div>
     </div>
   )
