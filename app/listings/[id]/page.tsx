@@ -211,7 +211,7 @@ export default function ListingPage() {
                     <div style={{ marginLeft: 'auto', position: 'relative' }} className="info-tooltip-wrap">
                       <button className="info-btn">i</button>
                       <div className="info-tooltip">
-                        Your purchase is protected. We'll mediate if the item is not as described, not delivered, or significantly damaged. Contact info@slabsend.com within 48h of receiving the item.
+                      Your purchase is protected. The seller receives payment only after you confirm the item is as described. If the item doesn't match the listing, contact info@slabsend.com within 48 of receiving the item and we'll help resolve it. 
                       </div>
                     </div>
                   </div>
