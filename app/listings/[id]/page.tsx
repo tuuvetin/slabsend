@@ -1,4 +1,5 @@
 'use client'
+import RentalCalendar from '@/app/components/RentalCalendar'
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
@@ -171,6 +172,15 @@ export default function ListingPage() {
             {listing.condition && <span className="listing-meta-item listing-meta-cond">{conditionLabels[listing.condition] || listing.condition}</span>}
           </div>
           {listing.description && <p className="listing-detail-desc">{listing.description}</p>}
+          {isRental && (
+  <RentalCalendar
+    listingId={listing.id}
+    pricePerDay={listing.price}
+    rentalPeriod={listing.rental_period || 'day'}
+    isOwner={currentUser?.id === listing.user_id}
+    currentUserId={currentUser?.id}
+  />
+)}
 
           {/* BUYER ACTIONS */}
           {currentUser && currentUser.id !== listing.user_id && (
