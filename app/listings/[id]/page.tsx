@@ -214,7 +214,11 @@ export default function ListingPage() {
     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)' }}>
       <span style={{ fontSize: '14px' }}>🛡️</span>
       <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em' }}>
-        Buyer protection included — {(listing.price * 0.08).toFixed(2)} €
+      Buyer protection included — {(listing.price * 0.08).toFixed(2)} €
+<span
+  title="Purchase protection covers: item not as described, item not delivered, or item significantly different from listing. Slabsend will mediate disputes and refund if seller is at fault."
+  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '14px', height: '14px', borderRadius: '50%', background: '#2a6a2a', color: '#fff', fontSize: '9px', fontWeight: 700, cursor: 'help', marginLeft: '6px', flexShrink: 0 }}
+>i</span>
       </span>
     </div>
   </div>
