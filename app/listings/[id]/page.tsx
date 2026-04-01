@@ -13,6 +13,7 @@ export default function ListingPage() {
   const [listing, setListing] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState<any>(null)
+  const [sellerProfile, setSellerProfile] = useState<any>(null)
   const [message, setMessage] = useState('')
   const [messageSent, setMessageSent] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -29,6 +30,9 @@ export default function ListingPage() {
     supabase.from('listings').select('*').eq('id', params.id).single().then(({ data }) => {
       setListing(data)
       setLoading(false)
+      if (data?.user_id) {
+        supabase.from('profiles').select('username, full_name, avatar_url, location').eq('user_id', data.user_id).single().then(({ data: p }) => setSellerProfile(p))
+      }
     })
   }, [params.id])
 
@@ -124,6 +128,7 @@ export default function ListingPage() {
 
   const isRental = listing.listing_type === 'rent'
   const images: string[] = listing.images || []
+  const sellerName = sellerProfile?.username || sellerProfile?.full_name || ''
 
   return (
     <div className="listing-detail-page">
@@ -173,6 +178,28 @@ export default function ListingPage() {
           </div>
           {listing.description && <p className="listing-detail-desc">{listing.description}</p>}
 
+          {/* MYYJÄN PROFIILI */}
+          {sellerName && (
+            <a href={`/sellers/${listing.user_id}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '16px', padding: '10px 14px', background: '#F5F3E6', borderRadius: '8px', border: '1px solid rgba(26,20,8,0.08)', textDecoration: 'none' }}>
+              {sellerProfile?.avatar_url ? (
+                <img src={sellerProfile.avatar_url} alt="" style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              ) : (
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#FC7038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700, color: '#F5F3E6', flexShrink: 0, fontFamily: 'Barlow Condensed' }}>
+                  {sellerName[0].toUpperCase()}
+                </div>
+              )}
+              <div>
+                <p style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#1a1408', margin: 0 }}>
+                  {sellerName}
+                </p>
+                <p style={{ fontSize: '11px', color: '#9a9080', margin: '2px 0 0', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>
+                  View all listings →
+                </p>
+              </div>
+            </a>
+          )}
+
+          {/* KALENTERI */}
           {isRental && (
             <RentalCalendar
               listingId={listing.id}
@@ -211,7 +238,7 @@ export default function ListingPage() {
                     <div style={{ marginLeft: 'auto', position: 'relative' }} className="info-tooltip-wrap">
                       <button className="info-btn">i</button>
                       <div className="info-tooltip">
-                      Your purchase is protected. The seller receives payment only after you confirm the item is as described. If the item doesn't match the listing, contact info@slabsend.com within 48 of receiving the item and we'll help resolve it. 
+                        Your purchase is protected. If something goes wrong, Slabsend steps in to help resolve the issue and ensure you get your money back. The seller receives payment only after you confirm the item is as described. If the item doesn't match the listing, contact info@slabsend.com and we'll help resolve it.
                       </div>
                     </div>
                   </div>
