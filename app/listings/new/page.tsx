@@ -30,24 +30,31 @@ const europeanCountries = [
   'United Kingdom',
 ]
 
+const packageSizes = [
+  { value: 'XS', label: 'XS', desc: 'Max 1kg · kirjekoko' },
+  { value: 'S', label: 'S', desc: 'Max 5kg · pieni paketti' },
+  { value: 'M', label: 'M', desc: 'Max 10kg · keskikokoinen' },
+  { value: 'L', label: 'L', desc: 'Max 20kg · iso paketti' },
+]
+
 function centerAspectCrop(width: number, height: number) {
   return centerCrop(makeAspectCrop({ unit: '%', width: 90 }, 1, width, height), width, height)
 }
 
 async function getCroppedBlob(imgEl: HTMLImageElement, crop: PixelCrop): Promise<Blob> {
-    const canvas = document.createElement('canvas')
-    const scaleX = imgEl.naturalWidth / imgEl.width
-    const scaleY = imgEl.naturalHeight / imgEl.height
-    const srcWidth = crop.width * scaleX
-    const srcHeight = crop.height * scaleY
-    const minSize = 1400
-    const scale = srcWidth < minSize ? minSize / srcWidth : 1
-    canvas.width = Math.round(srcWidth * scale)
-    canvas.height = Math.round(srcHeight * scale)
-    const ctx = canvas.getContext('2d')!
-    ctx.drawImage(imgEl, crop.x * scaleX, crop.y * scaleY, srcWidth, srcHeight, 0, 0, canvas.width, canvas.height)
-    return new Promise(resolve => canvas.toBlob(blob => resolve(blob!), 'image/jpeg', 0.95))
-  }
+  const canvas = document.createElement('canvas')
+  const scaleX = imgEl.naturalWidth / imgEl.width
+  const scaleY = imgEl.naturalHeight / imgEl.height
+  const srcWidth = crop.width * scaleX
+  const srcHeight = crop.height * scaleY
+  const minSize = 1400
+  const scale = srcWidth < minSize ? minSize / srcWidth : 1
+  canvas.width = Math.round(srcWidth * scale)
+  canvas.height = Math.round(srcHeight * scale)
+  const ctx = canvas.getContext('2d')!
+  ctx.drawImage(imgEl, crop.x * scaleX, crop.y * scaleY, srcWidth, srcHeight, 0, 0, canvas.width, canvas.height)
+  return new Promise(resolve => canvas.toBlob(blob => resolve(blob!), 'image/jpeg', 0.95))
+}
 
 export default function NewListingPage() {
   const [listingType, setListingType] = useState<'sell' | 'rent'>('sell')
@@ -62,6 +69,9 @@ export default function NewListingPage() {
   const [condition, setCondition] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [shippingEnabled, setShippingEnabled] = useState(false)
+  const [packageSize, setPackageSize] = useState('')
+  const [packageWeight, setPackageWeight] = useState('')
 
   // Crop state
   const [cropQueue, setCropQueue] = useState<{ file: File; src: string }[]>([])
@@ -131,6 +141,7 @@ export default function NewListingPage() {
   const handleSubmit = async () => {
     if (!country) { setMessage('Please select a country.'); return }
     if (!city.trim()) { setMessage('Please enter a city.'); return }
+    if (shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { window.location.href = '/login'; return }
@@ -153,6 +164,9 @@ export default function NewListingPage() {
       images: imageUrls,
       listing_type: listingType,
       rental_period: listingType === 'rent' ? rentalPeriod : null,
+      shipping_enabled: shippingEnabled,
+      package_size: shippingEnabled ? packageSize : null,
+      package_weight: shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
     })
 
     setLoading(false)
@@ -163,6 +177,7 @@ export default function NewListingPage() {
       setCountry(''); setCity('')
       setCategory(''); setSubcategory(''); setCondition('')
       setCroppedFiles([]); setCropQueue([])
+      setShippingEnabled(false); setPackageSize(''); setPackageWeight('')
     }
   }
 
@@ -185,36 +200,13 @@ export default function NewListingPage() {
             Photo {cropIndex + 1} / {cropQueue.length} — Drag to crop
           </p>
           <div style={{ maxWidth: '90vw', maxHeight: '60vh', overflow: 'hidden' }}>
-            <ReactCrop
-              crop={crop}
-              onChange={c => setCrop(c)}
-              onComplete={c => setCompletedCrop(c)}
-              aspect={1}
-            >
-              <img
-                ref={imgRef}
-                src={cropQueue[cropIndex].src}
-                onLoad={onImageLoad}
-                style={{ maxWidth: '80vw', maxHeight: '55vh', display: 'block' }}
-                alt="crop"
-              />
+            <ReactCrop crop={crop} onChange={c => setCrop(c)} onComplete={c => setCompletedCrop(c)} aspect={1}>
+              <img ref={imgRef} src={cropQueue[cropIndex].src} onLoad={onImageLoad} style={{ maxWidth: '80vw', maxHeight: '55vh', display: 'block' }} alt="crop" />
             </ReactCrop>
           </div>
           <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-            <button onClick={handleSkipCrop} style={{
-              fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 600,
-              letterSpacing: '0.12em', textTransform: 'uppercase',
-              background: 'transparent', color: '#f0ead8',
-              border: '1px solid rgba(240,234,216,0.3)', padding: '10px 24px',
-              borderRadius: '6px', cursor: 'pointer'
-            }}>Skip</button>
-            <button onClick={handleCropConfirm} style={{
-              fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700,
-              letterSpacing: '0.12em', textTransform: 'uppercase',
-              background: '#cc4400', color: '#f0ead8',
-              border: 'none', padding: '10px 24px',
-              borderRadius: '6px', cursor: 'pointer'
-            }}>Confirm crop</button>
+            <button onClick={handleSkipCrop} style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', color: '#f0ead8', border: '1px solid rgba(240,234,216,0.3)', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Skip</button>
+            <button onClick={handleCropConfirm} style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: '#cc4400', color: '#f0ead8', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Confirm crop</button>
           </div>
         </div>
       )}
@@ -271,6 +263,60 @@ export default function NewListingPage() {
         <option value="">Select condition</option>
         {conditions.map(c => <option key={c} value={c}>{c}</option>)}
       </select>
+
+      {/* SHIPPING */}
+      <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={shippingEnabled}
+            onChange={e => setShippingEnabled(e.target.checked)}
+            style={{ width: '18px', height: '18px', accentColor: '#FC7038' }}
+          />
+          <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
+            Offer shipping
+          </span>
+        </label>
+        <p style={{ fontSize: '12px', color: '#7a7060', marginTop: '6px', marginLeft: '28px' }}>
+          Buyers can choose shipping at checkout. You'll receive a shipping label by email.
+        </p>
+
+        {shippingEnabled && (
+          <div style={{ marginTop: '14px', marginLeft: '28px' }}>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
+              Package size
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '14px' }}>
+              {packageSizes.map(size => (
+                <button
+                  key={size.value}
+                  onClick={() => setPackageSize(size.value)}
+                  style={{
+                    fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700,
+                    letterSpacing: '0.08em', textTransform: 'uppercase',
+                    padding: '10px 8px', borderRadius: '8px', cursor: 'pointer',
+                    border: packageSize === size.value ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)',
+                    background: packageSize === size.value ? '#FC7038' : '#fff',
+                    color: packageSize === size.value ? '#F5F3E6' : '#1a1408',
+                    textAlign: 'center'
+                  }}
+                >
+                  <div>{size.label}</div>
+                  <div style={{ fontSize: '10px', fontWeight: 400, marginTop: '2px', opacity: 0.8 }}>{size.desc}</div>
+                </button>
+              ))}
+            </div>
+            <input
+              className="form-input"
+              type="number"
+              placeholder="Weight in kg (e.g. 0.5)"
+              value={packageWeight}
+              onChange={e => setPackageWeight(e.target.value)}
+              style={{ marginBottom: 0 }}
+            />
+          </div>
+        )}
+      </div>
 
       <div className="form-images">
         <label className="form-label">Photos (max 5)</label>
