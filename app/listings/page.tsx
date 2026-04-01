@@ -118,20 +118,14 @@ export default async function ListingsPage({
                     {listing.location && <span className="listing-card-loc">{listing.location}</span>}
                   </p>
                   {/* MYYJÄN TIEDOT */}
-                  {displayName && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(26,20,8,0.06)' }}>
-                      {avatarUrl ? (
-                        <img src={avatarUrl} alt={displayName} style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                      ) : (
-                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#FC7038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 700, color: '#F5F3E6', flexShrink: 0 }}>
-                          {displayName[0].toUpperCase()}
-                        </div>
-                      )}
-                      <span style={{ fontSize: '11px', color: '#7a7060', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {displayName}
-                      </span>
-                    </div>
-                  )}
+{displayName && (
+  <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(26,20,8,0.06)' }}>
+    <span style={{ fontSize: '11px', color: '#7a7060', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>
+      {displayName}
+    </span>
+  </div>
+)}
+                  )
                 </div>
               </div>
             </a>
