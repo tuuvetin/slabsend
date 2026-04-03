@@ -1,105 +1,127 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/utils/supabase/server'
 
-export default function MessagesPage() {
-  const [conversations, setConversations] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+const categories: Record<string, string[]> = {
+  'Clothing': ['T-Shirts', 'Hoodies', 'Pants', 'Shorts', 'Jackets', 'Other clothing'],
+  'Shoes': ['Climbing shoes', 'Approach shoes', 'Mountain boots', 'Other shoes'],
+  'Gear': ['Harnesses', 'Ropes', 'Alpine climbing', 'Ice climbing', 'Helmets', 'Crash pads', 'Chalk bags & brushes', 'Training equipment', 'Other gear'],
+  'Wall equipment': ['Climbing holds', 'Safety mats', 'Wall materials'],
+}
 
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { window.location.href = '/login'; return }
+const conditionLabels: Record<string, string> = {
+  'Uusi': 'New', 'Erinomainen': 'Excellent', 'Hyvä': 'Good', 'Tyydyttävä': 'Fair', 'Huono': 'Poor',
+}
 
-      const { data: messages } = await supabase
-        .from('messages')
-        .select('*')
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-        .order('created_at', { ascending: false })
+const europeanCountries = [
+  'All of Europe', 'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
+  'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary',
+  'Iceland', 'Ireland', 'Italy', 'Latvia', 'Liechtenstein', 'Lithuania',
+  'Luxembourg', 'Malta', 'Netherlands', 'Norway', 'and', 'Portugal',
+  'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom',
+]
 
-      const seen = new Set()
-      const unique = (messages || []).filter(msg => {
-        const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
-        const key = `${msg.listing_id}-${otherUserId}`
-        if (seen.has(key)) return false
-        seen.add(key)
-        return true
-      })
+export default async function ListingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; search?: string; category?: string; country?: string }>
+}) {
+  const params = await searchParams
+  const supabase = await createClient()
 
-      const enriched = await Promise.all(unique.map(async msg => {
-        const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
+  const { data: listings } = await supabase
+    .from('listings')
+    .select('*')
+    .eq('sold', false)
+    .order('created_at', { ascending: false })
 
-        const [{ data: listing }, { data: profile }, { data: order }] = await Promise.all([
-          supabase.from('listings').select('title, images').eq('id', msg.listing_id).single(),
-          supabase.from('profiles').select('username, full_name, avatar_url').eq('user_id', otherUserId).single(),
-          supabase.from('orders').select('status').eq('listing_id', msg.listing_id).or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`).in('status', ['paid', 'confirmed']).maybeSingle(),
-        ])
+  const userIds = [...new Set((listings || []).map(l => l.user_id))]
+  const { data: profiles } = userIds.length > 0
+    ? await supabase.from('profiles').select('user_id, username, full_name, avatar_url').in('user_id', userIds)
+    : { data: [] }
 
-        return { ...msg, listing, profile, otherUserId, order }
-      }))
+  const profileMap: Record<string, any> = {}
+  for (const p of profiles || []) profileMap[p.user_id] = p
 
-      setConversations(enriched)
-      setLoading(false)
-    })
-  }, [])
+  const tab = params.tab || 'sell'
+  const search = params.search || ''
+  const category = params.category || ''
+  const country = params.country || ''
 
-  if (loading) return <p className="listing-loading">Loading messages...</p>
+  let filtered = (listings || []).filter(l => (l.listing_type || 'sell') === tab)
+  if (search) filtered = filtered.filter(l => l.title.toLowerCase().includes(search.toLowerCase()))
+  if (category) filtered = filtered.filter(l => l.category === category)
+  if (country) filtered = filtered.filter(l => l.country === country)
 
   return (
-    <div className="messages-page">
-      <h1 className="messages-title">Messages</h1>
-
-      {conversations.length === 0 && (
-        <div className="messages-empty">
-          <p>No messages yet.</p>
-          <a href="/listings" className="messages-empty-link">Browse listings to get started →</a>
+    <div className="listings-page">
+      <div className="listings-header-row">
+        <h1 className="listings-title">Listings</h1>
+        <div className="listings-tab-toggle">
+          <a href="/listings?tab=sell" className={\`listings-tab-btn \${tab === 'sell' ? 'active' : ''}\`}>For sale</a>
+          <a href="/listings?tab=rent" className={\`listings-tab-btn \${tab === 'rent' ? 'active rent' : ''}\`}>For rent</a>
         </div>
-      )}
+      </div>
 
-      <div className="messages-list">
-        {conversations.map(msg => {
-          const displayName = msg.profile?.username || msg.profile?.full_name || 'User'
-          const avatarUrl = msg.profile?.avatar_url
-          const listingTitle = msg.listing?.title || `Listing #${msg.listing_id}`
-          const listingImage = msg.listing?.images?.[0]
-          const hasOrder = !!msg.order
+      <form method="GET" action="/listings">
+        <input type="hidden" name="tab" value={tab} />
+        <div className="listings-search-row">
+          <input className="listings-input" placeholder="Search listings..." name="search" defaultValue={search} />
+        </div>
+        <div className="listings-filter-row">
+          <select className="listings-select" name="category" defaultValue={category}>
+            <option value="">All categories</option>
+            {Object.keys(categories).map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+          <select className="listings-select listings-select-full" name="country" defaultValue={country}>
+            {europeanCountries.map(c => (
+              <option key={c} value={c === 'All of Europe' ? '' : c}>{c}</option>
+            ))}
+          </select>
+          <button type="submit" className="form-submit" style={{ width: 'auto', padding: '10px 20px' }}>Filter</button>
+        </div>
+      </form>
+
+      {filtered.length === 0 && <p className="listings-empty">No listings found.</p>}
+
+      <div className="listings-grid">
+        {filtered.map(listing => {
+          const profile = profileMap[listing.user_id]
+          const displayName = profile?.username || profile?.full_name || ''
 
           return (
-            <a key={msg.id} href={`/messages/${msg.listing_id}/${msg.otherUserId}`} className="conversation-link">
-              <div className="conversation-card" style={{ background: hasOrder ? '#f0f7f0' : undefined, borderColor: hasOrder ? 'rgba(42,106,42,0.2)' : undefined }}>
-                <div style={{ position: 'relative', flexShrink: 0 }}>
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt={displayName} style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(26,20,8,0.1)' }} />
-                  ) : (
-                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#FC7038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Barlow Condensed', fontSize: '18px', fontWeight: 700, color: '#F5F3E6', flexShrink: 0 }}>
-                      {displayName[0].toUpperCase()}
-                    </div>
+            <a key={listing.id} href={\`/listings/\${listing.id}\`} className="listing-card-link">
+              <div className="listing-card">
+                {listing.images && listing.images.length > 0 ? (
+                  <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
+                ) : (
+                  <div className="listing-card-no-img">No image</div>
+                )}
+                <div className="listing-card-body">
+                  <h3 className="listing-card-title">{listing.title}</h3>
+                  {listing.category && (
+                    <p className="listing-card-cat">
+                      {listing.category}{listing.subcategory ? \` › \${listing.subcategory}\` : ''}
+                    </p>
                   )}
-                  {listingImage && (
-                    <img src={listingImage} alt="" style={{ position: 'absolute', bottom: '-4px', right: '-4px', width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #F5F3E6' }} />
-                  )}
-                </div>
-
-                <div className="conversation-body">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <p className="conversation-listing" style={{ fontWeight: 600, margin: 0 }}>{displayName}</p>
-                    {hasOrder && (
-                      <span style={{ background: msg.order.status === 'confirmed' ? '#2a6a2a' : '#FC7038', color: '#fff', fontFamily: 'Barlow Condensed', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
-                        {msg.order.status === 'confirmed' ? '✓ Completed' : '⏳ Awaiting confirmation'}
+                  <p className="listing-card-price">
+                    {listing.price} €{listing.listing_type === 'rent' && listing.rental_period ? \`/\${lis.rental_period}\` : ''}
+                  </p>
+                  <p className="listing-card-meta">
+                    {listing.condition && (
+                      <span className="listing-card-cond">
+                        {conditionLabels[listing.condition] || listing.condition}
                       </span>
                     )}
-                  </div>
-                  <p style={{ fontSize: '12px', color: '#9a9080', margin: '1px 0 3px', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>{listingTitle}</p>
-                  <p className="conversation-preview">
-                    {msg.content.length > 60 ? msg.content.substring(0, 60) + '...' : msg.content}
+                    {listing.location && <span className="listing-card-loc">{listing.location}</span>}
                   </p>
-                </div>
-
-                <div className="conversation-meta">
-                  <span className="conversation-date">
-                    {new Date(msg.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </span>
-                  <span className="conversation-arrow">→</span>
+                  {displayName && (
+                    <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(26,20,8,0.06)' }}>
+                      <span style={{ fontSize: '11px', color: '#7a7060', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>
+                        {displayName}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </a>
