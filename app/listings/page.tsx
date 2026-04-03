@@ -105,7 +105,7 @@ export default async function ListingsPage({
                     </p>
                   )}
                   <p className="listing-card-price">
-                    {listing.price} €{listing.listing_type === 'rent' && listing.rental_period ? `/${lis.rental_period}` : ''}
+                    {listing.price} €{listing.listing_type === 'rent' && listing.rental_period ? `/${listing.rental_period}` : ''}
                   </p>
                   <p className="listing-card-meta">
                     {listing.condition && (
