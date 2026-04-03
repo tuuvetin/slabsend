@@ -48,11 +48,12 @@ export async function POST(req: Request) {
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listingId}?payment=success`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listingId}?payment=cancelled`,
     metadata: {
-      listing_id: listingId,
-      seller_user_id: listing.user_id,
-      base_amount: baseAmount.toString(),
-      service_fee: serviceFee.toString(),
-    },
+        listing_id: listingId,
+        seller_user_id: listing.user_id,
+        buyer_id: user.id,
+        base_amount: baseAmount.toString(),
+        service_fee: serviceFee.toString(),
+      },
   })
 
   return NextResponse.json({ url: session.url })
