@@ -58,7 +58,9 @@ export default function ConversationPage() {
   .eq('listing_id', parseInt(listingId as string))
   .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
   .in('status', ['paid', 'confirmed'])
-  .maybeSingle()
+.order('created_at', { ascending: false })
+.limit(1)
+.maybeSingle()
 
       if (orderData) setOrder(orderData)
 
