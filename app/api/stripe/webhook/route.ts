@@ -45,8 +45,10 @@ export async function POST(req: Request) {
 
     // Lasketaan summat
     const totalAmount = (session.amount_total || 0) / 100
-    const serviceFee = Math.round(totalAmount * 0.08 * 100) / 100
-    const baseAmount = parseFloat((totalAmount - serviceFee).toFixed(2))
+    const baseAmount = parseFloat((session.metadata?.base_amount 
+      ? parseInt(session.metadata.base_amount) / 100 
+      : totalAmount / 1.08).toFixed(2))
+    const serviceFee = parseFloat((totalAmount - baseAmount).toFixed(2))
 
     // 48h auto-confirm
     const autoConfirmAt = new Date()
@@ -102,7 +104,7 @@ export async function POST(req: Request) {
 
     // Lisätään viesti chattiin ostajan ja myyjän välille
     if (buyerId && sellerUserId) {
-        await supabaseAdmin.from('messages').insert({
+  await supabaseAdmin.from('messages').insert({
         sender_id: buyerId,
         receiver_id: sellerUserId,
         listing_id: parseInt(listingId),
