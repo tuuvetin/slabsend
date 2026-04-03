@@ -8,6 +8,8 @@ const conditionLabels: Record<string, string> = {
   'Uusi': 'New', 'Erinomainen': 'Excellent', 'Hyvä': 'Good', 'Tyydyttävä': 'Fair', 'Huono': 'Poor',
 }
 
+const ADMINS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com']
+
 export default function ListingPage() {
   const params = useParams()
   const [listing, setListing] = useState<any>(null)
@@ -30,61 +32,62 @@ export default function ListingPage() {
   useEffect(() => {
     if (!params.id) return
 
-    // Tarkista localStoragesta ensin
     const cached = localStorage.getItem(`order_${params.id}`)
     if (cached) {
       const parsedOrder = JSON.parse(cached)
       if (parsedOrder.status === 'paid') setOrder(parsedOrder)
     }
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    const init = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user)
+
+      const { data } = await supabase.from('listings').select('*').eq('id', params.id).single()
+
+      if (data?.sold) {
+        const isAdmin = ADMINS.includes(user?.email || '')
+        const isSellerOfThis = data.user_id === user?.id
+
+        const { data: orderData } = await supabase
+          .from('orders')
+          .select('buyer_id')
+          .eq('listing_id', data.id)
+          .single()
+
+        const isBuyerOfThis = orderData?.buyer_id === user?.id
+
+        if (!user || (!isBuyerOfThis && !isSellerOfThis && !isAdmin)) {
+          window.location.href = '/listings'
+          return
+        }
+      }
+
+      setListing(data)
+      setLoading(false)
+
+      if (data?.user_id) {
+        supabase.from('profiles').select('username, full_name, avatar_url, location').eq('user_id', data.user_id).single().then(({ data: p }) => setSellerProfile(p))
+      }
+
       if (user) {
         const urlParams = new URLSearchParams(window.location.search)
         if (urlParams.get('payment') === 'success') {
-          supabase
+          const { data: orderData } = await supabase
             .from('orders')
             .select('*')
             .eq('listing_id', params.id)
             .eq('buyer_id', user.id)
             .eq('status', 'paid')
             .single()
-            .then(({ data }) => {
-              if (data) {
-                setOrder(data)
-                localStorage.setItem(`order_${params.id}`, JSON.stringify(data))
-              }
-            })
+          if (orderData) {
+            setOrder(orderData)
+            localStorage.setItem(`order_${params.id}`, JSON.stringify(orderData))
+          }
         }
       }
-    })
+    }
 
-    supabase.from('listings').select('*').eq('id', params.id).single().then(async ({ data }) => {
-      if (data?.sold) {
-        // Myydyn ilmoituksen saa nähdä vain ostaja, myyjä tai admin
-        const admins = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com']
-        const { data: { user: u } } = await supabase.auth.getUser()
-        const { data: order } = await supabase
-          .from('orders')
-          .select('buyer_id')
-          .eq('listing_id', data.id)
-          .single()
-        const isBuyerOfThis = order?.buyer_id === u?.id
-        const isSellerOfThis = data.user_id === u?.id
-        const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', u?.id || '').single()
-        const isAdmin = admins.some(a => u?.email === a)
-        if (!isBuyerOfThis && !isSellerOfThis && !isAdmin) {
-          window.location.href = '/listings'
-          return
-        }
-      }
-      setListing(data)
-      setLoading(false)
-      if (data?.user_id) {
-        supabase.from('profiles').select('username, full_name, avatar_url, location').eq('user_id', data.user_id).single().then(({ data: p }) => setSellerProfile(p))
-      }
-    })
-    
+    init()
   }, [params.id])
 
   const closeLightbox = useCallback(() => setLightboxIndex(null), [])
@@ -233,6 +236,15 @@ export default function ListingPage() {
 
         <div className="listing-detail-info">
 
+          {/* SOLD BANNER */}
+          {listing.sold && (
+            <div style={{ background: '#f5f0e8', border: '1px solid rgba(26,20,8,0.15)', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px' }}>
+              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a7060', margin: 0 }}>
+                🔒 This item has been sold
+              </p>
+            </div>
+          )}
+
           {/* ITEM RECEIVED */}
           {order && !confirmDone && (
             <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '20px' }}>
@@ -304,8 +316,8 @@ export default function ListingPage() {
             />
           )}
 
-          {/* BUYER ACTIONS */}
-          {currentUser && currentUser.id !== listing.user_id && (
+          {/* BUYER ACTIONS — piilotetaan jos myyty */}
+          {!listing.sold && currentUser && currentUser.id !== listing.user_id && (
             <div className="listing-contact">
               {!isRental && (
                 <div style={{ marginBottom: '16px' }}>
@@ -367,7 +379,7 @@ export default function ListingPage() {
             </div>
           )}
 
-          {!currentUser && (
+          {!currentUser && !listing.sold && (
             <div className="listing-contact">
               <a href="/login" className="form-submit" style={{ display: 'block', textAlign: 'center' }}>Sign in to contact seller</a>
             </div>
