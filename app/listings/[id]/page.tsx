@@ -59,13 +59,32 @@ export default function ListingPage() {
       }
     })
 
-    supabase.from('listings').select('*').eq('id', params.id).single().then(({ data }) => {
+    supabase.from('listings').select('*').eq('id', params.id).single().then(async ({ data }) => {
+      if (data?.sold) {
+        // Myydyn ilmoituksen saa nähdä vain ostaja, myyjä tai admin
+        const admins = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com']
+        const { data: { user: u } } = await supabase.auth.getUser()
+        const { data: order } = await supabase
+          .from('orders')
+          .select('buyer_id')
+          .eq('listing_id', data.id)
+          .single()
+        const isBuyerOfThis = order?.buyer_id === u?.id
+        const isSellerOfThis = data.user_id === u?.id
+        const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', u?.id || '').single()
+        const isAdmin = admins.some(a => u?.email === a)
+        if (!isBuyerOfThis && !isSellerOfThis && !isAdmin) {
+          window.location.href = '/listings'
+          return
+        }
+      }
       setListing(data)
       setLoading(false)
       if (data?.user_id) {
         supabase.from('profiles').select('username, full_name, avatar_url, location').eq('user_id', data.user_id).single().then(({ data: p }) => setSellerProfile(p))
       }
     })
+    
   }, [params.id])
 
   const closeLightbox = useCallback(() => setLightboxIndex(null), [])
