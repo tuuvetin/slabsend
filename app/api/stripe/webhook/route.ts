@@ -102,7 +102,7 @@ export async function POST(req: Request) {
 
     // Lisätään viesti chattiin ostajan ja myyjän välille
     if (buyerId && sellerUserId) {
-      await supabase.from('messages').insert({
+        await supabaseAdmin.from('messages').insert({
         sender_id: buyerId,
         receiver_id: sellerUserId,
         listing_id: parseInt(listingId),
