@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@/utils/supabase/server'
+import { Resend } from 'resend'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const resend = new Resend(process.env.RESEND_API_KEY!)
+
+function generateOrderNumber(): string {
+  const timestamp = Date.now().toString().slice(-6)
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+  return `SLB-${timestamp}-${random}`
+}
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -19,42 +27,146 @@ export async function POST(req: Request) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
     const supabase = await createClient()
+
     const listingId = session.metadata?.listing_id
     const sellerUserId = session.metadata?.seller_user_id
-    const buyerEmail = session.customer_details?.email
+    const buyerId = session.metadata?.buyer_id
+    const buyerEmail = session.customer_details?.email || ''
 
-    if (listingId) {
-      // Merkitään ilmoitus myydyksi
-      await supabase.from('listings').update({ sold: true }).eq('id', listingId)
+    if (!listingId) return NextResponse.json({ received: true })
 
-      // Haetaan ostajan user_id sähköpostilla
-      const { data: buyerProfile } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .eq('user_id', session.metadata?.buyer_id || '')
-        .single()
+    // Merkitään ilmoitus myydyksi
+    await supabase.from('listings').update({ sold: true }).eq('id', listingId)
 
-      // Lasketaan summat
-      const totalAmount = (session.amount_total || 0) / 100
-      const serviceFee = Math.round(totalAmount * 0.08 * 100) / 100
-      const baseAmount = totalAmount - serviceFee
+    // Lasketaan summat
+    const totalAmount = (session.amount_total || 0) / 100
+    const serviceFee = Math.round(totalAmount * 0.08 * 100) / 100
+    const baseAmount = parseFloat((totalAmount - serviceFee).toFixed(2))
 
-      // Lasketaan auto-confirm 48h päähän
-      const autoConfirmAt = new Date()
-      autoConfirmAt.setHours(autoConfirmAt.getHours() + 48)
+    // 48h auto-confirm
+    const autoConfirmAt = new Date()
+    autoConfirmAt.setHours(autoConfirmAt.getHours() + 48)
 
-      // Luodaan order
-      await supabase.from('orders').insert({
+    // Luodaan tilausnumero
+    const orderNumber = generateOrderNumber()
+
+    // Luodaan order
+    const { data: order } = await supabase.from('orders').insert({
+      listing_id: parseInt(listingId),
+      buyer_id: buyerId || null,
+      seller_id: sellerUserId || null,
+      amount: baseAmount,
+      service_fee: serviceFee,
+      status: 'paid',
+      stripe_session_id: session.id,
+      auto_confirm_at: autoConfirmAt.toISOString(),
+    }).select().single()
+
+    // Haetaan ilmoituksen tiedot
+    const { data: listing } = await supabase
+      .from('listings')
+      .select('title, user_id')
+      .eq('id', listingId)
+      .single()
+
+    // Haetaan myyjän profiili ja sähköposti
+    const { data: sellerProfile } = await supabase
+      .from('profiles')
+      .select('username, full_name')
+      .eq('user_id', sellerUserId || '')
+      .single()
+
+    const sellerName = sellerProfile?.username || sellerProfile?.full_name || 'Seller'
+
+    // Haetaan myyjän sähköposti auth.users-taulusta
+    const { data: { user: sellerUser } } = await supabase.auth.admin.getUserById(sellerUserId || '')
+    const sellerEmail = sellerUser?.email || ''
+
+    // Merkitään kaikki avoimet tarjoukset perutuiksi
+    await supabase
+      .from('messages')
+      .update({ offer_status: 'declined' })
+      .eq('listing_id', listingId)
+      .eq('offer_status', 'pending')
+
+    // Lisätään viesti chattiin ostajan ja myyjän välille
+    if (buyerId && sellerUserId) {
+      await supabase.from('messages').insert({
+        sender_id: buyerId,
+        receiver_id: sellerUserId,
         listing_id: parseInt(listingId),
-        buyer_id: session.metadata?.buyer_id || null,
-        seller_id: sellerUserId || null,
-        amount: baseAmount,
-        service_fee: serviceFee,
-        status: 'paid',
-        stripe_session_id: session.id,
-        auto_confirm_at: autoConfirmAt.toISOString(),
+        content: `✅ Payment confirmed for "${listing?.title}". Order #${orderNumber}. Amount: ${baseAmount} €. Awaiting item confirmation.`,
       })
     }
+
+    // Sähköposti myyjälle
+    if (sellerEmail) {
+      await resend.emails.send({
+        from: 'Slabsend <info@slabsend.com>',
+        to: sellerEmail,
+        subject: `Your item "${listing?.title}" has been sold!`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #FC7038;">Your item has been sold! 🎉</h2>
+            <p>Hi ${sellerName},</p>
+            <p><strong>${listing?.title}</strong> has been purchased.</p>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${orderNumber}</strong></td></tr>
+              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${listing?.title}</td></tr>
+              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Amount you'll receive</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${baseAmount} €</strong></td></tr>
+            </table>
+            <p>Please ship the item as soon as possible. The buyer has 48 hours to confirm receipt, after which you'll receive your payment.</p>
+            <p>Questions? Contact <a href="mailto:info@slabsend.com">info@slabsend.com</a></p>
+            <p style="color: #9a9080; font-size: 12px;">Slabsend — Pre-owned climbing gear</p>
+          </div>
+        `,
+      })
+    }
+
+    // Sähköposti ostajalle
+    if (buyerEmail) {
+      await resend.emails.send({
+        from: 'Slabsend <info@slabsend.com>',
+        to: buyerEmail,
+        subject: `Order confirmed: ${listing?.title}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #FC7038;">Order confirmed! ✓</h2>
+            <p>Thank you for your purchase.</p>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${orderNumber}</strong></td></tr>
+              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${listing?.title}</td></tr>
+              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Total paid</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${totalAmount} €</strong></td></tr>
+            </table>
+            <p>Once you receive the item, please confirm receipt on the listing page. If anything is wrong, contact us within 48 hours at <a href="mailto:info@slabsend.com">info@slabsend.com</a></p>
+            <p style="color: #9a9080; font-size: 12px;">Slabsend — Pre-owned climbing gear</p>
+          </div>
+        `,
+      })
+    }
+
+    // Sähköposti Slabsendille
+    await resend.emails.send({
+      from: 'Slabsend <info@slabsend.com>',
+      to: 'info@slabsend.com',
+      subject: `New order: ${listing?.title} — ${orderNumber}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>New order received</h2>
+          <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${orderNumber}</strong></td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${listing?.title}</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Buyer email</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${buyerEmail}</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Seller</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${sellerName} (${sellerEmail})</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Total paid</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${totalAmount} €</strong></td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">To transfer to seller</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${baseAmount} €</strong></td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Slabsend fee</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${serviceFee} €</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Stripe session</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${session.id}</td></tr>
+          </table>
+          <p><strong>Action needed:</strong> Transfer ${baseAmount} € to seller after buyer confirms receipt or after 48 hours.</p>
+        </div>
+      `,
+    })
   }
 
   if (event.type === 'account.updated') {
