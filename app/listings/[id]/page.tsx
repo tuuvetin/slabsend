@@ -22,11 +22,29 @@ export default function ListingPage() {
   const [showOffer, setShowOffer] = useState(false)
   const [buyLoading, setBuyLoading] = useState(false)
   const [offerLoading, setOfferLoading] = useState(false)
+  const [order, setOrder] = useState<any>(null)
+  const [confirmLoading, setConfirmLoading] = useState(false)
+  const [confirmDone, setConfirmDone] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
     if (!params.id) return
-    supabase.auth.getUser().then(({ data: { user } }) => setCurrentUser(user))
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setCurrentUser(user)
+      if (user) {
+        const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.get('payment') === 'success') {
+          supabase
+            .from('orders')
+            .select('*')
+            .eq('listing_id', params.id)
+            .eq('buyer_id', user.id)
+            .eq('status', 'paid')
+            .single()
+            .then(({ data }) => setOrder(data))
+        }
+      }
+    })
     supabase.from('listings').select('*').eq('id', params.id).single().then(({ data }) => {
       setListing(data)
       setLoading(false)
@@ -123,6 +141,17 @@ export default function ListingPage() {
     }
   }
 
+  const handleConfirmReceipt = async () => {
+    if (!order) return
+    setConfirmLoading(true)
+    await supabase
+      .from('orders')
+      .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
+      .eq('id', order.id)
+    setConfirmLoading(false)
+    setConfirmDone(true)
+  }
+
   if (loading) return <p className="listing-loading">Loading...</p>
   if (!listing) return <p className="listing-loading">Listing not found.</p>
 
@@ -168,6 +197,36 @@ export default function ListingPage() {
         </div>
 
         <div className="listing-detail-info">
+
+          {/* ITEM RECEIVED */}
+          {order && !confirmDone && (
+            <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '20px' }}>
+              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>
+                ✓ Payment confirmed
+              </p>
+              <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: '1.5', marginBottom: '14px' }}>
+                Once you receive the item and everything looks good, confirm receipt below. The seller will receive payment after your confirmation or automatically after 48 hours.
+              </p>
+              <button className="form-submit" onClick={handleConfirmReceipt} disabled={confirmLoading} style={{ background: '#2a6a2a', width: '100%' }}>
+                {confirmLoading ? 'Confirming...' : 'Item received ✓'}
+              </button>
+              <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '8px', textAlign: 'center' }}>
+                Problem? Contact <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a> within 48h
+              </p>
+            </div>
+          )}
+
+          {confirmDone && (
+            <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '20px' }}>
+              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', color: '#2a6a2a' }}>
+                ✓ Receipt confirmed — thank you!
+              </p>
+              <p style={{ fontSize: '13px', color: '#3a3428', marginTop: '4px' }}>
+                The seller will receive their payment shortly.
+              </p>
+            </div>
+          )}
+
           {isRental && <span className="listing-rental-badge">For rent</span>}
           <h1 className="listing-detail-title">{listing.title}</h1>
           <p className="listing-detail-price">{listing.price} €{isRental ? '/day' : ''}</p>
@@ -213,23 +272,16 @@ export default function ListingPage() {
           {/* BUYER ACTIONS */}
           {currentUser && currentUser.id !== listing.user_id && (
             <div className="listing-contact">
-
-              {/* BUY NOW + MAKE OFFER */}
               {!isRental && (
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
                     <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ flex: 1 }}>
                       {buyLoading ? 'Loading...' : `Buy now — ${(listing.price * 1.08).toFixed(2)} €`}
                     </button>
-                    <button
-                      onClick={() => setShowOffer(!showOffer)}
-                      style={{ flex: 1, fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', borderRadius: '8px', padding: '14px', transition: 'all 0.15s' }}
-                    >
+                    <button onClick={() => setShowOffer(!showOffer)} style={{ flex: 1, fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', borderRadius: '8px', padding: '14px', transition: 'all 0.15s' }}>
                       Make an offer
                     </button>
                   </div>
-
-                  {/* OSTAJAN TURVA */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)', position: 'relative' }}>
                     <span style={{ fontSize: '14px' }}>🛡️</span>
                     <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em' }}>
@@ -245,7 +297,6 @@ export default function ListingPage() {
                 </div>
               )}
 
-              {/* OFFER FORM */}
               {showOffer && (
                 <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '8px', padding: '16px', marginBottom: '16px' }}>
                   <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
