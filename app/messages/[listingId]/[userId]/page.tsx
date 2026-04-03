@@ -53,12 +53,12 @@ export default function ConversationPage() {
 
       // Haetaan order
       const { data: orderData } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('listing_id', listingId)
-        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
-        .in('status', ['paid', 'confirmed'])
-        .maybeSingle()
+  .from('orders')
+  .select('*')
+  .eq('listing_id', parseInt(listingId as string))
+  .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+  .in('status', ['paid', 'confirmed'])
+  .maybeSingle()
 
       if (orderData) setOrder(orderData)
 
