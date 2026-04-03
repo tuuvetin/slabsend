@@ -17,7 +17,6 @@ export default function MessagesPage() {
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false })
 
-      // Yksi viesti per listing + käyttäjäpari
       const seen = new Set()
       const unique = (messages || []).filter(msg => {
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
@@ -30,12 +29,17 @@ export default function MessagesPage() {
       const enriched = await Promise.all(unique.map(async msg => {
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
 
-        const [{ data: listing }, { data: profile }] = await Promise.all([
+        const [{ data: listing }, { data: profile }, { data: order }] = await Promise.all([
           supabase.from('listings').select('title, images').eq('id', msg.listing_id).single(),
           supabase.from('profiles').select('username, full_name, avatar_url').eq('user_id', otherUserId).single(),
+          supabase.from('orders').select('status')
+            .eq('listing_id', msg.listing_id)
+            .or(`and(buyer_id.eq.${user.id},seller_id.eq.${otherUserId}),and(buyer_id.eq.${otherUserId},seller_id.eq.${user.id})`)
+            .in('status', ['paid', 'confirmed'])
+            .maybeSingle(),
         ])
 
-        return { ...msg, listing, profile, otherUserId }
+        return { ...msg, listing, profile, otherUserId, order }
       }))
 
       setConversations(enriched)
@@ -62,10 +66,11 @@ export default function MessagesPage() {
           const avatarUrl = msg.profile?.avatar_url
           const listingTitle = msg.listing?.title || `Listing #${msg.listing_id}`
           const listingImage = msg.listing?.images?.[0]
+          const hasOrder = !!msg.order
 
           return (
             <a key={msg.id} href={`/messages/${msg.listing_id}/${msg.otherUserId}`} className="conversation-link">
-              <div className="conversation-card">
+              <div className="conversation-card" style={{ background: hasOrder ? '#f0f7f0' : undefined, borderColor: hasOrder ? 'rgba(42,106,42,0.2)' : undefined }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   {avatarUrl ? (
                     <img src={avatarUrl} alt={displayName} style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(26,20,8,0.1)' }} />
@@ -80,7 +85,14 @@ export default function MessagesPage() {
                 </div>
 
                 <div className="conversation-body">
-                  <p className="conversation-listing" style={{ fontWeight: 600 }}>{displayName}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <p className="conversation-listing" style={{ fontWeight: 600, margin: 0 }}>{displayName}</p>
+                    {hasOrder && (
+                      <span style={{ background: msg.order.status === 'confirmed' ? '#2a6a2a' : '#FC7038', color: '#fff', fontFamily: 'Barlow Condensed', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
+                        {msg.order.status === 'confirmed' ? '✓ Completed' : '⏳ Awaiting confirmation'}
+                      </span>
+                    )}
+                  </div>
                   <p style={{ fontSize: '12px', color: '#9a9080', margin: '1px 0 3px', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>{listingTitle}</p>
                   <p className="conversation-preview">
                     {msg.content.length > 60 ? msg.content.substring(0, 60) + '...' : msg.content}

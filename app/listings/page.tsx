@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-
+export const revalidate = 0
 const categories: Record<string, string[]> = {
   'Clothing': ['T-Shirts', 'Hoodies', 'Pants', 'Shorts', 'Jackets', 'Other clothing'],
   'Shoes': ['Climbing shoes', 'Approach shoes', 'Mountain boots', 'Other shoes'],
@@ -15,7 +15,7 @@ const europeanCountries = [
   'All of Europe', 'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
   'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary',
   'Iceland', 'Ireland', 'Italy', 'Latvia', 'Liechtenstein', 'Lithuania',
-  'Luxembourg', 'Malta', 'Netherlands', 'Norway', 'and', 'Portugal',
+  'Luxembourg', 'Malta', 'Netherlands', 'Norway', 'Poland', 'Portugal',
   'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom',
 ]
 
