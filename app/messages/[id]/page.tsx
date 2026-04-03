@@ -13,6 +13,9 @@ export default function ConversationPage() {
   const [counterAmount, setCounterAmount] = useState('')
   const [showCounter, setShowCounter] = useState<string | null>(null)
   const [profiles, setProfiles] = useState<Record<string, any>>({})
+  const [order, setOrder] = useState<any>(null)
+  const [confirmLoading, setConfirmLoading] = useState(false)
+  const [confirmDone, setConfirmDone] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
@@ -31,11 +34,9 @@ export default function ConversationPage() {
       setMessages(msgs || [])
 
       if (msgs && msgs.length > 0) {
-        // Haetaan listing
         const { data: l } = await supabase.from('listings').select('*').eq('id', msgs[0].listing_id).single()
         setListing(l)
 
-        // Haetaan kaikkien osallistujien profiilit
         const userIds = [...new Set(msgs.flatMap(m => [m.sender_id, m.receiver_id]))]
         const { data: profileData } = await supabase
           .from('profiles')
@@ -45,6 +46,17 @@ export default function ConversationPage() {
         const profileMap: Record<string, any> = {}
         for (const p of profileData || []) profileMap[p.user_id] = p
         setProfiles(profileMap)
+
+        // Haetaan order jos on
+        const { data: orderData } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('listing_id', msgs[0].listing_id)
+          .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+          .in('status', ['paid', 'confirmed'])
+          .single()
+
+        if (orderData) setOrder(orderData)
       }
 
       setLoading(false)
@@ -114,6 +126,19 @@ export default function ConversationPage() {
     setCounterAmount('')
   }
 
+  const handleConfirmReceipt = async () => {
+    if (!order) return
+    setConfirmLoading(true)
+    await supabase
+      .from('orders')
+      .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
+      .eq('id', order.id)
+    localStorage.removeItem(`order_${params.id}`)
+    setConfirmLoading(false)
+    setConfirmDone(true)
+    setOrder({ ...order, status: 'confirmed' })
+  }
+
   const Avatar = ({ userId, size = 32 }: { userId: string, size?: number }) => {
     const p = profiles[userId]
     const name = p?.username || p?.full_name || '?'
@@ -129,35 +154,81 @@ export default function ConversationPage() {
 
   if (loading) return <p className="listing-loading">Loading...</p>
 
+  const isBuyer = order && currentUser && order.buyer_id === currentUser.id
+  const isSeller = order && currentUser && order.seller_id === currentUser.id
+
   return (
     <div className="conversation-page">
       <a href="/messages" className="listing-back">← Back to messages</a>
 
       {listing && (
-  <div className="conversation-listing-header">
-    {listing.images && listing.images.length > 0 && (
-      <img src={listing.images[0]} alt={listing.title} className="conversation-listing-img" />
-    )}
-    <div>
-      <h2 className="conversation-listing-title">{listing.title}</h2>
-      <p className="conversation-listing-price">
-        {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''}
-      </p>
-      {messages.length > 0 && (() => {
-        const otherUserId = messages[0].sender_id === currentUser?.id
-          ? messages[0].receiver_id
-          : messages[0].sender_id
-        const otherProfile = profiles[otherUserId]
-        const otherName = otherProfile?.username || otherProfile?.full_name || null
-        return otherName ? (
-          <p style={{ fontSize: '12px', color: '#9a9080', marginTop: '2px', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>
-            Conversation with {otherName}
+        <div className="conversation-listing-header">
+          {listing.images && listing.images.length > 0 && (
+            <img src={listing.images[0]} alt={listing.title} className="conversation-listing-img" />
+          )}
+          <div>
+            <h2 className="conversation-listing-title">{listing.title}</h2>
+            <p className="conversation-listing-price">
+              {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''}
+            </p>
+            {messages.length > 0 && (() => {
+              const otherUserId = messages[0].sender_id === currentUser?.id
+                ? messages[0].receiver_id
+                : messages[0].sender_id
+              const otherProfile = profiles[otherUserId]
+              const otherName = otherProfile?.username || otherProfile?.full_name || null
+              return otherName ? (
+                <p style={{ fontSize: '12px', color: '#9a9080', marginTop: '2px', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>
+                  Conversation with {otherName}
+                </p>
+              ) : null
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* PAYMENT STATUS BANNER */}
+      {order && order.status === 'paid' && isBuyer && !confirmDone && (
+        <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>
+            ✓ Payment confirmed
           </p>
-        ) : null
-      })()}
-    </div>
-  </div>
-)}
+          <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: '1.5', marginBottom: '14px' }}>
+            Once you receive the item and everything looks good, confirm receipt below. The seller will receive payment after your confirmation or automatically after 48 hours.
+          </p>
+          <button className="form-submit" onClick={handleConfirmReceipt} disabled={confirmLoading} style={{ background: '#2a6a2a', width: '100%' }}>
+            {confirmLoading ? 'Confirming...' : 'Item received ✓'}
+          </button>
+          <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '8px', textAlign: 'center' }}>
+            Problem? Contact <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a> within 48h
+          </p>
+        </div>
+      )}
+
+      {order && order.status === 'paid' && isSeller && (
+        <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>
+            ✓ Item sold — payment received
+          </p>
+          <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: '1.5' }}>
+            The buyer has paid <strong>{order.amount} €</strong>. This amount will be transferred to your bank account once the buyer confirms receipt or automatically after 48 hours.
+          </p>
+          <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '8px' }}>
+            Order #{order.order_number || order.id} · Questions? <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a>
+          </p>
+        </div>
+      )}
+
+      {(order?.status === 'confirmed' || confirmDone) && (
+        <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', color: '#2a6a2a' }}>
+            ✓ Transaction complete
+          </p>
+          <p style={{ fontSize: '13px', color: '#3a3428', marginTop: '4px' }}>
+            {isBuyer ? 'Thank you for your purchase!' : 'Payment will be transferred to your account shortly.'}
+          </p>
+        </div>
+      )}
 
       <div className="conversation-messages">
         {messages.map(msg => {
@@ -165,14 +236,13 @@ export default function ConversationPage() {
           const isOffer = msg.is_offer
           const isPending = msg.offer_status === 'pending'
           const isAccepted = msg.offer_status === 'accepted'
-          const isSeller = listing && currentUser && listing.user_id === currentUser.id
-          const isBuyer = msg.sender_id === currentUser?.id
+          const isSellerMsg = listing && currentUser && listing.user_id === currentUser.id
+          const isBuyerMsg = msg.sender_id === currentUser?.id
           const senderProfile = profiles[msg.sender_id]
           const senderName = senderProfile?.username || senderProfile?.full_name || ''
 
           return (
             <div key={msg.id} className={`message-row ${isMine ? 'mine' : 'theirs'}`}>
-              {/* Avatar vastapuolelle */}
               {!isMine && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', marginRight: '8px' }}>
                   <Avatar userId={msg.sender_id} size={32} />
@@ -203,7 +273,7 @@ export default function ConversationPage() {
                     {msg.offer_amount} €
                   </p>
 
-                  {isSeller && isPending && !isBuyer && (
+                  {isSellerMsg && isPending && !isBuyerMsg && (
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       <button onClick={() => handleOfferAction(msg.id, 'accepted')} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept</button>
                       <button onClick={() => setShowCounter(showCounter === msg.id ? null : msg.id)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Counter</button>
@@ -211,7 +281,7 @@ export default function ConversationPage() {
                     </div>
                   )}
 
-                  {isBuyer && isAccepted && (
+                  {isBuyerMsg && isAccepted && (
                     <button onClick={() => handleAcceptAndPay(msg)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept & Pay</button>
                   )}
 
@@ -235,7 +305,6 @@ export default function ConversationPage() {
                 </div>
               )}
 
-              {/* Oma avatar oikealle */}
               {isMine && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', marginLeft: '8px' }}>
                   <Avatar userId={currentUser.id} size={32} />
