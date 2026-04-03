@@ -5,13 +5,11 @@ import { createClient } from '@/utils/supabase/client'
 export default function MessagesPage() {
   const [conversations, setConversations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [currentUser, setCurrentUser] = useState<any>(null)
   const supabase = createClient()
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { window.location.href = '/login'; return }
-      setCurrentUser(user)
 
       const { data: messages } = await supabase
         .from('messages')
@@ -19,9 +17,11 @@ export default function MessagesPage() {
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false })
 
+      // Yksi viesti per listing + käyttäjäpari
       const seen = new Set()
       const unique = (messages || []).filter(msg => {
-        const key = `${msg.listing_id}-${[msg.sender_id, msg.receiver_id].sort().join('-')}`
+        const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
+        const key = `${msg.listing_id}-${otherUserId}`
         if (seen.has(key)) return false
         seen.add(key)
         return true
