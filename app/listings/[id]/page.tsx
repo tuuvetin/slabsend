@@ -29,6 +29,14 @@ export default function ListingPage() {
 
   useEffect(() => {
     if (!params.id) return
+
+    // Tarkista localStoragesta ensin
+    const cached = localStorage.getItem(`order_${params.id}`)
+    if (cached) {
+      const parsedOrder = JSON.parse(cached)
+      if (parsedOrder.status === 'paid') setOrder(parsedOrder)
+    }
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       setCurrentUser(user)
       if (user) {
@@ -41,10 +49,16 @@ export default function ListingPage() {
             .eq('buyer_id', user.id)
             .eq('status', 'paid')
             .single()
-            .then(({ data }) => setOrder(data))
+            .then(({ data }) => {
+              if (data) {
+                setOrder(data)
+                localStorage.setItem(`order_${params.id}`, JSON.stringify(data))
+              }
+            })
         }
       }
     })
+
     supabase.from('listings').select('*').eq('id', params.id).single().then(({ data }) => {
       setListing(data)
       setLoading(false)
@@ -148,8 +162,10 @@ export default function ListingPage() {
       .from('orders')
       .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
       .eq('id', order.id)
+    localStorage.removeItem(`order_${params.id}`)
     setConfirmLoading(false)
     setConfirmDone(true)
+    setOrder(null)
   }
 
   if (loading) return <p className="listing-loading">Loading...</p>
