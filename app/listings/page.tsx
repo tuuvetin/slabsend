@@ -56,8 +56,8 @@ export default async function ListingsPage({
       <div className="listings-header-row">
         <h1 className="listings-title">Listings</h1>
         <div className="listings-tab-toggle">
-          <a href="/listings?tab=sell" className={\`listings-tab-btn \${tab === 'sell' ? 'active' : ''}\`}>For sale</a>
-          <a href="/listings?tab=rent" className={\`listings-tab-btn \${tab === 'rent' ? 'active rent' : ''}\`}>For rent</a>
+          <a href="/listings?tab=sell" className={`listings-tab-btn ${tab === 'sell' ? 'active' : ''}`}>For sale</a>
+          <a href="/listings?tab=rent" className={`listings-tab-btn ${tab === 'rent' ? 'active rent' : ''}`}>For rent</a>
         </div>
       </div>
 
@@ -90,7 +90,7 @@ export default async function ListingsPage({
           const displayName = profile?.username || profile?.full_name || ''
 
           return (
-            <a key={listing.id} href={\`/listings/\${listing.id}\`} className="listing-card-link">
+            <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
               <div className="listing-card">
                 {listing.images && listing.images.length > 0 ? (
                   <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
@@ -101,11 +101,11 @@ export default async function ListingsPage({
                   <h3 className="listing-card-title">{listing.title}</h3>
                   {listing.category && (
                     <p className="listing-card-cat">
-                      {listing.category}{listing.subcategory ? \` › \${listing.subcategory}\` : ''}
+                      {listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}
                     </p>
                   )}
                   <p className="listing-card-price">
-                    {listing.price} €{listing.listing_type === 'rent' && listing.rental_period ? \`/\${lis.rental_period}\` : ''}
+                    {listing.price} €{listing.listing_type === 'rent' && listing.rental_period ? `/${lis.rental_period}` : ''}
                   </p>
                   <p className="listing-card-meta">
                     {listing.condition && (
