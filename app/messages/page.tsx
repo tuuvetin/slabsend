@@ -5,11 +5,13 @@ import { createClient } from '@/utils/supabase/client'
 export default function MessagesPage() {
   const [conversations, setConversations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const supabase = createClient()
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { window.location.href = '/login'; return }
+      setCurrentUser(user)
 
       const { data: messages } = await supabase
         .from('messages')
@@ -17,15 +19,14 @@ export default function MessagesPage() {
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false })
 
-      // Yksi viesti per listing
       const seen = new Set()
       const unique = (messages || []).filter(msg => {
-        if (seen.has(msg.listing_id)) return false
-        seen.add(msg.listing_id)
+        const key = `${msg.listing_id}-${[msg.sender_id, msg.receiver_id].sort().join('-')}`
+        if (seen.has(key)) return false
+        seen.add(key)
         return true
       })
 
-      // Haetaan listing-nimet ja vastapuolen profiilit
       const enriched = await Promise.all(unique.map(async msg => {
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
 
@@ -63,34 +64,18 @@ export default function MessagesPage() {
           const listingImage = msg.listing?.images?.[0]
 
           return (
-            <a key={msg.id} href={`/messages/${msg.listing_id}`} className="conversation-link">
+            <a key={msg.id} href={`/messages/${msg.listing_id}/${msg.otherUserId}`} className="conversation-link">
               <div className="conversation-card">
-
-                {/* Vastapuolen avatar tai listing-kuva */}
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={displayName}
-                      style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(26,20,8,0.1)' }}
-                    />
+                    <img src={avatarUrl} alt={displayName} style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(26,20,8,0.1)' }} />
                   ) : (
-                    <div style={{
-                      width: '44px', height: '44px', borderRadius: '50%',
-                      background: '#FC7038', display: 'flex', alignItems: 'center',
-                      justifyContent: 'center', fontFamily: 'Barlow Condensed',
-                      fontSize: '18px', fontWeight: 700, color: '#F5F3E6', flexShrink: 0
-                    }}>
+                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#FC7038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Barlow Condensed', fontSize: '18px', fontWeight: 700, color: '#F5F3E6', flexShrink: 0 }}>
                       {displayName[0].toUpperCase()}
                     </div>
                   )}
-                  {/* Listing thumbnail pieni kulmassa */}
                   {listingImage && (
-                    <img
-                      src={listingImage}
-                      alt=""
-                      style={{ position: 'absolute', bottom: '-4px', right: '-4px', width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #F5F3E6' }}
-                    />
+                    <img src={listingImage} alt="" style={{ position: 'absolute', bottom: '-4px', right: '-4px', width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #F5F3E6' }} />
                   )}
                 </div>
 
@@ -104,9 +89,7 @@ export default function MessagesPage() {
 
                 <div className="conversation-meta">
                   <span className="conversation-date">
-                    {new Date(msg.created_at).toLocaleDateString('en-GB', {
-                      day: 'numeric', month: 'short', year: 'numeric'
-                    })}
+                    {new Date(msg.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
                   <span className="conversation-arrow">→</span>
                 </div>
