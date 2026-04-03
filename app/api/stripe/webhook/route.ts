@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@/utils/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 const resend = new Resend(process.env.RESEND_API_KEY!)
+const supabaseAdmin = createSupabaseClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 function generateOrderNumber(): string {
   const timestamp = Date.now().toString().slice(-6)
@@ -51,7 +56,7 @@ export async function POST(req: Request) {
     const orderNumber = generateOrderNumber()
 
     // Luodaan order
-    const { data: order } = await supabase.from('orders').insert({
+    await supabase.from('orders').insert({
       listing_id: parseInt(listingId),
       buyer_id: buyerId || null,
       seller_id: sellerUserId || null,
@@ -60,7 +65,8 @@ export async function POST(req: Request) {
       status: 'paid',
       stripe_session_id: session.id,
       auto_confirm_at: autoConfirmAt.toISOString(),
-    }).select().single()
+      order_number: orderNumber,
+    })
 
     // Haetaan ilmoituksen tiedot
     const { data: listing } = await supabase
@@ -69,7 +75,7 @@ export async function POST(req: Request) {
       .eq('id', listingId)
       .single()
 
-    // Haetaan myyjän profiili ja sähköposti
+    // Haetaan myyjän profiili
     const { data: sellerProfile } = await supabase
       .from('profiles')
       .select('username, full_name')
@@ -78,9 +84,14 @@ export async function POST(req: Request) {
 
     const sellerName = sellerProfile?.username || sellerProfile?.full_name || 'Seller'
 
-    // Haetaan myyjän sähköposti auth.users-taulusta
-    const { data: { user: sellerUser } } = await supabase.auth.admin.getUserById(sellerUserId || '')
-    const sellerEmail = sellerUser?.email || ''
+    // Haetaan myyjän sähköposti admin-clientillä
+    let sellerEmail = ''
+    try {
+      const { data: { user: sellerUser } } = await supabaseAdmin.auth.admin.getUserById(sellerUserId || '')
+      sellerEmail = sellerUser?.email || ''
+    } catch (e) {
+      console.error('Error fetching seller email:', e)
+    }
 
     // Merkitään kaikki avoimet tarjoukset perutuiksi
     await supabase
@@ -95,7 +106,7 @@ export async function POST(req: Request) {
         sender_id: buyerId,
         receiver_id: sellerUserId,
         listing_id: parseInt(listingId),
-        content: `✅ Payment confirmed for "${listing?.title}". Order #${orderNumber}. Amount: ${baseAmount} €. Awaiting item confirmation.`,
+        content: `✅ Payment confirmed for "${listing?.title}". Order #${orderNumber}. The seller will receive ${baseAmount} € when you confirm receipt.`,
       })
     }
 
