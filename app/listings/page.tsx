@@ -10,7 +10,7 @@ const conditionLabels: Record<string, string> = {
 export default async function ListingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; search?: string; category?: string; country?: string }>
+  searchParams: Promise<{ tab?: string; search?: string; category?: string; subcategory?: string; country?: string }>
 }) {
   const params = await searchParams
   const supabase = await createClient()
@@ -32,17 +32,19 @@ export default async function ListingsPage({
   const tab = params.tab || 'sell'
   const search = params.search || ''
   const category = params.category || ''
+  const subcategory = params.subcategory || ''
   const country = params.country || ''
 
   let filtered = (listings || []).filter((l: any) => (l.listing_type || 'sell') === tab)
   if (search) filtered = filtered.filter((l: any) => l.title.toLowerCase().includes(search.toLowerCase()))
   if (category) filtered = filtered.filter((l: any) => l.category === category)
+  if (subcategory) filtered = filtered.filter((l: any) => l.subcategory === subcategory)
   if (country) filtered = filtered.filter((l: any) => l.country === country)
 
   return (
     <div className="listings-page">
 
-      <ListingsSearch tab={tab} search={search} category={category} country={country} />
+      <ListingsSearch tab={tab} search={search} category={category} subcategory={subcategory} country={country} />
 
       {filtered.length === 0 && <p className="listings-empty">No listings found.</p>}
 

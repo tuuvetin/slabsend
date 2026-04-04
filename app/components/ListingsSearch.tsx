@@ -21,21 +21,25 @@ interface Props {
   tab: string
   search: string
   category: string
+  subcategory: string
   country: string
 }
 
-export default function ListingsSearch({ tab, search, category, country }: Props) {
+export default function ListingsSearch({ tab, search, category, subcategory, country }: Props) {
   const router = useRouter()
   const [searchVal, setSearchVal] = useState(search)
   const [categoryVal, setCategoryVal] = useState(category)
+  const [subcategoryVal, setSubcategoryVal] = useState(subcategory)
   const [countryVal, setCountryVal] = useState(country)
 
-  const sellHref = `/listings?tab=sell&search=${searchVal}&category=${categoryVal}&country=${countryVal}`
-  const rentHref = `/listings?tab=rent&search=${searchVal}&category=${categoryVal}&country=${countryVal}`
+  const subcategories = categoryVal ? categories[categoryVal] || [] : []
+
+  const buildHref = (t: string) =>
+    `/listings?tab=${t}&search=${searchVal}&category=${categoryVal}&subcategory=${subcategoryVal}&country=${countryVal}`
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    router.push(`/listings?tab=${tab}&search=${searchVal}&category=${categoryVal}&country=${countryVal}`)
+    router.push(buildHref(tab))
   }
 
   return (
@@ -43,7 +47,7 @@ export default function ListingsSearch({ tab, search, category, country }: Props
 
       {/* SELL / RENT TOGGLE */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', justifyContent: 'center' }}>
-        <a href={sellHref} style={{
+        <a href={buildHref('sell')} style={{
           padding: '8px 24px', fontFamily: 'Barlow Condensed', fontSize: '13px',
           fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
           textDecoration: 'none', borderRadius: '8px',
@@ -51,7 +55,7 @@ export default function ListingsSearch({ tab, search, category, country }: Props
           color: tab === 'sell' ? '#fff' : '#7a7060',
           border: tab === 'sell' ? '1px solid #FC7038' : '1px solid rgba(26,20,8,0.1)',
         }}>For sale</a>
-        <a href={rentHref} style={{
+        <a href={buildHref('rent')} style={{
           padding: '8px 24px', fontFamily: 'Barlow Condensed', fontSize: '13px',
           fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
           textDecoration: 'none', borderRadius: '8px',
@@ -71,10 +75,9 @@ export default function ListingsSearch({ tab, search, category, country }: Props
         }}>
 
           {/* SEARCH */}
-          <div style={{ flex: '2 1 160px', borderRight: '1px solid rgba(26,20,8,0.1)', borderBottom: '0', padding: '12px 16px' }}>
-            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }} className="search-label">Search</p>
+          <div style={{ flex: '2 1 140px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Search</p>
             <input
-              placeholder="Chalk bags, ropes..."
               value={searchVal}
               onChange={e => setSearchVal(e.target.value)}
               style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0 }}
@@ -82,11 +85,11 @@ export default function ListingsSearch({ tab, search, category, country }: Props
           </div>
 
           {/* CATEGORY */}
-          <div style={{ flex: '1 1 120px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
-            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }} className="search-label">Category</p>
+          <div style={{ flex: '1 1 100px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Category</p>
             <select
               value={categoryVal}
-              onChange={e => setCategoryVal(e.target.value)}
+              onChange={e => { setCategoryVal(e.target.value); setSubcategoryVal('') }}
               style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
             >
               <option value="">All</option>
@@ -96,9 +99,26 @@ export default function ListingsSearch({ tab, search, category, country }: Props
             </select>
           </div>
 
+          {/* SUBCATEGORY */}
+          {subcategories.length > 0 && (
+            <div style={{ flex: '1 1 100px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
+              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Type</p>
+              <select
+                value={subcategoryVal}
+                onChange={e => setSubcategoryVal(e.target.value)}
+                style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
+              >
+                <option value="">All</option>
+                {subcategories.map(sub => (
+                  <option key={sub} value={sub}>{sub}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* LOCATION */}
-          <div style={{ flex: '1 1 120px', padding: '12px 16px' }}>
-            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }} className="search-label">Location</p>
+          <div style={{ flex: '1 1 100px', padding: '12px 16px' }}>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Location</p>
             <select
               value={countryVal}
               onChange={e => setCountryVal(e.target.value)}
