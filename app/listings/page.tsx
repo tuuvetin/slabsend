@@ -59,83 +59,83 @@ export default async function ListingsPage({
   return (
     <div className="listings-page">
 
-      <form method="GET" action="/listings">
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          background: '#fff',
-          border: '1px solid rgba(26,20,8,0.15)',
-          borderRadius: '60px',
-          boxShadow: '0 2px 12px rgba(26,20,8,0.08)',
-          overflow: 'hidden',
-          marginBottom: '32px',
-          maxWidth: '860px',
-        }}>
+      <div style={{ maxWidth: '760px', margin: '0 auto 32px', width: '100%' }}>
 
-          <div style={{ display: 'flex', borderRight: '1px solid rgba(26,20,8,0.1)', flexShrink: 0 }}>
-            <a href={sellHref} style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '14px 20px', fontFamily: 'Barlow Condensed', fontSize: '13px',
-              fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-              textDecoration: 'none', whiteSpace: 'nowrap',
-              background: tab === 'sell' ? '#FC7038' : 'transparent',
-              color: tab === 'sell' ? '#fff' : '#7a7060',
-              borderRadius: tab === 'sell' ? '60px 0 0 60px' : '0',
-            }}>For sale</a>
-            <a href={rentHref} style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '14px 20px', fontFamily: 'Barlow Condensed', fontSize: '13px',
-              fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-              textDecoration: 'none', whiteSpace: 'nowrap',
-              background: tab === 'rent' ? '#4a7c59' : 'transparent',
-              color: tab === 'rent' ? '#fff' : '#7a7060',
-            }}>For rent</a>
-          </div>
-
-          <input type="hidden" name="tab" value={tab} />
-
-          <div style={{ flex: 1, borderRight: '1px solid rgba(26,20,8,0.1)', padding: '0 20px' }}>
-            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Search</p>
-            <input
-              placeholder="Chalk bags, ropes, shoes..."
-              name="search"
-              defaultValue={search}
-              style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0 }}
-            />
-          </div>
-
-          <div style={{ flex: 1, borderRight: '1px solid rgba(26,20,8,0.1)', padding: '0 20px' }}>
-            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Category</p>
-            <select name="category" defaultValue={category} style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: category ? '#1a1408' : '#9a9080', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}>
-              <option value="">All categories</option>
-              {Object.keys(categories).map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-
-          <div style={{ flex: 1, padding: '0 20px' }}>
-            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Location</p>
-            <select name="country" defaultValue={country} style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: country ? '#1a1408' : '#9a9080', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}>
-              {europeanCountries.map(c => (
-                <option key={c} value={c === 'All of Europe' ? '' : c}>{c}</option>
-              ))}
-            </select>
-          </div>
-
-          <button type="submit" style={{
-            background: '#FC7038', border: 'none', cursor: 'pointer',
-            width: '52px', height: '52px', borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '6px', flexShrink: 0,
-          }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-          </button>
+        {/* SELL / RENT TOGGLE */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', justifyContent: 'center' }}>
+          <a href={sellHref} style={{
+            padding: '8px 24px', fontFamily: 'Barlow Condensed', fontSize: '13px',
+            fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+            textDecoration: 'none', borderRadius: '8px',
+            background: tab === 'sell' ? '#FC7038' : 'rgba(26,20,8,0.06)',
+            color: tab === 'sell' ? '#fff' : '#7a7060',
+            border: tab === 'sell' ? '1px solid #FC7038' : '1px solid rgba(26,20,8,0.1)',
+          }}>For sale</a>
+          <a href={rentHref} style={{
+            padding: '8px 24px', fontFamily: 'Barlow Condensed', fontSize: '13px',
+            fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+            textDecoration: 'none', borderRadius: '8px',
+            background: tab === 'rent' ? '#4a7c59' : 'rgba(26,20,8,0.06)',
+            color: tab === 'rent' ? '#fff' : '#7a7060',
+            border: tab === 'rent' ? '1px solid #4a7c59' : '1px solid rgba(26,20,8,0.1)',
+          }}>For rent</a>
         </div>
-      </form>
+
+        {/* SEARCH BAR */}
+        <form method="GET" action="/listings">
+          <input type="hidden" name="tab" value={tab} />
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            background: '#ede9de',
+            border: '1px solid rgba(26,20,8,0.15)',
+            borderRadius: '12px',
+            boxShadow: '0 2px 8px rgba(26,20,8,0.06)',
+            overflow: 'hidden',
+          }}>
+            <div style={{ flex: 2, borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 20px' }}>
+              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Search</p>
+              <input
+                placeholder="Chalk bags, ropes, shoes..."
+                name="search"
+                defaultValue={search}
+                style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0 }}
+              />
+            </div>
+
+            <div style={{ flex: 1, borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 20px' }}>
+              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Category</p>
+              <select name="category" defaultValue={category} style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}>
+                <option value="">All categories</option>
+                {Object.keys(categories).map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ flex: 1, padding: '12px 20px' }}>
+              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Location</p>
+              <select name="country" defaultValue={country} style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}>
+                {europeanCountries.map(c => (
+                  <option key={c} value={c === 'All of Europe' ? '' : c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            <button type="submit" style={{
+              background: '#FC7038', border: 'none', cursor: 'pointer',
+              width: '52px', height: '52px', borderRadius: '8px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '6px', flexShrink: 0,
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
 
       {filtered.length === 0 && <p className="listings-empty">No listings found.</p>}
 
