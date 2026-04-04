@@ -17,7 +17,7 @@ const europeanCountries = [
   'All of Europe', 'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
   'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary',
   'Iceland', 'Ireland', 'Italy', 'Latvia', 'Liechtenstein', 'Lithuania',
-  'Luxembourg', 'Malta', 'Netherlands', 'Norway', 'Poland', 'Portugal',
+  'Luxembourg', 'Malta', 'Nerlands', 'Norway', 'Poland', 'Portugal',
   'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'United Kingdom',
 ]
 
@@ -35,7 +35,7 @@ export default async function ListingsPage({
     .eq('sold', false)
     .order('created_at', { ascending: false })
 
-  const userIds = [...new Set((listings || []).map(l => l.user_id))]
+  const userIds = [...new Set((listings || []).map((l: any) => l.user_id))]
   const { data: profiles } = userIds.length > 0
     ? await supabase.from('profiles').select('user_id, username, full_name, avatar_url').in('user_id', userIds)
     : { data: [] }
@@ -48,15 +48,17 @@ export default async function ListingsPage({
   const category = params.category || ''
   const country = params.country || ''
 
-  let filtered = (listings || []).filter(l => (l.listing_type || 'sell') === tab)
-  if (search) filtered = filtered.filter(l => l.title.toLowerCase().includes(search.toLowerCase()))
-  if (category) filtered = filtered.filter(l => l.category === category)
-  if (country) filtered = filtered.filter(l => l.country === country)
+  let filtered = (listings || []).filter((l: any) => (l.listing_type || 'sell') === tab)
+  if (search) filtered = filtered.filter((l: any) => l.title.toLowerCase().includes(search.toLowerCase()))
+  if (category) filtered = filtered.filter((l: any) => l.category === category)
+  if (country) filtered = filtered.filter((l: any) => l.country === country)
+
+  const sellHref = `/listings?tab=sell&search=${search}&category=${category}&country=${country}`
+  const rentHref = `/listings?tab=rent&search=${search}&category=${category}&country=${country}`
 
   return (
     <div className="listings-page">
 
-      {/* AIRBNB-TYYLINEN HAKUPALKKI */}
       <form method="GET" action="/listings">
         <div style={{
           display: 'flex',
@@ -70,46 +72,31 @@ export default async function ListingsPage({
           maxWidth: '860px',
         }}>
 
-          {/* SELL / RENT TOGGLE */}
           <div style={{ display: 'flex', borderRight: '1px solid rgba(26,20,8,0.1)', flexShrink: 0 }}>
-            
-              href={`/listings?tab=sell&search=${search}&category=${category}&country=${country}`}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '14px 20px', fontFamily: 'Barlow Condensed', fontSize: '13px',
-                fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-                textDecoration: 'none', whiteSpace: 'nowrap',
-                background: tab === 'sell' ? '#FC7038' : 'transparent',
-                color: tab === 'sell' ? '#fff' : '#7a7060',
-                borderRadius: tab === 'sell' ? '60px 0 0 60px' : '0',
-                transition: 'all 0.15s',
-              }}
-            >
-              For sale
-            </a>
-            <a
-              href={`/listings?tab=rent&search=${search}&category=${category}&country=${country}`}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '14px 20px', fontFamily: 'Barlow Condensed', fontSize: '13px',
-                fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-                textDecoration: 'none', whiteSpace: 'nowrap',
-                background: tab === 'rent' ? '#4a7c59' : 'transparent',
-                color: tab === 'rent' ? '#fff' : '#7a7060',
-                transition: 'all 0.15s',
-              }}
-            >
-              For rent
-            </a>
+            <a href={sellHref} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '14px 20px', fontFamily: 'Barlow Condensed', fontSize: '13px',
+              fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+              textDecoration: 'none', whiteSpace: 'nowrap',
+              background: tab === 'sell' ? '#FC7038' : 'transparent',
+              color: tab === 'sell' ? '#fff' : '#7a7060',
+              borderRadius: tab === 'sell' ? '60px 0 0 60px' : '0',
+            }}>For sale</a>
+            <a href={rentHref} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '14px 20px', fontFamily: 'Barlow Condensed', fontSize: '13px',
+              fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+              textDecoration: 'none', whiteSpace: 'nowrap',
+              background: tab === 'rent' ? '#4a7c59' : 'transparent',
+              color: tab === 'rent' ? '#fff' : '#7a7060',
+            }}>For rent</a>
           </div>
 
           <input type="hidden" name="tab" value={tab} />
 
-          {/* SEARCH */}
           <div style={{ flex: 1, borderRight: '1px solid rgba(26,20,8,0.1)', padding: '0 20px' }}>
             <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Search</p>
             <input
-              className="listings-search-inline"
               placeholder="Chalk bags, ropes, shoes..."
               name="search"
               defaultValue={search}
@@ -117,14 +104,9 @@ export default async function ListingsPage({
             />
           </div>
 
-          {/* CATEGORY */}
           <div style={{ flex: 1, borderRight: '1px solid rgba(26,20,8,0.1)', padding: '0 20px' }}>
             <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Category</p>
-            <select
-              name="category"
-              defaultValue={category}
-              style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: category ? '#1a1408' : '#9a9080', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
-            >
+            <select name="category" defaultValue={category} style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: category ? '#1a1408' : '#9a9080', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}>
               <option value="">All categories</option>
               {Object.keys(categories).map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
@@ -132,30 +114,21 @@ export default async function ListingsPage({
             </select>
           </div>
 
-          {/* COUNTRY */}
           <div style={{ flex: 1, padding: '0 20px' }}>
             <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Location</p>
-            <select
-              name="country"
-              defaultValue={country}
-              style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: country ? '#1a1408' : '#9a9080', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
-            >
+            <select name="country" defaultValue={country} style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: country ? '#1a1408' : '#9a9080', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}>
               {europeanCountries.map(c => (
                 <option key={c} value={c === 'All of Europe' ? '' : c}>{c}</option>
               ))}
             </select>
           </div>
 
-          {/* SEARCH BUTTON */}
-          <button
-            type="submit"
-            style={{
-              background: '#FC7038', border: 'none', cursor: 'pointer',
-              width: '52px', height: '52px', borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '6px', flexShrink: 0, transition: 'background 0.15s',
-            }}
-          >
+          <button type="submit" style={{
+            background: '#FC7038', border: 'none', cursor: 'pointer',
+            width: '52px', height: '52px', borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '6px', flexShrink: 0,
+          }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8"/>
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -167,7 +140,7 @@ export default async function ListingsPage({
       {filtered.length === 0 && <p className="listings-empty">No listings found.</p>}
 
       <div className="listings-grid">
-        {filtered.map(listing => {
+        {filtered.map((listing: any) => {
           const profile = profileMap[listing.user_id]
           const displayName = profile?.username || profile?.full_name || ''
 
