@@ -117,8 +117,12 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
                     <div className="home-cat-img-fallback" style={{ background: cat.defaultBg }} />
                   )}
                 </div>
-                <div className="home-cat-name" style={{ textTransform: 'uppercase' }}>{cat.label}</div>
-                <div className="home-cat-shop-btn">Shop</div>
+                <div className="home-cat-name">{cat.label}</div>
+                <div className="home-cat-links">
+                  {cat.subcategories.slice(0, 3).map(sub => (
+                    <span key={sub} className="home-cat-link">{sub}</span>
+                  ))}
+                </div>
               </a>
             ))}
 
@@ -127,8 +131,11 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               <div className="home-cat-img-wrap">
                 <div className="home-cat-img-fallback" style={{ background: '#5a3e2b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px' }}>🧗</div>
               </div>
-              <div className="home-cat-name" style={{ textTransform: 'uppercase' }}>Crash pads</div>
-              <div className="home-cat-shop-btn">Shop</div>
+              <div className="home-cat-name">Crash pads</div>
+              <div className="home-cat-links">
+                <span className="home-cat-link">Bouldering</span>
+                <span className="home-cat-link">Highball</span>
+              </div>
             </a>
           </div>
           <button
