@@ -321,8 +321,8 @@ export default function ListingPage() {
             />
           )}
 
-          {/* BUYER ACTIONS — piilotetaan jos myyty */}
-          {!listing.sold && currentUser && currentUser.id !== listing.user_id && (
+          {/* BUYER ACTIONS — piilotetaan jos myyty tai tilaus on jo olemassa */}
+          {!listing.sold && !order && currentUser && currentUser.id !== listing.user_id && (
             <div className="listing-contact">
               {!isRental && (
                 <div style={{ marginBottom: '16px' }}>
