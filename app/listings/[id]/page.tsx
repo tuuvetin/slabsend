@@ -32,15 +32,18 @@ export default function ListingPage() {
   useEffect(() => {
     if (!params.id) return
 
-    const cached = localStorage.getItem(`order_${params.id}`)
-    if (cached) {
-      const parsedOrder = JSON.parse(cached)
-      if (parsedOrder.status === 'paid') setOrder(parsedOrder)
-    }
-
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user)
+
+      // localStorage tarkistetaan vain kirjautuneelle käyttäjälle
+      if (user) {
+        const cached = localStorage.getItem(`order_${params.id}`)
+        if (cached) {
+          const parsedOrder = JSON.parse(cached)
+          if (parsedOrder.status === 'paid') setOrder(parsedOrder)
+        }
+      }
 
       const { data } = await supabase.from('listings').select('*').eq('id', params.id).single()
 
