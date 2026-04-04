@@ -67,7 +67,7 @@ export default function ListingsSearch({ tab, search, category, subcategory, cou
 
       {/* SEARCH BAR */}
       <form onSubmit={handleSubmit}>
-        <div style={{
+        <div className="search-box" style={{
           display: 'flex', alignItems: 'stretch',
           background: '#ede9de', border: '1px solid rgba(26,20,8,0.15)',
           borderRadius: '12px', boxShadow: '0 2px 8px rgba(26,20,8,0.06)',
@@ -75,18 +75,19 @@ export default function ListingsSearch({ tab, search, category, subcategory, cou
         }}>
 
           {/* SEARCH */}
-          <div style={{ flex: '2 1 140px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
-            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Search</p>
+          <div className="search-field-search" style={{ flex: '2 1 140px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
+            <p className="search-field-label" style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Search</p>
             <input
               value={searchVal}
               onChange={e => setSearchVal(e.target.value)}
+              placeholder="Search gear..."
               style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0 }}
             />
           </div>
 
           {/* CATEGORY */}
-          <div style={{ flex: '1 1 100px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
-            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Category</p>
+          <div className="search-field-cat" style={{ flex: '1 1 100px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
+            <p className="search-field-label" style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Category</p>
             <select
               value={categoryVal}
               onChange={e => { setCategoryVal(e.target.value); setSubcategoryVal('') }}
@@ -101,8 +102,8 @@ export default function ListingsSearch({ tab, search, category, subcategory, cou
 
           {/* SUBCATEGORY */}
           {subcategories.length > 0 && (
-            <div style={{ flex: '1 1 100px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
-              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Type</p>
+            <div className="search-field-sub" style={{ flex: '1 1 100px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
+              <p className="search-field-label" style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Type</p>
               <select
                 value={subcategoryVal}
                 onChange={e => setSubcategoryVal(e.target.value)}
@@ -117,8 +118,8 @@ export default function ListingsSearch({ tab, search, category, subcategory, cou
           )}
 
           {/* LOCATION */}
-          <div style={{ flex: '1 1 100px', padding: '12px 16px' }}>
-            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Location</p>
+          <div className="search-field-loc" style={{ flex: '1 1 100px', padding: '12px 16px' }}>
+            <p className="search-field-label" style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Location</p>
             <select
               value={countryVal}
               onChange={e => setCountryVal(e.target.value)}
@@ -131,17 +132,19 @@ export default function ListingsSearch({ tab, search, category, subcategory, cou
           </div>
 
           {/* BUTTON */}
-          <button type="submit" style={{
-            background: '#FC7038', border: 'none', cursor: 'pointer',
-            width: '52px', minHeight: '52px', borderRadius: '8px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '6px', flexShrink: 0, alignSelf: 'center',
-          }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-          </button>
+          <div className="search-btn-outer">
+            <button type="submit" style={{
+              background: '#FC7038', border: 'none', cursor: 'pointer',
+              width: '52px', minHeight: '52px', borderRadius: '8px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '6px', flexShrink: 0, alignSelf: 'center',
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </form>
     </div>
