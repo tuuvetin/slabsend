@@ -44,19 +44,21 @@ export default function ListingPage() {
 
       const { data } = await supabase.from('listings').select('*').eq('id', params.id).single()
 
-      if (data?.sold) {
-        const isAdmin = ADMINS.includes(user?.email || '')
-        const isSellerOfThis = data.user_id === user?.id
+      if (!data || (data.sold && !user)) {
+        window.location.href = '/listings'
+        return
+      }
 
+      if (data.sold && user) {
+        const isAdmin = ADMINS.includes(user.email || '')
+        const isSellerOfThis = data.user_id === user.id
         const { data: orderData } = await supabase
           .from('orders')
           .select('buyer_id')
           .eq('listing_id', data.id)
           .single()
-
-        const isBuyerOfThis = orderData?.buyer_id === user?.id
-
-        if (!user || (!isBuyerOfThis && !isSellerOfThis && !isAdmin)) {
+        const isBuyerOfThis = orderData?.buyer_id === user.id
+        if (!isBuyerOfThis && !isSellerOfThis && !isAdmin) {
           window.location.href = '/listings'
           return
         }
