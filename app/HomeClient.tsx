@@ -79,8 +79,8 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
         </div>
       </div>
 
-{/* CATEGORIES */}
-<div className="home-section full-bleed">
+      {/* CATEGORIES */}
+      <div className="home-section full-bleed">
         <div className="home-section-header">
           <h2 className="home-section-title">Browse by category</h2>
           <a href="/listings" className="home-see-all">View all →</a>
@@ -101,7 +101,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
           >‹</button>
           <div id="cat-scroll" style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(5, 1fr)',
             gap: '13px',
             overflowX: 'auto',
             scrollSnapType: 'x mandatory',
@@ -123,10 +123,21 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
                     <div className="home-cat-img-fallback" style={{ background: cat.defaultBg }} />
                   )}
                 </div>
-                <div className="home-cat-name">{cat.label}</div>
+                <div className="home-cat-name" style={{ textTransform: 'uppercase' }}>{cat.label}</div>
                 <div className="home-cat-shop-btn">Shop</div>
               </a>
             ))}
+
+            {/* CRASHPADS OIKOTIE */}
+            <a href="/listings?tab=sell&category=Gear&subcategory=Crash+pads" className="home-cat-card" style={{ scrollSnapAlign: 'start' }}>
+              <div className="home-cat-img-wrap">
+                <div className="home-cat-img-fallback" style={{ background: '#5a3e2b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px' }}>
+                  🧗
+                </div>
+              </div>
+              <div className="home-cat-name" style={{ textTransform: 'uppercase' }}>Crash pads</div>
+              <div className="home-cat-shop-btn">Shop</div>
+            </a>
           </div>
           <button
             onClick={() => {
