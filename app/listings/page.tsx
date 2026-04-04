@@ -1,5 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
+
 export const revalidate = 0
+
 const categories: Record<string, string[]> = {
   'Clothing': ['T-Shirts', 'Hoodies', 'Pants', 'Shorts', 'Jackets', 'Other clothing'],
   'Shoes': ['Climbing shoes', 'Approach shoes', 'Mountain boots', 'Other shoes'],
@@ -53,32 +55,112 @@ export default async function ListingsPage({
 
   return (
     <div className="listings-page">
-      <div className="listings-header-row">
-        <h1 className="listings-title">Listings</h1>
-        <div className="listings-tab-toggle">
-          <a href="/listings?tab=sell" className={`listings-tab-btn ${tab === 'sell' ? 'active' : ''}`}>For sale</a>
-          <a href="/listings?tab=rent" className={`listings-tab-btn ${tab === 'rent' ? 'active rent' : ''}`}>For rent</a>
-        </div>
-      </div>
 
+      {/* AIRBNB-TYYLINEN HAKUPALKKI */}
       <form method="GET" action="/listings">
-        <input type="hidden" name="tab" value={tab} />
-        <div className="listings-search-row">
-          <input className="listings-input" placeholder="Search listings..." name="search" defaultValue={search} />
-        </div>
-        <div className="listings-filter-row">
-          <select className="listings-select" name="category" defaultValue={category}>
-            <option value="">All categories</option>
-            {Object.keys(categories).map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-          <select className="listings-select listings-select-full" name="country" defaultValue={country}>
-            {europeanCountries.map(c => (
-              <option key={c} value={c === 'All of Europe' ? '' : c}>{c}</option>
-            ))}
-          </select>
-          <button type="submit" className="form-submit" style={{ width: 'auto', padding: '10px 20px' }}>Filter</button>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          background: '#fff',
+          border: '1px solid rgba(26,20,8,0.15)',
+          borderRadius: '60px',
+          boxShadow: '0 2px 12px rgba(26,20,8,0.08)',
+          overflow: 'hidden',
+          marginBottom: '32px',
+          maxWidth: '860px',
+        }}>
+
+          {/* SELL / RENT TOGGLE */}
+          <div style={{ display: 'flex', borderRight: '1px solid rgba(26,20,8,0.1)', flexShrink: 0 }}>
+            
+              href={`/listings?tab=sell&search=${search}&category=${category}&country=${country}`}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '14px 20px', fontFamily: 'Barlow Condensed', fontSize: '13px',
+                fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+                textDecoration: 'none', whiteSpace: 'nowrap',
+                background: tab === 'sell' ? '#FC7038' : 'transparent',
+                color: tab === 'sell' ? '#fff' : '#7a7060',
+                borderRadius: tab === 'sell' ? '60px 0 0 60px' : '0',
+                transition: 'all 0.15s',
+              }}
+            >
+              For sale
+            </a>
+            
+              href={`/listings?tab=rent&search=${search}&category=${category}&country=${country}`}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '14px 20px', fontFamily: 'Barlow Condensed', fontSize: '13px',
+                fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+                textDecoration: 'none', whiteSpace: 'nowrap',
+                background: tab === 'rent' ? '#4a7c59' : 'transparent',
+                color: tab === 'rent' ? '#fff' : '#7a7060',
+                transition: 'all 0.15s',
+              }}
+            >
+              For rent
+            </a>
+          </div>
+
+          <input type="hidden" name="tab" value={tab} />
+
+          {/* SEARCH */}
+          <div style={{ flex: 1, borderRight: '1px solid rgba(26,20,8,0.1)', padding: '0 20px' }}>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Search</p>
+            <input
+              className="listings-search-inline"
+              placeholder="Chalk bags, ropes, shoes..."
+              name="search"
+              defaultValue={search}
+              style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0 }}
+            />
+          </div>
+
+          {/* CATEGORY */}
+          <div style={{ flex: 1, borderRight: '1px solid rgba(26,20,8,0.1)', padding: '0 20px' }}>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Category</p>
+            <select
+              name="category"
+              defaultValue={category}
+              style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: category ? '#1a1408' : '#9a9080', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
+            >
+              <option value="">All categories</option>
+              {Object.keys(categories).map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* COUNTRY */}
+          <div style={{ flex: 1, padding: '0 20px' }}>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Location</p>
+            <select
+              name="country"
+              defaultValue={country}
+              style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: country ? '#1a1408' : '#9a9080', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
+            >
+              {europeanCountries.map(c => (
+                <option key={c} value={c === 'All of Europe' ? '' : c}>{c}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* SEARCH BUTTON */}
+          <button
+            type="submit"
+            style={{
+              background: '#FC7038', border: 'none', cursor: 'pointer',
+              width: '52px', height: '52px', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '6px', flexShrink: 0, transition: 'background 0.15s',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
         </div>
       </form>
 
