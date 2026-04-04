@@ -87,7 +87,7 @@ export default async function ListingsPage({
             >
               For sale
             </a>
-            
+            <a
               href={`/listings?tab=rent&search=${search}&category=${category}&country=${country}`}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
