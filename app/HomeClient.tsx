@@ -25,12 +25,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
       {/* HERO */}
       <div className="home-hero-full" style={{height: '640px', minHeight: '640px'}}>
         {!heroError && (
-          <img
-            src={heroImageUrl}
-            alt="Hero"
-            className="home-hero-bg-img"
-            onError={() => setHeroError(true)}
-          />
+          <img src={heroImageUrl} alt="Hero" className="home-hero-bg-img" onError={() => setHeroError(true)} />
         )}
         <svg className="home-topo" viewBox="0 0 1400 640" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
           <rect width="1400" height="640" fill="#3a5460"/>
@@ -89,81 +84,60 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
           <button
             onClick={() => {
               const el = document.getElementById('cat-scroll')
-              if (el) el.scrollBy({ left: -340, behavior: 'smooth' })
+              if (el) el.scrollBy({ left: -320, behavior: 'smooth' })
             }}
             style={{
-              position: 'absolute', left: '0px', top: '45%', transform: 'translateY(-50%)',
+              position: 'absolute', left: '0px', top: '40%', transform: 'translateY(-50%)',
               zIndex: 10, background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.15)',
               borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '18px', color: '#1a1408', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
             }}
           >‹</button>
-
           <div id="cat-scroll" style={{
-            display: 'flex', gap: '16px', overflowX: 'auto',
-            scrollSnapType: 'x mandatory', scrollbarWidth: 'none',
-            paddingLeft: '4px', paddingBottom: '8px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, 1fr)',
+            gap: '13px',
+            overflowX: 'auto',
+            scrollSnapType: 'x mandatory',
+            scrollbarWidth: 'none',
+            paddingLeft: '0',
           }}>
             {categories.map(cat => (
-              <a key={cat.key} href={cat.href} style={{
-                scrollSnapAlign: 'start', textDecoration: 'none', flexShrink: 0,
-                width: 'clamp(200px, 26vw, 300px)',
-              }}>
-                <div style={{
-                  borderRadius: '12px', overflow: 'hidden',
-                  aspectRatio: '3/4', marginBottom: '12px',
-                }}>
+              <a key={cat.key} href={cat.href} className="home-cat-card" style={{ scrollSnapAlign: 'start' }}>
+                <div className="home-cat-img-wrap">
                   {!catErrors[cat.key] ? (
                     <img
                       src={catImageUrls[cat.key]}
                       alt={cat.label}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      className="home-cat-img"
                       onError={() => setCatErrors(prev => ({ ...prev, [cat.key]: true }))}
                     />
                   ) : (
-                    <div style={{ width: '100%', height: '100%', background: cat.defaultBg }} />
+                    <div className="home-cat-img-fallback" style={{ background: cat.defaultBg }} />
                   )}
                 </div>
-                <div style={{ fontFamily: 'Barlow Condensed', fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '8px' }}>
-                  {cat.label}
-                </div>
-                <div style={{
-                  display: 'inline-block', fontFamily: 'Barlow Condensed', fontSize: '13px',
-                  fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-                  color: '#1a1408', borderBottom: '1px solid #1a1408', paddingBottom: '2px',
-                }}>Shop</div>
+                <div className="home-cat-name" style={{ textTransform: 'uppercase' }}>{cat.label}</div>
+                <div className="home-cat-shop-btn">Shop</div>
               </a>
             ))}
 
             {/* CRASHPADS */}
-            <a href="/listings?tab=sell&category=Gear&subcategory=Crash+pads" style={{
-              scrollSnapAlign: 'start', textDecoration: 'none', flexShrink: 0,
-              width: 'clamp(200px, 26vw, 300px)',
-            }}>
-              <div style={{
-                borderRadius: '12px', overflow: 'hidden', aspectRatio: '3/4',
-                marginBottom: '12px', background: '#5a3e2b',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '72px',
-              }}>🧗</div>
-              <div style={{ fontFamily: 'Barlow Condensed', fontSize: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '8px' }}>
-                Crash pads
+            <a href="/listings?tab=sell&category=Gear&subcategory=Crash+pads" className="home-cat-card" style={{ scrollSnapAlign: 'start' }}>
+              <div className="home-cat-img-wrap">
+                <div className="home-cat-img-fallback" style={{ background: '#5a3e2b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px' }}>🧗</div>
               </div>
-              <div style={{
-                display: 'inline-block', fontFamily: 'Barlow Condensed', fontSize: '13px',
-                fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-                color: '#1a1408', borderBottom: '1px solid #1a1408', paddingBottom: '2px',
-              }}>Shop</div>
+              <div className="home-cat-name" style={{ textTransform: 'uppercase' }}>Crash pads</div>
+              <div className="home-cat-shop-btn">Shop</div>
             </a>
           </div>
-
           <button
             onClick={() => {
               const el = document.getElementById('cat-scroll')
-              if (el) el.scrollBy({ left: 340, behavior: 'smooth' })
+              if (el) el.scrollBy({ left: 320, behavior: 'smooth' })
             }}
             style={{
-              position: 'absolute', right: '0px', top: '45%', transform: 'translateY(-50%)',
+              position: 'absolute', right: '0px', top: '40%', transform: 'translateY(-50%)',
               zIndex: 10, background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.15)',
               borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
