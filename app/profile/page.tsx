@@ -7,13 +7,12 @@ import { createClient } from '@/utils/supabase/client'
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null)
   const [username, setUsername] = useState('')
+  const [usernameSet, setUsernameSet] = useState(false)
   const [fullName, setFullName] = useState('')
   const [location, setLocation] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [message, setMessage] = useState('')
   const [listings, setListings] = useState<any[]>([])
-  const [stripeOnboarded, setStripeOnboarded] = useState(false)
-  const [stripeLoading, setStripeLoading] = useState(false)
 
   // Crop
   const [cropSrc, setCropSrc] = useState<string | null>(null)
@@ -33,10 +32,10 @@ export default function ProfilePage() {
       supabase.from('profiles').select('*').eq('user_id', user.id).single().then(({ data }) => {
         if (data) {
           setUsername(data.username || '')
+          setUsernameSet(!!data.username)
           setFullName(data.full_name || '')
           setLocation(data.location || '')
           setAvatarUrl(data.avatar_url || '')
-          setStripeOnboarded(data.stripe_onboarded || false)
         }
       })
 
@@ -44,20 +43,40 @@ export default function ProfilePage() {
         setListings(data || [])
       })
     })
-
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('stripe') === 'success') setMessage('Stripe connected successfully!')
-    else if (params.get('stripe') === 'refresh') setMessage('Stripe connection was interrupted. Please try again.')
   }, [])
 
   const handleSave = async () => {
     if (!user) return
+
+    // Tarkistetaan onko username jo otettu
+    if (!usernameSet && username) {
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('username', username)
+        .neq('user_id', user.id)
+        .single()
+
+      if (existing) {
+        setMessage('Error: Username is already taken')
+        return
+      }
+    }
+
     const { error } = await supabase.from('profiles').upsert(
-      { user_id: user.id, username, full_name: fullName, location },
+      {
+        user_id: user.id,
+        username: usernameSet ? username : username,
+        full_name: fullName,
+        location
+      },
       { onConflict: 'user_id' }
     )
     if (error) setMessage('Error: ' + error.message)
-    else setMessage('Profile saved!')
+    else {
+      setMessage('Profile saved!')
+      if (username) setUsernameSet(true)
+    }
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,40 +151,21 @@ export default function ProfilePage() {
     setAvatarUploading(false)
   }
 
-  const handleConnectStripe = async () => {
-    setStripeLoading(true)
-    const res = await fetch('/api/stripe/connect', { method: 'POST' })
-    const data = await res.json()
-    if (data.url) window.location.href = data.url
-    else { setMessage('Error connecting Stripe: ' + data.error); setStripeLoading(false) }
-  }
-
   if (!user) return <p className="listing-loading">Loading...</p>
 
   return (
     <div className="profile-page">
 
       <div className="profile-header">
-        {/* Avatar */}
         <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => fileInputRef.current?.click()}>
           {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt="Avatar"
-              style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(26,20,8,0.1)' }}
-            />
+            <img src={avatarUrl} alt="Avatar" style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(26,20,8,0.1)' }} />
           ) : (
             <div className="profile-avatar">
               {(fullName || user.email || '?')[0].toUpperCase()}
             </div>
           )}
-          <div style={{
-            position: 'absolute', bottom: 0, right: 0,
-            background: '#FC7038', borderRadius: '50%',
-            width: '22px', height: '22px', display: 'flex',
-            alignItems: 'center', justifyContent: 'center',
-            border: '2px solid #F5F3E6', fontSize: '11px'
-          }}>✏️</div>
+          <div style={{ position: 'absolute', bottom: 0, right: 0, background: '#FC7038', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #F5F3E6', fontSize: '11px' }}>✏️</div>
         </div>
         <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileSelect} />
 
@@ -181,25 +181,16 @@ export default function ProfilePage() {
           <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
             Crop profile picture
           </p>
-          <ReactCrop
-            crop={crop}
-            onChange={c => setCrop(c)}
-            onComplete={c => setCompletedCrop(c)}
-            aspect={1}
-            circularCrop
-          >
+          <ReactCrop crop={crop} onChange={c => setCrop(c)} onComplete={c => setCompletedCrop(c)} aspect={1} circularCrop>
             <img ref={imgRef} src={cropSrc} onLoad={onImageLoad} style={{ maxWidth: '100%', maxHeight: '340px', objectFit: 'contain' }} alt="crop" />
           </ReactCrop>
           <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
             <button className="form-submit" onClick={handleAvatarUpload} disabled={avatarUploading} style={{ flex: 1 }}>
               {avatarUploading ? 'Uploading...' : 'Save picture'}
             </button>
-            <button onClick={() => setCropSrc(null)} style={{
-              flex: 1, fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700,
-              letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
-              background: 'transparent', color: '#7a7060', border: '1px solid rgba(26,20,8,0.15)',
-              borderRadius: '8px', padding: '14px'
-            }}>Cancel</button>
+            <button onClick={() => setCropSrc(null)} style={{ flex: 1, fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#7a7060', border: '1px solid rgba(26,20,8,0.15)', borderRadius: '8px', padding: '14px' }}>
+              Cancel
+            </button>
           </div>
         </div>
       )}
@@ -209,7 +200,24 @@ export default function ProfilePage() {
         {/* SETTINGS */}
         <div className="profile-section">
           <h2 className="profile-section-title">Account settings</h2>
-          <input className="form-input" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
+
+          {/* USERNAME — lukittu jos jo asetettu */}
+          <div style={{ position: 'relative' }}>
+            <input
+              className="form-input"
+              placeholder="Username"
+              value={username}
+              onChange={e => !usernameSet && setUsername(e.target.value)}
+              readOnly={usernameSet}
+              style={{ opacity: usernameSet ? 0.6 : 1, cursor: usernameSet ? 'not-allowed' : 'text' }}
+            />
+            {usernameSet && (
+              <p style={{ fontSize: '11px', color: '#9a9080', marginTop: '-8px', marginBottom: '12px' }}>
+                Username cannot be changed after it's set.
+              </p>
+            )}
+          </div>
+
           <input className="form-input" placeholder="Full name" value={fullName} onChange={e => setFullName(e.target.value)} />
           <input className="form-input" placeholder="Location" value={location} onChange={e => setLocation(e.target.value)} />
           <button className="form-submit" onClick={handleSave}>Save changes</button>
@@ -217,13 +225,12 @@ export default function ProfilePage() {
             <p className={`form-message ${message.startsWith('Error') ? 'error' : 'success'}`}>{message}</p>
           )}
 
-         {/* PAYMENTS INFO */}
-<div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
-  <h2 className="profile-section-title">Payments</h2>
-  <p style={{ fontSize: '13px', color: '#7a7060', lineHeight: '1.5' }}>
-    Payments are handled securely by Slabsend. When your item sells, we'll transfer the payment directly to your bank account.
-  </p>
-</div>
+          <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
+            <h2 className="profile-section-title">Payments</h2>
+            <p style={{ fontSize: '13px', color: '#7a7060', lineHeight: '1.5' }}>
+              Payments are handled securely by Slabsend. When your item sells, we'll transfer the payment directly to your bank account.
+            </p>
+          </div>
 
           <button className="profile-signout-btn" onClick={() => supabase.auth.signOut().then(() => window.location.href = '/login')}>
             Sign out
