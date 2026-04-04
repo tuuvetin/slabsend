@@ -71,6 +71,17 @@ export default async function ListingsPage({
                   <p className="listing-card-price">
                     {listing.price} €{listing.listing_type === 'rent' && listing.rental_period ? `/${listing.rental_period}` : ''}
                   </p>
+                  {listing.listing_type !== 'rent' && (
+                    <p className="listing-card-price-total">
+                      {(listing.price * 1.08).toFixed(2)} € incl.
+                      <span className="info-tooltip-wrap" tabIndex={0} style={{ position: 'relative', display: 'inline-block', cursor: 'default' }}>
+                        🛡️
+                        <span className="info-tooltip price-tooltip">
+                          Your purchase is covered by Slabsend Buyer Protection. The seller receives payment only after you confirm the item arrived as described.
+                        </span>
+                      </span>
+                    </p>
+                  )}
                   <p className="listing-card-meta">
                     {listing.condition && (
                       <span className="listing-card-cond">
