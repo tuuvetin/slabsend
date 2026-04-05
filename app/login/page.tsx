@@ -7,6 +7,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
   const [message, setMessage] = useState('')
   const [logoUrl, setLogoUrl] = useState<string>('')
@@ -29,34 +30,73 @@ export default function LoginPage() {
 
   const handleSubmit = async () => {
     if (isSignUp) {
-      const { error } = await supabase.auth.signUp({ email, password })
-      if (error) setMessage(error.message)
-      else setMessage('Check your email to confirm your account!')
+      if (!username.trim()) { setMessage('Username is required'); return }
+
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('username', username.trim().toLowerCase())
+        .maybeSingle()
+
+      if (existing) { setMessage('Username is already taken'); return }
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username: username.trim().toLowerCase() } },
+      })
+      if (error) { setMessage(error.message); return }
+
+      if (data.user) {
+        await supabase.from('profiles').upsert(
+          { user_id: data.user.id, username: username.trim().toLowerCase() },
+          { onConflict: 'user_id' }
+        )
+      }
+      setMessage('Check your email to confirm your account!')
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setMessage(error.message)
-      else { setMessage('Signed in!'); window.location.href = '/profile' }
+      else window.location.href = '/profile'
     }
   }
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) { setMessage('Enter your email address above first'); return }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/profile?reset=true`,
+    })
+    if (error) setMessage(error.message)
+    else setMessage('Password reset link sent! Check your email.')
+  }
+
+  const isError = message.toLowerCase().includes('error') || message.toLowerCase().includes('invalid') || message.toLowerCase().includes('taken') || message.toLowerCase().includes('required')
 
   return (
     <div className="login-page">
       <div className="login-card">
-      <div className="login-logo" style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
-  {logoReady && (
-    logoUrl
-      ? <img src={logoUrl} alt="Slabsend" style={{ width: '220px', height: 'auto' }} />
-      : <>Slab<span>send</span></>
-  )}
-</div>
-        <h1 className="login-title">
-          {isSignUp ? 'Create account' : 'Sign in'}
-        </h1>
+        <div className="login-logo" style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+          {logoReady && (
+            logoUrl
+              ? <img src={logoUrl} alt="Slabsend" style={{ width: '220px', height: 'auto' }} />
+              : <>Slab<span>send</span></>
+          )}
+        </div>
+        <h1 className="login-title">{isSignUp ? 'Create account' : 'Sign in'}</h1>
         <p className="login-subtitle">
-          {isSignUp
-            ? 'Join the climbing gear community'
-            : 'Welcome back to the climbing gear marketplace'}
+          {isSignUp ? 'Join the climbing gear community' : 'Welcome back to the climbing gear marketplace'}
         </p>
+
+        {isSignUp && (
+          <input
+            className="form-input"
+            type="text"
+            placeholder="Username (unique, cannot be changed later)"
+            value={username}
+            onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+          />
+        )}
+
         <input
           className="form-input"
           type="email"
@@ -72,17 +112,24 @@ export default function LoginPage() {
           onChange={e => setPassword(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSubmit()}
         />
+
         <button className="form-submit" onClick={handleSubmit}>
           {isSignUp ? 'Create account' : 'Sign in'}
         </button>
-        {message && (
-          <p className={`form-message ${message.includes('Error') || message.includes('Invalid') ? 'error' : 'success'}`}>
-            {message}
-          </p>
+
+        {!isSignUp && (
+          <button className="login-forgot-btn" onClick={handleForgotPassword}>
+            Forgot your password?
+          </button>
         )}
+
+        {message && (
+          <p className={`form-message ${isError ? 'error' : 'success'}`}>{message}</p>
+        )}
+
         <button
           className="login-switch-btn"
-          onClick={() => { setIsSignUp(!isSignUp); setMessage('') }}
+          onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setUsername('') }}
         >
           {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
         </button>

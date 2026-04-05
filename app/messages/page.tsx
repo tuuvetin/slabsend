@@ -5,11 +5,13 @@ import { createClient } from '@/utils/supabase/client'
 export default function MessagesPage() {
   const [conversations, setConversations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const supabase = createClient()
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { window.location.href = '/login'; return }
+      setCurrentUser(user)
 
       const { data: messages } = await supabase
         .from('messages')
@@ -81,6 +83,9 @@ export default function MessagesPage() {
                   )}
                   {listingImage && (
                     <img src={listingImage} alt="" style={{ position: 'absolute', bottom: '-4px', right: '-4px', width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #F5F3E6' }} />
+                  )}
+                  {msg.sender_id !== currentUser?.id && (
+                    <span style={{ position: 'absolute', top: 0, right: 0, width: '11px', height: '11px', background: '#FC7038', borderRadius: '50%', border: '2px solid #F5F3E6' }} />
                   )}
                 </div>
 

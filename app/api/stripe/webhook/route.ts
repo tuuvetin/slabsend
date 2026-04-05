@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createClient } from '@/utils/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
@@ -31,7 +30,6 @@ export async function POST(req: Request) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
-
     const listingId = session.metadata?.listing_id
     const sellerUserId = session.metadata?.seller_user_id
     const buyerId = session.metadata?.buyer_id
@@ -39,7 +37,7 @@ export async function POST(req: Request) {
 
     if (!listingId) return NextResponse.json({ received: true })
 
-    // Merkitään ilmoitus myydyksi (admin-client ohittaa RLS)
+    // Merkitään ilmoitus myydyksi
     await supabaseAdmin.from('listings').update({ sold: true }).eq('id', listingId)
 
     // Lasketaan summat
@@ -85,24 +83,13 @@ export async function POST(req: Request) {
 
     const sellerName = sellerProfile?.username || sellerProfile?.full_name || 'Seller'
 
-    // Haetaan myyjän sähköposti
+    // Haetaan myyjän sähköposti admin-clientillä
     let sellerEmail = ''
     try {
       const { data: { user: sellerUser } } = await supabaseAdmin.auth.admin.getUserById(sellerUserId || '')
       sellerEmail = sellerUser?.email || ''
     } catch (e) {
       console.error('Error fetching seller email:', e)
-    }
-
-    // Haetaan ostajan sähköposti jos ei Stripestä saatu
-    let resolvedBuyerEmail = buyerEmail
-    if (!resolvedBuyerEmail && buyerId) {
-      try {
-        const { data: { user: buyerUser } } = await supabaseAdmin.auth.admin.getUserById(buyerId)
-        resolvedBuyerEmail = buyerUser?.email || ''
-      } catch (e) {
-        console.error('Error fetching buyer email:', e)
-      }
     }
 
     // Merkitään kaikki avoimet tarjoukset perutuiksi
@@ -138,8 +125,7 @@ export async function POST(req: Request) {
               <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${listing?.title}</td></tr>
               <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Amount you'll receive</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${baseAmount} €</strong></td></tr>
             </table>
-            <p>Please ship the item as soon as possible. The buyer has 48 hours to confirm receipt after delivery. Once confirmed, you will receive your payment within one week to the bank account on your profile.</p>
-            <p style="background: #FFF8F0; border: 1px solid rgba(252,112,56,0.2); border-radius: 6px; padding: 10px 14px; font-size: 13px;">💸 Haven't added your bank details yet? Add them on your <a href="https://slabsend.com/profile" style="color: #FC7038;">profile page</a> so we can process your payment without delay.</p>
+            <p>Please ship the item as soon as possible. The buyer has 48 hours to confirm receipt, after which you'll receive your payment.</p>
             <p>Questions? Contact <a href="mailto:info@slabsend.com">info@slabsend.com</a></p>
             <p style="color: #9a9080; font-size: 12px;">Slabsend — Pre-owned climbing gear</p>
           </div>
@@ -148,10 +134,10 @@ export async function POST(req: Request) {
     }
 
     // Sähköposti ostajalle
-    if (resolvedBuyerEmail) {
+    if (buyerEmail) {
       await resend.emails.send({
         from: 'Slabsend <info@slabsend.com>',
-        to: resolvedBuyerEmail,
+        to: buyerEmail,
         subject: `Order confirmed: ${listing?.title}`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -180,7 +166,7 @@ export async function POST(req: Request) {
           <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${orderNumber}</strong></td></tr>
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${listing?.title}</td></tr>
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Buyer email</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${resolvedBuyerEmail}</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Buyer email</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${buyerEmail}</td></tr>
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Seller</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${sellerName} (${sellerEmail})</td></tr>
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Total paid</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${totalAmount} €</strong></td></tr>
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">To transfer to seller</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${baseAmount} €</strong></td></tr>
@@ -196,8 +182,7 @@ export async function POST(req: Request) {
   if (event.type === 'account.updated') {
     const account = event.data.object as Stripe.Account
     if (account.charges_enabled) {
-      const supabase = await createClient()
-      await supabase.from('profiles').update({ stripe_onboarded: true }).eq('stripe_account_id', account.id)
+      await supabaseAdmin.from('profiles').update({ stripe_onboarded: true }).eq('stripe_account_id', account.id)
     }
   }
 

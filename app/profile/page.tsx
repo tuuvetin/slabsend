@@ -13,6 +13,15 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [message, setMessage] = useState('')
   const [listings, setListings] = useState<any[]>([])
+  const [bankName, setBankName] = useState('')
+  const [bankIban, setBankIban] = useState('')
+  const [bankBic, setBankBic] = useState('')
+  const [bankCountry, setBankCountry] = useState('')
+  const [bankMessage, setBankMessage] = useState('')
+  const [bankSaving, setBankSaving] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [passwordMessage, setPasswordMessage] = useState('')
+  const [passwordSaving, setPasswordSaving] = useState(false)
 
   // Crop
   const [cropSrc, setCropSrc] = useState<string | null>(null)
@@ -36,6 +45,10 @@ export default function ProfilePage() {
           setFullName(data.full_name || '')
           setLocation(data.location || '')
           setAvatarUrl(data.avatar_url || '')
+          setBankName(data.bank_name || '')
+          setBankIban(data.bank_iban || '')
+          setBankBic(data.bank_bic || '')
+          setBankCountry(data.bank_country || '')
         }
       })
 
@@ -77,6 +90,27 @@ export default function ProfilePage() {
       setMessage('Profile saved!')
       if (username) setUsernameSet(true)
     }
+  }
+
+  const handleChangePassword = async () => {
+    if (!newPassword || newPassword.length < 6) { setPasswordMessage('Password must be at least 6 characters'); return }
+    setPasswordSaving(true)
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    setPasswordSaving(false)
+    if (error) setPasswordMessage('Error: ' + error.message)
+    else { setPasswordMessage('Password updated!'); setNewPassword('') }
+  }
+
+  const handleSaveBank = async () => {
+    if (!user) return
+    setBankSaving(true)
+    const { error } = await supabase.from('profiles').upsert(
+      { user_id: user.id, bank_name: bankName, bank_iban: bankIban.replace(/\s/g, '').toUpperCase(), bank_bic: bankBic.replace(/\s/g, '').toUpperCase(), bank_country: bankCountry },
+      { onConflict: 'user_id' }
+    )
+    setBankSaving(false)
+    if (error) setBankMessage('Error: ' + error.message)
+    else setBankMessage('Bank details saved!')
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -226,10 +260,61 @@ export default function ProfilePage() {
           )}
 
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
-            <h2 className="profile-section-title">Payments</h2>
-            <p style={{ fontSize: '13px', color: '#7a7060', lineHeight: '1.5' }}>
-              Payments are handled securely by Slabsend. When your item sells, we'll transfer the payment directly to your bank account.
+            <h2 className="profile-section-title">Bank account for payouts</h2>
+            <p style={{ fontSize: '13px', color: '#7a7060', lineHeight: '1.5', marginBottom: '16px' }}>
+              When you sell an item, we'll transfer your payment to the bank account below. We support all European banks — IBAN transfers via Wise or Holvi.
             </p>
+
+            <input
+              className="form-input"
+              placeholder="Full name (account holder)"
+              value={bankName}
+              onChange={e => setBankName(e.target.value)}
+            />
+            <input
+              className="form-input"
+              placeholder="IBAN (e.g. FI21 1234 5600 0007 85)"
+              value={bankIban}
+              onChange={e => setBankIban(e.target.value)}
+              style={{ fontFamily: 'monospace', letterSpacing: '0.05em' }}
+            />
+            <input
+              className="form-input"
+              placeholder="BIC / SWIFT code (e.g. OKOYFIHH)"
+              value={bankBic}
+              onChange={e => setBankBic(e.target.value)}
+              style={{ fontFamily: 'monospace', letterSpacing: '0.05em' }}
+            />
+            <input
+              className="form-input"
+              placeholder="Country (e.g. Finland)"
+              value={bankCountry}
+              onChange={e => setBankCountry(e.target.value)}
+            />
+
+            <button className="form-submit" onClick={handleSaveBank} disabled={bankSaving}>
+              {bankSaving ? 'Saving...' : 'Save bank details'}
+            </button>
+            {bankMessage && (
+              <p className={`form-message ${bankMessage.startsWith('Error') ? 'error' : 'success'}`}>{bankMessage}</p>
+            )}
+          </div>
+
+          <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
+            <h2 className="profile-section-title">Change password</h2>
+            <input
+              className="form-input"
+              type="password"
+              placeholder="New password (min. 6 characters)"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+            />
+            <button className="form-submit" onClick={handleChangePassword} disabled={passwordSaving}>
+              {passwordSaving ? 'Saving...' : 'Update password'}
+            </button>
+            {passwordMessage && (
+              <p className={`form-message ${passwordMessage.startsWith('Error') ? 'error' : 'success'}`}>{passwordMessage}</p>
+            )}
           </div>
 
           <button className="profile-signout-btn" onClick={() => supabase.auth.signOut().then(() => window.location.href = '/login')}>

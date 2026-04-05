@@ -6,7 +6,7 @@ export default function PriceTooltipIcon() {
   return (
     <span
       tabIndex={0}
-      style={{ position: 'relative', display: 'inline-block', cursor: 'help', flexShrink: 0 }}
+      style={{ position: 'relative', display: 'inline-block', cursor: 'pointer', flexShrink: 0, cursor: 'help' }}
       onClick={e => { e.preventDefault(); e.stopPropagation(); setOpen(o => !o) }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}

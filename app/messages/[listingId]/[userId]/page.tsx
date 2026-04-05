@@ -27,7 +27,6 @@ export default function ConversationPage() {
       if (!user) { window.location.href = '/login'; return }
       setCurrentUser(user)
 
-      // Haetaan viestit vain näiden kahden käyttäjän väliltä tälle ilmoitukselle
       const { data: msgs } = await supabase
         .from('messages')
         .select('*')
@@ -37,11 +36,9 @@ export default function ConversationPage() {
 
       setMessages(msgs || [])
 
-      // Haetaan listing
       const { data: l } = await supabase.from('listings').select('*').eq('id', listingId).single()
       setListing(l)
 
-      // Haetaan profiilit
       const { data: profileData } = await supabase
         .from('profiles')
         .select('user_id, username, full_name, avatar_url')
@@ -51,19 +48,17 @@ export default function ConversationPage() {
       for (const p of profileData || []) profileMap[p.user_id] = p
       setProfiles(profileMap)
 
-      // Haetaan order
       const { data: orderData } = await supabase
-  .from('orders')
-  .select('*')
-  .eq('listing_id', parseInt(listingId as string))
-  .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
-  .in('status', ['paid', 'confirmed'])
-.order('created_at', { ascending: false })
-.limit(1)
-.maybeSingle()
+        .from('orders')
+        .select('*')
+        .eq('listing_id', parseInt(listingId as string))
+        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+        .in('status', ['paid', 'confirmed'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
 
       if (orderData) setOrder(orderData)
-
       setLoading(false)
 
       const channel = supabase
@@ -100,22 +95,12 @@ export default function ConversationPage() {
       sender_id: currentUser.id,
       receiver_id: otherUserId,
       listing_id: listingId,
-      content: newMessage
+      content: newMessage,
     })
-    const senderProfile = profiles[currentUser.id]
-    const senderName = senderProfile?.username || senderProfile?.full_name || 'Someone'
     fetch('/api/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'message',
-        receiverId: otherUserId,
-        senderId: currentUser.id,
-        senderName,
-        listingTitle: listing?.title || '',
-        listingId,
-        messagePreview: newMessage.slice(0, 200),
-      }),
+      body: JSON.stringify({ type: 'message', recipientId: otherUserId, listingId, preview: newMessage }),
     })
     setNewMessage('')
   }
@@ -130,24 +115,13 @@ export default function ConversationPage() {
     if (data.url) window.location.href = data.url
   }
 
-  const handleOfferAction = async (msgId: string, action: 'accepted' | 'declined', msg: any) => {
+  const handleOfferAction = async (msgId: string, action: 'accepted' | 'declined') => {
     await supabase.from('messages').update({ offer_status: action }).eq('id', msgId)
     if (action === 'accepted') {
-      const myProfile = profiles[currentUser.id]
-      const myName = myProfile?.username || myProfile?.full_name || 'The seller'
       fetch('/api/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'offer',
-          receiverId: otherUserId,
-          senderName: myName,
-          listingTitle: listing?.title || '',
-          listingId,
-          offerAction: 'accepted',
-          offerAmount: msg.offer_amount,
-          senderId: currentUser.id,
-        }),
+        body: JSON.stringify({ type: 'offer', recipientId: otherUserId, listingId, offerAction: 'accepted' }),
       })
     }
   }
@@ -155,22 +129,6 @@ export default function ConversationPage() {
   const handleCounterOffer = async (msg: any) => {
     if (!counterAmount || isNaN(Number(counterAmount))) return
     await supabase.from('messages').update({ offer_status: 'countered' }).eq('id', msg.id)
-    const myProfile = profiles[currentUser.id]
-    const myName = myProfile?.username || myProfile?.full_name || 'Someone'
-    fetch('/api/notify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'offer',
-        receiverId: otherUserId,
-        senderId: currentUser.id,
-        senderName: myName,
-        listingTitle: listing?.title || '',
-        listingId,
-        offerAction: 'countered',
-        offerAmount: parseFloat(counterAmount),
-      }),
-    })
     await supabase.from('messages').insert({
       sender_id: currentUser.id,
       receiver_id: otherUserId,
@@ -179,6 +137,11 @@ export default function ConversationPage() {
       is_offer: true,
       offer_amount: parseFloat(counterAmount),
       offer_status: 'pending',
+    })
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'offer', recipientId: otherUserId, listingId, offerAction: 'countered' }),
     })
     setShowCounter(null)
     setCounterAmount('')
@@ -191,30 +154,17 @@ export default function ConversationPage() {
       .from('orders')
       .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
       .eq('id', order.id)
-    localStorage.removeItem(`order_${listingId}`)
-    const buyerProfile = profiles[currentUser.id]
-    const buyerName = buyerProfile?.username || buyerProfile?.full_name || 'The buyer'
-    const sellerProfile = profiles[otherUserId]
-    const sellerName = sellerProfile?.username || sellerProfile?.full_name || 'Seller'
     fetch('/api/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'receipt_confirmed',
-        sellerId: otherUserId,
-        sellerName,
-        buyerName,
-        listingTitle: listing?.title || '',
-        orderNumber: order.order_number || order.id,
-        amount: order.amount,
-      }),
+      body: JSON.stringify({ type: 'receipt_confirmed', recipientId: otherUserId, listingId }),
     })
     setConfirmLoading(false)
     setConfirmDone(true)
     setOrder({ ...order, status: 'confirmed' })
   }
 
-  const Avatar = ({ userId, size = 32 }: { userId: string, size?: number }) => {
+  const Avatar = ({ userId, size = 32 }: { userId: string; size?: number }) => {
     const p = profiles[userId]
     const name = p?.username || p?.full_name || '?'
     if (p?.avatar_url) return (
@@ -232,144 +182,160 @@ export default function ConversationPage() {
   const isBuyer = order && currentUser && order.buyer_id === currentUser.id
   const isSellerOrder = order && currentUser && order.seller_id === currentUser.id
   const otherProfile = profiles[otherUserId]
-  const otherName = otherProfile?.username || otherProfile?.full_name || ''
+  const otherName = otherProfile?.username || otherProfile?.full_name || 'User'
 
   return (
     <div className="conversation-page">
-      <a href="/messages" className="listing-back">← Back to messages</a>
 
-      {listing && (
-  <a href={`/listings/${listingId}`} style={{ textDecoration: 'none' }} className="conversation-listing-header">
-    {listing.images && listing.images.length > 0 && (
-      <img src={listing.images[0]} alt={listing.title} className="conversation-listing-img" />
-    )}
-    <div>
-      <h2 className="conversation-listing-title">{listing.title}</h2>
-      <p className="conversation-listing-price">
-        {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''}
-      </p>
-      {otherName && (
-        <p style={{ fontSize: '12px', color: '#9a9080', marginTop: '2px', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>
-          Conversation with {otherName}
-        </p>
-      )}
-    </div>
-  </a>
-)}
-
-      {/* OSTAJAN PAYMENT BANNER */}
-      {order && order.status === 'paid' && isBuyer && !confirmDone && (
-        <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>✓ Payment confirmed</p>
-          <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: '1.5', marginBottom: '14px' }}>
-            Once you receive the item and everything looks good, confirm receipt below. The seller will receive payment after your confirmation or automatically after 48 hours.
-          </p>
-          <button className="form-submit" onClick={handleConfirmReceipt} disabled={confirmLoading} style={{ background: '#2a6a2a', width: '100%' }}>
-            {confirmLoading ? 'Confirming...' : 'Item received ✓'}
-          </button>
-          <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '8px', textAlign: 'center' }}>
-            Problem? Contact <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a> within 48h
-          </p>
+      {/* HEADER */}
+      <div className="conversation-header">
+        <a href="/messages" className="conversation-back-btn">← Messages</a>
+        <div className="conversation-header-center">
+          <Avatar userId={otherUserId} size={32} />
+          <span className="conversation-header-name">{otherName}</span>
         </div>
-      )}
-
-      {/* MYYJÄN PAYMENT BANNER */}
-      {order && order.status === 'paid' && isSellerOrder && (
-        <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>✓ Item sold — payment received</p>
-          <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: '1.5' }}>
-            The buyer has paid. You will receive <strong>{order.amount} €</strong> to your bank account once the buyer confirms receipt or automatically after 48 hours.
-          </p>
-          <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '8px' }}>
-            Order #{order.order_number || order.id} · Questions? <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a>
-          </p>
-        </div>
-      )}
-
-      {/* TRANSACTION COMPLETE */}
-      {(order?.status === 'confirmed' || confirmDone) && (
-        <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', color: '#2a6a2a' }}>✓ Transaction complete</p>
-          <p style={{ fontSize: '13px', color: '#3a3428', marginTop: '4px' }}>
-            {isBuyer ? 'Thank you for your purchase!' : 'Payment will be transferred to your account shortly.'}
-          </p>
-        </div>
-      )}
-
-      <div className="conversation-messages">
-        {messages.map(msg => {
-          const isMine = msg.sender_id === currentUser?.id
-          const isOffer = msg.is_offer
-          const isPending = msg.offer_status === 'pending'
-          const isAccepted = msg.offer_status === 'accepted'
-          const isSellerMsg = listing && currentUser && listing.user_id === currentUser.id
-          const isBuyerMsg = msg.sender_id === currentUser?.id
-          const senderProfile = profiles[msg.sender_id]
-          const senderName = senderProfile?.username || senderProfile?.full_name || ''
-
-          return (
-            <div key={msg.id} className={`message-row ${isMine ? 'mine' : 'theirs'}`}>
-              {!isMine && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', marginRight: '8px' }}>
-                  <Avatar userId={msg.sender_id} size={32} />
-                  {senderName && (
-                    <span style={{ fontSize: '10px', fontFamily: 'Barlow Condensed', color: '#9a9080', letterSpacing: '0.05em', maxWidth: '48px', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {senderName}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {isOffer ? (
-                <div style={{ background: isMine ? '#FC7038' : '#F5F3E6', border: isMine ? 'none' : '1px solid rgba(26,20,8,0.12)', borderRadius: '12px', borderBottomRightRadius: isMine ? '3px' : '12px', borderBottomLeftRadius: isMine ? '12px' : '3px', padding: '12px 16px', maxWidth: '75%' }}>
-                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: isMine ? 'rgba(245,243,230,0.7)' : '#9a9080', marginBottom: '4px' }}>
-                    {msg.offer_status === 'accepted' ? '✓ Offer accepted' : msg.offer_status === 'declined' ? '✗ Offer declined' : msg.offer_status === 'countered' ? '↩ Counter offered' : 'Offer'}
-                  </p>
-                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: '24px', fontWeight: 700, color: isMine ? '#F5F3E6' : '#1a1408', margin: '0 0 8px 0' }}>{msg.offer_amount} €</p>
-
-                  {isSellerMsg && isPending && !isBuyerMsg && (
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      <button onClick={() => handleOfferAction(msg.id, 'accepted', msg)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept</button>
-                      <button onClick={() => setShowCounter(showCounter === msg.id ? null : msg.id)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Counter</button>
-                      <button onClick={() => handleOfferAction(msg.id, 'declined', msg)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#aa2200', border: '1px solid #aa2200', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Decline</button>
-                    </div>
-                  )}
-
-                  {isBuyerMsg && isAccepted && (
-                    <button onClick={() => handleAcceptAndPay(msg)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept & Pay</button>
-                  )}
-
-                  {showCounter === msg.id && (
-                    <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
-                      <input type="number" placeholder="Your counter offer €" value={counterAmount} onChange={e => setCounterAmount(e.target.value)} style={{ fontFamily: 'Barlow', fontSize: '13px', padding: '6px 10px', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', background: '#F5F3E6', color: '#1a1408', flex: 1 }} />
-                      <button onClick={() => handleCounterOffer(msg)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#FC7038', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', whiteSpace: 'nowrap' }}>Send</button>
-                    </div>
-                  )}
-
-                  <p style={{ fontSize: '11px', color: isMine ? 'rgba(245,243,230,0.6)' : '#9a9080', margin: '8px 0 0 0', textAlign: isMine ? 'right' : 'left' }}>
-                    {new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              ) : (
-                <div className={`message-bubble ${isMine ? 'mine' : 'theirs'}`}>
-                  <p className="message-content">{msg.content}</p>
-                  <p className="message-time">{new Date(msg.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</p>
-                </div>
-              )}
-
-              {isMine && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', marginLeft: '8px' }}>
-                  <Avatar userId={currentUser.id} size={32} />
-                </div>
-              )}
-            </div>
-          )
-        })}
-        <div ref={bottomRef} />
+        <div style={{ width: 90 }} />
       </div>
 
+      {/* SCROLLABLE CONTENT */}
+      <div className="conversation-scroll">
+
+        {listing && (
+          <a href={`/listings/${listingId}`} style={{ textDecoration: 'none' }} className="conversation-listing-header">
+            {listing.images && listing.images.length > 0 && (
+              <img src={listing.images[0]} alt={listing.title} className="conversation-listing-img" />
+            )}
+            <div>
+              <h2 className="conversation-listing-title">{listing.title}</h2>
+              <p className="conversation-listing-price">{listing.price} €{listing.listing_type === 'rent' ? '/day' : ''}</p>
+            </div>
+          </a>
+        )}
+
+        {order && order.status === 'paid' && isBuyer && !confirmDone && (
+          <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>✓ Payment confirmed</p>
+            <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: '1.5', marginBottom: '14px' }}>
+              Once you receive the item and everything looks good, confirm below. The seller will receive payment after your confirmation or automatically after 48 hours.
+            </p>
+            <button className="form-submit" onClick={handleConfirmReceipt} disabled={confirmLoading} style={{ background: '#2a6a2a', width: '100%' }}>
+              {confirmLoading ? 'Confirming...' : 'Item received ✓'}
+            </button>
+            <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '8px', textAlign: 'center' }}>
+              Problem? Contact <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a> within 48h
+            </p>
+          </div>
+        )}
+
+        {order && order.status === 'paid' && isSellerOrder && (
+          <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>✓ Item sold — payment received</p>
+            <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: '1.5' }}>
+              The buyer has paid. You will receive <strong>{order.amount} €</strong> to your bank account once the buyer confirms receipt or automatically after 48 hours.
+            </p>
+            <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '8px' }}>
+              Order #{order.order_number || order.id} · Questions? <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a>
+            </p>
+          </div>
+        )}
+
+        {(order?.status === 'confirmed' || confirmDone) && (
+          <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', color: '#2a6a2a' }}>✓ Transaction complete</p>
+            <p style={{ fontSize: '13px', color: '#3a3428', marginTop: '4px' }}>
+              {isBuyer ? 'Thank you for your purchase!' : 'Payment will be transferred to your account shortly.'}
+            </p>
+          </div>
+        )}
+
+        {/* MESSAGES */}
+        <div className="conversation-messages">
+          {messages.map((msg, idx) => {
+            const isMine = msg.sender_id === currentUser?.id
+            const isOffer = msg.is_offer
+            const isPending = msg.offer_status === 'pending'
+            const isAccepted = msg.offer_status === 'accepted'
+            const isSellerMsg = listing && currentUser && listing.user_id === currentUser.id
+            const isBuyerMsg = msg.sender_id === currentUser?.id
+
+            const senderProfile = profiles[msg.sender_id]
+            const senderName = senderProfile?.username || senderProfile?.full_name || ''
+
+            const prevMsg = idx > 0 ? messages[idx - 1] : null
+            const msgDate = new Date(msg.created_at)
+            const prevDate = prevMsg ? new Date(prevMsg.created_at) : null
+            const showDateSep = !prevDate || msgDate.toDateString() !== prevDate.toDateString()
+            const time = msgDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+            const dateLabel = msgDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+
+            return (
+              <div key={msg.id}>
+                {showDateSep && (
+                  <div className="message-date-sep">
+                    <span>{dateLabel}</span>
+                  </div>
+                )}
+
+                <div className={`message-row ${isMine ? 'mine' : 'theirs'}`}>
+                  {!isMine && <Avatar userId={msg.sender_id} size={28} />}
+
+                  <div className="message-body">
+                    {!isMine && senderName && (
+                      <p className="message-sender-label">{senderName} · {time}</p>
+                    )}
+
+                    {isOffer ? (
+                      <div className={`message-bubble ${isMine ? 'mine' : 'theirs'}`} style={{ minWidth: 200 }}>
+                        <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: isMine ? 'rgba(245,243,230,0.7)' : '#9a9080', margin: '0 0 4px' }}>
+                          {msg.offer_status === 'accepted' ? '✓ Offer accepted' : msg.offer_status === 'declined' ? '✗ Offer declined' : msg.offer_status === 'countered' ? '↩ Counter offered' : 'Offer'}
+                        </p>
+                        <p style={{ fontFamily: 'Barlow Condensed', fontSize: '24px', fontWeight: 700, color: isMine ? '#F5F3E6' : '#1a1408', margin: '0 0 10px' }}>{msg.offer_amount} €</p>
+
+                        {isSellerMsg && isPending && !isBuyerMsg && (
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <button onClick={() => handleOfferAction(msg.id, 'accepted')} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept</button>
+                            <button onClick={() => setShowCounter(showCounter === msg.id ? null : msg.id)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: isMine ? '#F5F3E6' : '#FC7038', border: `1px solid ${isMine ? 'rgba(245,243,230,0.5)' : '#FC7038'}`, padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Counter</button>
+                            <button onClick={() => handleOfferAction(msg.id, 'declined')} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: isMine ? 'rgba(245,243,230,0.7)' : '#aa2200', border: `1px solid ${isMine ? 'rgba(245,243,230,0.3)' : '#aa2200'}`, padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Decline</button>
+                          </div>
+                        )}
+
+                        {isBuyerMsg && isAccepted && (
+                          <button onClick={() => handleAcceptAndPay(msg)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept & Pay</button>
+                        )}
+
+                        {showCounter === msg.id && (
+                          <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
+                            <input type="number" placeholder="Your counter offer €" value={counterAmount} onChange={e => setCounterAmount(e.target.value)} style={{ fontFamily: 'Barlow', fontSize: '13px', padding: '6px 10px', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', background: '#F5F3E6', color: '#1a1408', flex: 1 }} />
+                            <button onClick={() => handleCounterOffer(msg)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#FC7038', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', whiteSpace: 'nowrap' }}>Send</button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className={`message-bubble ${isMine ? 'mine' : 'theirs'}`}>
+                        <p className="message-content">{msg.content}</p>
+                      </div>
+                    )}
+
+                    {isMine && <p className="message-time-mine">{time}</p>}
+                    {!isMine && !senderName && <p className="message-time-theirs">{time}</p>}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+          <div ref={bottomRef} />
+        </div>
+      </div>
+
+      {/* INPUT */}
       <div className="conversation-input-row">
-        <input className="conversation-input" placeholder="Write a message..." value={newMessage} onChange={e => setNewMessage(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()} />
+        <input
+          className="conversation-input"
+          placeholder="Write a message..."
+          value={newMessage}
+          onChange={e => setNewMessage(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleSend()}
+        />
         <button className="conversation-send-btn" onClick={handleSend}>Send</button>
       </div>
     </div>
