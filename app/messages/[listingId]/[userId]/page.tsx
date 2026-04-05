@@ -196,7 +196,7 @@ export default function ConversationPage() {
         <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
           <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>✓ Payment confirmed</p>
           <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: '1.5', marginBottom: '14px' }}>
-            Once you receive the item and everything looks good, confirm receipt below. The seller will receive payment after your confirmation or automatically after 48 hours.
+            Once you receive the item and everything looks good, confirm below. The seller will receive payment after your confirmation or automatically after 48 hours.
           </p>
           <button className="form-submit" onClick={handleConfirmReceipt} disabled={confirmLoading} style={{ background: '#2a6a2a', width: '100%' }}>
             {confirmLoading ? 'Confirming...' : 'Item received ✓'}

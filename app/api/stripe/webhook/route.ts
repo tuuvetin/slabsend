@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createClient } from '@/utils/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
@@ -31,8 +30,6 @@ export async function POST(req: Request) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
-    const supabase = await createClient()
-
     const listingId = session.metadata?.listing_id
     const sellerUserId = session.metadata?.seller_user_id
     const buyerId = session.metadata?.buyer_id
@@ -41,12 +38,12 @@ export async function POST(req: Request) {
     if (!listingId) return NextResponse.json({ received: true })
 
     // Merkitään ilmoitus myydyksi
-    await supabase.from('listings').update({ sold: true }).eq('id', listingId)
+    await supabaseAdmin.from('listings').update({ sold: true }).eq('id', listingId)
 
     // Lasketaan summat
     const totalAmount = (session.amount_total || 0) / 100
-    const baseAmount = parseFloat((session.metadata?.base_amount 
-      ? parseInt(session.metadata.base_amount) / 100 
+    const baseAmount = parseFloat((session.metadata?.base_amount
+      ? parseInt(session.metadata.base_amount) / 100
       : totalAmount / 1.08).toFixed(2))
     const serviceFee = parseFloat((totalAmount - baseAmount).toFixed(2))
 
@@ -58,7 +55,7 @@ export async function POST(req: Request) {
     const orderNumber = generateOrderNumber()
 
     // Luodaan order
-    await supabase.from('orders').insert({
+    await supabaseAdmin.from('orders').insert({
       listing_id: parseInt(listingId),
       buyer_id: buyerId || null,
       seller_id: sellerUserId || null,
@@ -71,14 +68,14 @@ export async function POST(req: Request) {
     })
 
     // Haetaan ilmoituksen tiedot
-    const { data: listing } = await supabase
+    const { data: listing } = await supabaseAdmin
       .from('listings')
       .select('title, user_id')
       .eq('id', listingId)
       .single()
 
     // Haetaan myyjän profiili
-    const { data: sellerProfile } = await supabase
+    const { data: sellerProfile } = await supabaseAdmin
       .from('profiles')
       .select('username, full_name')
       .eq('user_id', sellerUserId || '')
@@ -96,7 +93,7 @@ export async function POST(req: Request) {
     }
 
     // Merkitään kaikki avoimet tarjoukset perutuiksi
-    await supabase
+    await supabaseAdmin
       .from('messages')
       .update({ offer_status: 'declined' })
       .eq('listing_id', listingId)
@@ -185,8 +182,7 @@ export async function POST(req: Request) {
   if (event.type === 'account.updated') {
     const account = event.data.object as Stripe.Account
     if (account.charges_enabled) {
-      const supabase = await createClient()
-      await supabase.from('profiles').update({ stripe_onboarded: true }).eq('stripe_account_id', account.id)
+      await supabaseAdmin.from('profiles').update({ stripe_onboarded: true }).eq('stripe_account_id', account.id)
     }
   }
 
