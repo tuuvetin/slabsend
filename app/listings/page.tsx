@@ -19,7 +19,7 @@ export default async function ListingsPage({
   const { data: listings } = await supabase
     .from('listings')
     .select('*')
-    .eq('sold', false)
+    .neq('sold', true)
     .order('created_at', { ascending: false })
 
   const userIds = [...new Set((listings || []).map((l: any) => l.user_id))]
