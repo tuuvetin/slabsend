@@ -259,7 +259,7 @@ body {
 
 .home-hero-search-wrap { background: #EDE9D8; padding: 28px 32px; }
 .home-hero-search-form { max-width: 600px; margin: 0 auto; display: -webkit-flex; display: flex; gap: 10px; }
-.home-hero-search-input { -webkit-flex: 1; flex: 1; font-family: 'Barlow', sans-serif; font-size: 15px; color: #1a1408; background: #fff; border: 1px solid rgba(26,20,8,0.15); border-radius: 8px; padding: 12px 16px; outline: none; -webkit-transition: border-color 0.15s; transition: border-color 0.15s; }
+.home-hero-search-input { -webkit-flex: 1; flex: 1; font-family: 'Barlow', sans-serif; font-size: 15px; color: #1a1408; background: #F5F3E6; border: 1px solid rgba(26,20,8,0.18); border-radius: 8px; padding: 12px 16px; outline: none; -webkit-transition: border-color 0.15s; transition: border-color 0.15s; }
 .home-hero-search-input::placeholder { color: #b0a898; }
 .home-hero-search-input:focus { border-color: #FC7038; }
 .home-hero-search-btn { display: -webkit-flex; display: flex; align-items: center; gap: 8px; background: #FC7038; color: #fff; border: none; border-radius: 8px; padding: 12px 20px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; white-space: nowrap; -webkit-transition: background 0.15s; transition: background 0.15s; -webkit-flex-shrink: 0; flex-shrink: 0; }

@@ -4,6 +4,8 @@ import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 
 export const revalidate = 0
 
+const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']
+
 const conditionLabels: Record<string, string> = {
   'Uusi': 'New', 'Erinomainen': 'Excellent', 'Hyvä': 'Good', 'Tyydyttävä': 'Fair', 'Huono': 'Poor',
 }
@@ -16,11 +18,13 @@ export default async function ListingsPage({
   const params = await searchParams
   const supabase = await createClient()
 
-  const { data: listings } = await supabase
-    .from('listings')
-    .select('*')
-    .neq('sold', true)
-    .order('created_at', { ascending: false })
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAdmin = ADMIN_EMAILS.includes(user?.email || '')
+
+  let query = supabase.from('listings').select('*').order('created_at', { ascending: false })
+  if (!isAdmin) query = query.neq('sold', true)
+
+  const { data: listings } = await query
 
   const userIds = [...new Set((listings || []).map((l: any) => l.user_id))]
   const { data: profiles } = userIds.length > 0
@@ -56,13 +60,16 @@ export default async function ListingsPage({
 
           return (
             <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
-              <div className="listing-card">
+              <div className="listing-card" style={listing.sold ? { opacity: 0.6 } : undefined}>
                 {listing.images && listing.images.length > 0 ? (
                   <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
                 ) : (
                   <div className="listing-card-no-img">No image</div>
                 )}
                 <div className="listing-card-body">
+                  {listing.sold && (
+                    <p style={{ fontFamily: 'Barlow Condensed', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#fff', background: '#aa2200', display: 'inline-block', padding: '2px 8px', borderRadius: 4, marginBottom: 6 }}>Sold</p>
+                  )}
                   <h3 className="listing-card-title">{listing.title}</h3>
                   {listing.category && (
                     <p className="listing-card-cat">
