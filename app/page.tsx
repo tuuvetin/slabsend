@@ -19,6 +19,7 @@ export default async function Home() {
     .from('listings')
     .select('*')
     .eq('listing_type', 'sell')
+    .eq('sold', false)
     .order('created_at', { ascending: false })
     .limit(4)
 

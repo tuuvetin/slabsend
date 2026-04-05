@@ -27,6 +27,7 @@ export default function ListingPage() {
   const [order, setOrder] = useState<any>(null)
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [confirmDone, setConfirmDone] = useState(false)
+  const [bpTooltipOpen, setBpTooltipOpen] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -339,11 +340,16 @@ export default function ListingPage() {
                     <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em' }}>
                       Buyer protection included — {(listing.price * 0.08).toFixed(2)} €
                     </span>
-                    <div style={{ marginLeft: 'auto', position: 'relative' }} className="info-tooltip-wrap">
-                      <button className="info-btn">i</button>
-                      <div className="info-tooltip">
-                        Your purchase is protected. If something goes wrong, Slabsend steps in to help resolve the issue and ensure you get your money back. The seller receives payment only after you confirm the item is as described. If the item doesn't match the listing, contact info@slabsend.com and we'll help resolve it.
-                      </div>
+                    <div style={{ marginLeft: 'auto', position: 'relative' }}>
+                      <button
+                        className="info-btn"
+                        onClick={e => { e.stopPropagation(); setBpTooltipOpen(o => !o) }}
+                      >i</button>
+                      {bpTooltipOpen && (
+                        <div className="info-tooltip" style={{ display: 'block' }}>
+                          Your purchase is protected. If something goes wrong, Slabsend steps in to help resolve the issue and ensure you get your money back. The seller receives payment only after you confirm the item is as described. If the item doesn't match the listing, contact info@slabsend.com and we'll help resolve it.
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

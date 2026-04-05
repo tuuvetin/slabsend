@@ -176,6 +176,10 @@ export default function AdminPage() {
         </div>
       )}
 
+      <div style={{ display: 'flex', gap: 12, marginBottom: 28 }}>
+        <a href="/admin/orders" style={{ fontFamily: 'Barlow Condensed', fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: '#FC7038', color: '#fff', padding: '9px 18px', borderRadius: 6, textDecoration: 'none' }}>Orders →</a>
+      </div>
+
       <h1 className="admin-title">Image management</h1>
       <p className="admin-subtitle">Upload images for the logo, homepage hero and category cards.</p>
 
