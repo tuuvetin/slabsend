@@ -130,13 +130,47 @@ export default function ConversationPage() {
     if (data.url) window.location.href = data.url
   }
 
-  const handleOfferAction = async (msgId: string, action: 'accepted' | 'declined') => {
+  const handleOfferAction = async (msgId: string, action: 'accepted' | 'declined', msg: any) => {
     await supabase.from('messages').update({ offer_status: action }).eq('id', msgId)
+    if (action === 'accepted') {
+      const myProfile = profiles[currentUser.id]
+      const myName = myProfile?.username || myProfile?.full_name || 'The seller'
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'offer',
+          receiverId: otherUserId,
+          senderName: myName,
+          listingTitle: listing?.title || '',
+          listingId,
+          offerAction: 'accepted',
+          offerAmount: msg.offer_amount,
+          senderId: currentUser.id,
+        }),
+      })
+    }
   }
 
   const handleCounterOffer = async (msg: any) => {
     if (!counterAmount || isNaN(Number(counterAmount))) return
     await supabase.from('messages').update({ offer_status: 'countered' }).eq('id', msg.id)
+    const myProfile = profiles[currentUser.id]
+    const myName = myProfile?.username || myProfile?.full_name || 'Someone'
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'offer',
+        receiverId: otherUserId,
+        senderId: currentUser.id,
+        senderName: myName,
+        listingTitle: listing?.title || '',
+        listingId,
+        offerAction: 'countered',
+        offerAmount: parseFloat(counterAmount),
+      }),
+    })
     await supabase.from('messages').insert({
       sender_id: currentUser.id,
       receiver_id: otherUserId,
@@ -295,9 +329,9 @@ export default function ConversationPage() {
 
                   {isSellerMsg && isPending && !isBuyerMsg && (
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      <button onClick={() => handleOfferAction(msg.id, 'accepted')} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept</button>
+                      <button onClick={() => handleOfferAction(msg.id, 'accepted', msg)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept</button>
                       <button onClick={() => setShowCounter(showCounter === msg.id ? null : msg.id)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Counter</button>
-                      <button onClick={() => handleOfferAction(msg.id, 'declined')} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#aa2200', border: '1px solid #aa2200', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Decline</button>
+                      <button onClick={() => handleOfferAction(msg.id, 'declined', msg)} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#aa2200', border: '1px solid #aa2200', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Decline</button>
                     </div>
                   )}
 
