@@ -1,5 +1,7 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 
 interface Category {
   key: string
@@ -19,6 +21,13 @@ interface Props {
 export default function HomeClient({ listings, categories, heroImageUrl, catImageUrls }: Props) {
   const [heroError, setHeroError] = useState(false)
   const [catErrors, setCatErrors] = useState<Record<string, boolean>>({})
+  const [searchVal, setSearchVal] = useState('')
+  const router = useRouter()
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchVal.trim()) router.push(`/listings?search=${encodeURIComponent(searchVal.trim())}`)
+  }
 
   return (
     <main>
@@ -74,20 +83,40 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
         </div>
       </div>
 
+      {/* HERO SEARCH */}
+      <div className="home-hero-search-wrap">
+        <form onSubmit={handleSearch} className="home-hero-search-form">
+          <input
+            type="text"
+            value={searchVal}
+            onChange={e => setSearchVal(e.target.value)}
+            placeholder="Search for gear, brand or category..."
+            className="home-hero-search-input"
+          />
+          <button type="submit" className="home-hero-search-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <span>Search</span>
+          </button>
+        </form>
+      </div>
+
       {/* CATEGORIES */}
       <div className="home-section full-bleed">
         <div className="home-section-header">
           <h2 className="home-section-title">Browse by category</h2>
           <a href="/listings" className="home-see-all">View all →</a>
         </div>
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', paddingLeft: '32px', paddingRight: '32px' }}>
           <button
             onClick={() => {
               const el = document.getElementById('cat-scroll')
               if (el) el.scrollBy({ left: -320, behavior: 'smooth' })
             }}
             style={{
-              position: 'absolute', left: '0px', top: '40%', transform: 'translateY(-50%)',
+              position: 'absolute', left: '32px', top: '40%', transform: 'translateY(-50%)',
               zIndex: 10, background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.15)',
               borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -101,7 +130,6 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             overflowX: 'auto',
             scrollSnapType: 'x mandatory',
             scrollbarWidth: 'none',
-            paddingLeft: '0',
           }}>
             {categories.map(cat => (
               <a key={cat.key} href={cat.href} className="home-cat-card" style={{ scrollSnapAlign: 'start' }}>
@@ -137,7 +165,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               if (el) el.scrollBy({ left: 320, behavior: 'smooth' })
             }}
             style={{
-              position: 'absolute', right: '0px', top: '40%', transform: 'translateY(-50%)',
+              position: 'absolute', right: '32px', top: '40%', transform: 'translateY(-50%)',
               zIndex: 10, background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.15)',
               borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -170,6 +198,11 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
                     </p>
                   )}
                   <p className="listing-card-price">{listing.price} €</p>
+                  {listing.listing_type !== 'rent' && (
+                    <p className="listing-card-price-total">
+                      {(listing.price * 1.08).toFixed(2)} € incl. <PriceTooltipIcon />
+                    </p>
+                  )}
                   <p className="listing-card-meta">
                     {listing.location && <span className="listing-card-loc">{listing.location}</span>}
                   </p>
