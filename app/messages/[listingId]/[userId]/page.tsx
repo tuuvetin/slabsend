@@ -102,6 +102,21 @@ export default function ConversationPage() {
       listing_id: listingId,
       content: newMessage
     })
+    const senderProfile = profiles[currentUser.id]
+    const senderName = senderProfile?.username || senderProfile?.full_name || 'Someone'
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'message',
+        receiverId: otherUserId,
+        senderId: currentUser.id,
+        senderName,
+        listingTitle: listing?.title || '',
+        listingId,
+        messagePreview: newMessage.slice(0, 200),
+      }),
+    })
     setNewMessage('')
   }
 
@@ -143,6 +158,23 @@ export default function ConversationPage() {
       .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
       .eq('id', order.id)
     localStorage.removeItem(`order_${listingId}`)
+    const buyerProfile = profiles[currentUser.id]
+    const buyerName = buyerProfile?.username || buyerProfile?.full_name || 'The buyer'
+    const sellerProfile = profiles[otherUserId]
+    const sellerName = sellerProfile?.username || sellerProfile?.full_name || 'Seller'
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'receipt_confirmed',
+        sellerId: otherUserId,
+        sellerName,
+        buyerName,
+        listingTitle: listing?.title || '',
+        orderNumber: order.order_number || order.id,
+        amount: order.amount,
+      }),
+    })
     setConfirmLoading(false)
     setConfirmDone(true)
     setOrder({ ...order, status: 'confirmed' })
