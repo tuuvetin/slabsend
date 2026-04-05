@@ -1,5 +1,7 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 
 interface Category {
   key: string
@@ -19,6 +21,13 @@ interface Props {
 export default function HomeClient({ listings, categories, heroImageUrl, catImageUrls }: Props) {
   const [heroError, setHeroError] = useState(false)
   const [catErrors, setCatErrors] = useState<Record<string, boolean>>({})
+  const [searchVal, setSearchVal] = useState('')
+  const router = useRouter()
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchVal.trim()) router.push(`/listings?search=${encodeURIComponent(searchVal.trim())}`)
+  }
 
   return (
     <main>
@@ -72,6 +81,26 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             </a>
           </div>
         </div>
+      </div>
+
+      {/* HERO SEARCH */}
+      <div className="home-hero-search-wrap">
+        <form onSubmit={handleSearch} className="home-hero-search-form">
+          <input
+            type="text"
+            value={searchVal}
+            onChange={e => setSearchVal(e.target.value)}
+            placeholder="Search for gear, brand or category..."
+            className="home-hero-search-input"
+          />
+          <button type="submit" className="home-hero-search-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <span>Search</span>
+          </button>
+        </form>
       </div>
 
       {/* CATEGORIES */}
@@ -171,13 +200,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
                   <p className="listing-card-price">{listing.price} €</p>
                   {listing.listing_type !== 'rent' && (
                     <p className="listing-card-price-total">
-                      {(listing.price * 1.08).toFixed(2)} € incl.
-                      <span className="info-tooltip-wrap" tabIndex={0} style={{ position: 'relative', display: 'inline-block', cursor: 'default' }}>
-                        🛡️
-                        <span className="info-tooltip price-tooltip">
-                          Your purchase is covered by Slabsend Buyer Protection. The seller receives payment only after you confirm the item arrived as described.
-                        </span>
-                      </span>
+                      {(listing.price * 1.08).toFixed(2)} € incl. <PriceTooltipIcon />
                     </p>
                   )}
                   <p className="listing-card-meta">

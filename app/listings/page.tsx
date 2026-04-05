@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import ListingsSearch from '@/app/components/ListingsSearch'
+import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 
 export const revalidate = 0
 
@@ -73,13 +74,7 @@ export default async function ListingsPage({
                   </p>
                   {listing.listing_type !== 'rent' && (
                     <p className="listing-card-price-total">
-                      {(listing.price * 1.08).toFixed(2)} € incl.
-                      <span className="info-tooltip-wrap" tabIndex={0} style={{ position: 'relative', display: 'inline-block', cursor: 'default' }}>
-                        🛡️
-                        <span className="info-tooltip price-tooltip">
-                          Your purchase is covered by Slabsend Buyer Protection. The seller receives payment only after you confirm the item arrived as described.
-                        </span>
-                      </span>
+                      {(listing.price * 1.08).toFixed(2)} € incl. <PriceTooltipIcon />
                     </p>
                   )}
                   <p className="listing-card-meta">
