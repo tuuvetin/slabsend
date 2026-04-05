@@ -460,6 +460,21 @@ body {
 }
 
 @media (max-width: 768px) {
+  .price-tooltip, .info-tooltip {
+    position: fixed !important;
+    left: 16px !important;
+    right: 16px !important;
+    bottom: 24px !important;
+    top: auto !important;
+    width: auto !important;
+    max-width: calc(100vw - 32px) !important;
+    transform: none !important;
+    z-index: 1000 !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+    padding: 14px 16px !important;
+  }
+  .price-tooltip::after, .info-tooltip::after { display: none !important; }
   body { overflow-x: hidden; }
   .sb-nav { padding: 0 16px; justify-content: space-between; }
   .sb-nav-links { display: none; }

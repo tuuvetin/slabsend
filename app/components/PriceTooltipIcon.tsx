@@ -15,7 +15,7 @@ export default function PriceTooltipIcon() {
     >
       🛡️
       {open && (
-        <span className="info-tooltip price-tooltip">
+        <span className="info-tooltip price-tooltip" style={{ display: 'block' }}>
           Your purchase is covered by Slabsend Buyer Protection. The seller receives payment only after you confirm the item arrived as described.
         </span>
       )}
