@@ -19,6 +19,9 @@ export default function ProfilePage() {
   const [bankCountry, setBankCountry] = useState('')
   const [bankMessage, setBankMessage] = useState('')
   const [bankSaving, setBankSaving] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [passwordMessage, setPasswordMessage] = useState('')
+  const [passwordSaving, setPasswordSaving] = useState(false)
 
   // Crop
   const [cropSrc, setCropSrc] = useState<string | null>(null)
@@ -87,6 +90,15 @@ export default function ProfilePage() {
       setMessage('Profile saved!')
       if (username) setUsernameSet(true)
     }
+  }
+
+  const handleChangePassword = async () => {
+    if (!newPassword || newPassword.length < 6) { setPasswordMessage('Password must be at least 6 characters'); return }
+    setPasswordSaving(true)
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    setPasswordSaving(false)
+    if (error) setPasswordMessage('Error: ' + error.message)
+    else { setPasswordMessage('Password updated!'); setNewPassword('') }
   }
 
   const handleSaveBank = async () => {
@@ -285,6 +297,23 @@ export default function ProfilePage() {
             </button>
             {bankMessage && (
               <p className={`form-message ${bankMessage.startsWith('Error') ? 'error' : 'success'}`}>{bankMessage}</p>
+            )}
+          </div>
+
+          <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
+            <h2 className="profile-section-title">Change password</h2>
+            <input
+              className="form-input"
+              type="password"
+              placeholder="New password (min. 6 characters)"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+            />
+            <button className="form-submit" onClick={handleChangePassword} disabled={passwordSaving}>
+              {passwordSaving ? 'Saving...' : 'Update password'}
+            </button>
+            {passwordMessage && (
+              <p className={`form-message ${passwordMessage.startsWith('Error') ? 'error' : 'success'}`}>{passwordMessage}</p>
             )}
           </div>
 
