@@ -31,7 +31,6 @@ export async function POST(req: Request) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
-    const supabase = await createClient()
 
     const listingId = session.metadata?.listing_id
     const sellerUserId = session.metadata?.seller_user_id
@@ -40,13 +39,13 @@ export async function POST(req: Request) {
 
     if (!listingId) return NextResponse.json({ received: true })
 
-    // Merkitään ilmoitus myydyksi
-    await supabase.from('listings').update({ sold: true }).eq('id', listingId)
+    // Merkitään ilmoitus myydyksi (admin-client ohittaa RLS)
+    await supabaseAdmin.from('listings').update({ sold: true }).eq('id', listingId)
 
     // Lasketaan summat
     const totalAmount = (session.amount_total || 0) / 100
-    const baseAmount = parseFloat((session.metadata?.base_amount 
-      ? parseInt(session.metadata.base_amount) / 100 
+    const baseAmount = parseFloat((session.metadata?.base_amount
+      ? parseInt(session.metadata.base_amount) / 100
       : totalAmount / 1.08).toFixed(2))
     const serviceFee = parseFloat((totalAmount - baseAmount).toFixed(2))
 
@@ -58,7 +57,7 @@ export async function POST(req: Request) {
     const orderNumber = generateOrderNumber()
 
     // Luodaan order
-    await supabase.from('orders').insert({
+    await supabaseAdmin.from('orders').insert({
       listing_id: parseInt(listingId),
       buyer_id: buyerId || null,
       seller_id: sellerUserId || null,
@@ -71,14 +70,14 @@ export async function POST(req: Request) {
     })
 
     // Haetaan ilmoituksen tiedot
-    const { data: listing } = await supabase
+    const { data: listing } = await supabaseAdmin
       .from('listings')
       .select('title, user_id')
       .eq('id', listingId)
       .single()
 
     // Haetaan myyjän profiili
-    const { data: sellerProfile } = await supabase
+    const { data: sellerProfile } = await supabaseAdmin
       .from('profiles')
       .select('username, full_name')
       .eq('user_id', sellerUserId || '')
@@ -86,7 +85,7 @@ export async function POST(req: Request) {
 
     const sellerName = sellerProfile?.username || sellerProfile?.full_name || 'Seller'
 
-    // Haetaan myyjän sähköposti admin-clientillä
+    // Haetaan myyjän sähköposti
     let sellerEmail = ''
     try {
       const { data: { user: sellerUser } } = await supabaseAdmin.auth.admin.getUserById(sellerUserId || '')
@@ -95,8 +94,19 @@ export async function POST(req: Request) {
       console.error('Error fetching seller email:', e)
     }
 
+    // Haetaan ostajan sähköposti jos ei Stripestä saatu
+    let resolvedBuyerEmail = buyerEmail
+    if (!resolvedBuyerEmail && buyerId) {
+      try {
+        const { data: { user: buyerUser } } = await supabaseAdmin.auth.admin.getUserById(buyerId)
+        resolvedBuyerEmail = buyerUser?.email || ''
+      } catch (e) {
+        console.error('Error fetching buyer email:', e)
+      }
+    }
+
     // Merkitään kaikki avoimet tarjoukset perutuiksi
-    await supabase
+    await supabaseAdmin
       .from('messages')
       .update({ offer_status: 'declined' })
       .eq('listing_id', listingId)
@@ -128,7 +138,8 @@ export async function POST(req: Request) {
               <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${listing?.title}</td></tr>
               <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Amount you'll receive</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${baseAmount} €</strong></td></tr>
             </table>
-            <p>Please ship the item as soon as possible. The buyer has 48 hours to confirm receipt, after which you'll receive your payment.</p>
+            <p>Please ship the item as soon as possible. The buyer has 48 hours to confirm receipt after delivery. Once confirmed, you will receive your payment within one week to the bank account on your profile.</p>
+            <p style="background: #FFF8F0; border: 1px solid rgba(252,112,56,0.2); border-radius: 6px; padding: 10px 14px; font-size: 13px;">💸 Haven't added your bank details yet? Add them on your <a href="https://slabsend.com/profile" style="color: #FC7038;">profile page</a> so we can process your payment without delay.</p>
             <p>Questions? Contact <a href="mailto:info@slabsend.com">info@slabsend.com</a></p>
             <p style="color: #9a9080; font-size: 12px;">Slabsend — Pre-owned climbing gear</p>
           </div>
@@ -137,10 +148,10 @@ export async function POST(req: Request) {
     }
 
     // Sähköposti ostajalle
-    if (buyerEmail) {
+    if (resolvedBuyerEmail) {
       await resend.emails.send({
         from: 'Slabsend <info@slabsend.com>',
-        to: buyerEmail,
+        to: resolvedBuyerEmail,
         subject: `Order confirmed: ${listing?.title}`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -169,7 +180,7 @@ export async function POST(req: Request) {
           <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${orderNumber}</strong></td></tr>
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${listing?.title}</td></tr>
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Buyer email</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${buyerEmail}</td></tr>
+            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Buyer email</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${resolvedBuyerEmail}</td></tr>
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Seller</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${sellerName} (${sellerEmail})</td></tr>
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Total paid</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${totalAmount} €</strong></td></tr>
             <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">To transfer to seller</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${baseAmount} €</strong></td></tr>
