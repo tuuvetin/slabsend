@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/client'
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
-const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com']
+const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']
 const categoryKeys = ['gear', 'shoes', 'clothing', 'wall']
 const categoryLabels: Record<string, string> = {
   gear: 'Gear', shoes: 'Shoes', clothing: 'Clothing', wall: 'Wall equipment',
