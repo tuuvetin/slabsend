@@ -40,6 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
           <div className="site-footer-bottom">
             <span className="site-footer-copy">© {new Date().getFullYear()} Slabsend</span>
+            <a href="mailto:info@slabsend.com" className="site-footer-privacy">info@slabsend.com</a>
             <a href="/privacy" className="site-footer-privacy">Privacy & Terms</a>
           </div>
         </footer>
