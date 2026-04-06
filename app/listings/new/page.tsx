@@ -71,6 +71,7 @@ export default function NewListingPage() {
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [shippingEnabled, setShippingEnabled] = useState(false)
+  const [pickupEnabled, setPickupEnabled] = useState(false)
   const [packageSize, setPackageSize] = useState('')
   const [packageWeight, setPackageWeight] = useState('')
 
@@ -166,6 +167,7 @@ export default function NewListingPage() {
       listing_type: listingType,
       rental_period: listingType === 'rent' ? rentalPeriod : null,
       shipping_enabled: shippingEnabled,
+      pickup_enabled: pickupEnabled,
       package_size: shippingEnabled ? packageSize : null,
       package_weight: shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
     })
@@ -178,7 +180,7 @@ export default function NewListingPage() {
       setCountry(''); setCity('')
       setCategory(''); setSubcategory(''); setCondition('')
       setCroppedFiles([]); setCropQueue([])
-      setShippingEnabled(false); setPackageSize(''); setPackageWeight('')
+      setShippingEnabled(false); setPickupEnabled(false); setPackageSize(''); setPackageWeight('')
     }
   }
 
@@ -265,8 +267,26 @@ export default function NewListingPage() {
         {conditions.map(c => <option key={c} value={c}>{c}</option>)}
       </select>
 
-      {/* SHIPPING */}
+      {/* SHIPPING + PICKUP */}
       <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+        <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+          Delivery options
+        </p>
+
+        {/* PICKUP */}
+        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '12px' }}>
+          <input
+            type="checkbox"
+            checked={pickupEnabled}
+            onChange={e => setPickupEnabled(e.target.checked)}
+            style={{ width: '18px', height: '18px', accentColor: '#FC7038' }}
+          />
+          <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
+            Pickup
+          </span>
+        </label>
+
+        {/* SHIPPING */}
         <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
           <input
             type="checkbox"
@@ -275,7 +295,7 @@ export default function NewListingPage() {
             style={{ width: '18px', height: '18px', accentColor: '#FC7038' }}
           />
           <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
-            Offer shipping
+            Shipping
           </span>
         </label>
         <p style={{ fontSize: '12px', color: '#7a7060', marginTop: '6px', marginLeft: '28px' }}>

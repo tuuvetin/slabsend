@@ -297,6 +297,28 @@ export default function ListingPage() {
           </div>
           {listing.description && <p className="listing-detail-desc">{listing.description}</p>}
 
+          {/* DELIVERY OPTIONS */}
+          {(listing.pickup_enabled || listing.shipping_enabled) && (
+            <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap' }}>
+              {listing.pickup_enabled && (
+                <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '20px', padding: '5px 12px', color: '#1a1408', cursor: 'default' }}
+                  onMouseEnter={e => { const t = (e.currentTarget as HTMLElement).querySelector('.pickup-tip') as HTMLElement; if (t) t.style.display = 'block' }}
+                  onMouseLeave={e => { const t = (e.currentTarget as HTMLElement).querySelector('.pickup-tip') as HTMLElement; if (t) t.style.display = 'none' }}
+                >
+                  📍 Pickup
+                  <span className="pickup-tip" style={{ display: 'none', position: 'absolute', bottom: 'calc(100% + 8px)', left: '50%', transform: 'translateX(-50%)', background: '#1a1408', color: '#F5F3E6', fontSize: '11px', fontWeight: 400, letterSpacing: '0.03em', textTransform: 'none', fontFamily: 'Barlow', borderRadius: '6px', padding: '7px 10px', whiteSpace: 'nowrap', zIndex: 10, pointerEvents: 'none' }}>
+                    Agree on pickup location with the seller via message
+                  </span>
+                </span>
+              )}
+              {listing.shipping_enabled && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '20px', padding: '5px 12px', color: '#1a1408' }}>
+                  📦 Shipping
+                </span>
+              )}
+            </div>
+          )}
+
           {/* MYYJÄN PROFIILI */}
           {sellerName && (
             <a href={`/sellers/${listing.user_id}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '16px', padding: '10px 14px', background: '#F5F3E6', borderRadius: '8px', border: '1px solid rgba(26,20,8,0.08)', textDecoration: 'none' }}>
