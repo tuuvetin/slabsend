@@ -301,15 +301,12 @@ export default function ListingPage() {
           {(listing.pickup_enabled || listing.shipping_enabled) && (
             <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap' }}>
               {listing.pickup_enabled && (
-                <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '20px', padding: '5px 12px', color: '#1a1408', cursor: 'default' }}
-                  onMouseEnter={e => { const t = (e.currentTarget as HTMLElement).querySelector('.pickup-tip') as HTMLElement; if (t) t.style.display = 'block' }}
-                  onMouseLeave={e => { const t = (e.currentTarget as HTMLElement).querySelector('.pickup-tip') as HTMLElement; if (t) t.style.display = 'none' }}
-                >
+                <div className="info-tooltip-wrap" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '20px', padding: '5px 12px', color: '#1a1408', cursor: 'default' }}>
                   📍 Pickup
-                  <span className="pickup-tip" style={{ display: 'none', position: 'absolute', bottom: 'calc(100% + 10px)', left: '50%', transform: 'translateX(-50%)', background: '#fff', color: '#1a1408', fontSize: '13px', fontWeight: 400, letterSpacing: 'normal', textTransform: 'none', fontFamily: 'Barlow', borderRadius: '10px', padding: '12px 16px', whiteSpace: 'normal', width: '220px', zIndex: 10, pointerEvents: 'none', boxShadow: '0 4px 20px rgba(26,20,8,0.15)', border: '1px solid rgba(26,20,8,0.08)', lineHeight: '1.5' }}>
+                  <div className="info-tooltip" style={{ right: 'auto', left: 0 }}>
                     Agree on pickup location with the seller via message.
-                  </span>
-                </span>
+                  </div>
+                </div>
               )}
               {listing.shipping_enabled && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '20px', padding: '5px 12px', color: '#1a1408' }}>
