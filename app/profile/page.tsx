@@ -262,7 +262,7 @@ export default function ProfilePage() {
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
             <h2 className="profile-section-title">Bank account for payouts</h2>
             <p style={{ fontSize: '13px', color: '#7a7060', lineHeight: '1.5', marginBottom: '16px' }}>
-              When you sell an item, we'll transfer your payment to the bank account below. We support all European banks — IBAN transfers via Wise or Holvi.
+              When you sell an item, we'll transfer your payment to the bank account below. If you have any questions, email us at <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a>
             </p>
 
             <input
