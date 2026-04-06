@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
-const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']
+const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com']
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 
 export default function NavBar() {
@@ -89,7 +89,7 @@ export default function NavBar() {
           </button>
         </div>
 
-        {/* MOBILE RIGHT — logo + listings + messages + hamburger */}
+        {/* MOBILE RIGHT — listings + messages + sell + hamburger */}
         <div className="sb-nav-mobile-right">
           <a href="/listings" className="sb-nav-link">Listings</a>
           <a href="/messages" className="sb-nav-link" style={{ position: 'relative' }}>
@@ -102,6 +102,7 @@ export default function NavBar() {
               }} />
             )}
           </a>
+          <a href="/listings/new" style={{ fontFamily: 'Barlow Condensed', fontWeight: 400, fontSize: '18px', color: '#F5F3E6', background: '#FC7038', textDecoration: 'none', width: '26px', height: '26px', borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>+</a>
           <button className="sb-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
             <span /><span /><span />
           </button>
