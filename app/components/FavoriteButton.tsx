@@ -34,7 +34,7 @@ export default function FavoriteButton({ listingId }: { listingId: string }) {
       setIsFavorited(false)
     } else {
       const { error } = await supabase.from('favorites').insert({ user_id: user.id, listing_id: listingId })
-      if (error) { console.error('Favorites insert error:', error); setLoading(false); return }
+      if (error) { alert('Favorites error: ' + error.message + ' | code: ' + error.code); setLoading(false); return }
       setIsFavorited(true)
     }
     setLoading(false)
