@@ -264,7 +264,7 @@ body {
   gap: 40px;
 }
 .home-hero-text { display: flex; flex-direction: column; }
-.home-hero-title { font-family: 'Barlow Condensed', sans-serif; font-size: 72px; font-weight: 700; text-transform: uppercase; color: #F5F3E6; line-height: 0.95; letter-spacing: 0.01em; margin-bottom: 16px; }
+.home-hero-title { font-family: 'Barlow Condensed', sans-serif; font-size: 56px; font-weight: 700; text-transform: uppercase; color: #F5F3E6; line-height: 1; letter-spacing: 0.02em; margin-bottom: 16px; }
 .home-hero-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245, 243, 230, 0.75); margin: 0; }
 .home-action-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; -webkit-flex-shrink: 0; flex-shrink: 0; -webkit-align-self: flex-end; align-self: flex-end; }
 .home-action-box-sm { background: transparent; border: 1px solid #FC7038; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: flex-start; align-items: flex-start; -webkit-justify-content: center; justify-content: center; padding: 10px 14px; cursor: pointer; -webkit-transition: background 0.15s; transition: background 0.15s; position: relative; text-decoration: none; border-radius: 4px; white-space: nowrap; min-width: 130px; }
