@@ -29,10 +29,12 @@ export default function FavoriteButton({ listingId }: { listingId: string }) {
     if (!user) { window.location.href = '/login'; return }
     setLoading(true)
     if (isFavorited) {
-      await supabase.from('favorites').delete().eq('user_id', user.id).eq('listing_id', listingId)
+      const { error } = await supabase.from('favorites').delete().eq('user_id', user.id).eq('listing_id', listingId)
+      if (error) { console.error('Favorites delete error:', error); setLoading(false); return }
       setIsFavorited(false)
     } else {
-      await supabase.from('favorites').insert({ user_id: user.id, listing_id: listingId })
+      const { error } = await supabase.from('favorites').insert({ user_id: user.id, listing_id: listingId })
+      if (error) { console.error('Favorites insert error:', error); setLoading(false); return }
       setIsFavorited(true)
     }
     setLoading(false)
