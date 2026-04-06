@@ -306,8 +306,8 @@ export default function ListingPage() {
                   onMouseLeave={e => { const t = (e.currentTarget as HTMLElement).querySelector('.pickup-tip') as HTMLElement; if (t) t.style.display = 'none' }}
                 >
                   📍 Pickup
-                  <span className="pickup-tip" style={{ display: 'none', position: 'absolute', bottom: 'calc(100% + 8px)', left: '50%', transform: 'translateX(-50%)', background: '#FC7038', color: '#F5F3E6', fontSize: '12px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: 'Barlow Condensed', borderRadius: '8px', padding: '8px 12px', whiteSpace: 'nowrap', zIndex: 10, pointerEvents: 'none', boxShadow: '0 2px 10px rgba(252,112,56,0.3)' }}>
-                    Agree on pickup location with the seller via message
+                  <span className="pickup-tip" style={{ display: 'none', position: 'absolute', bottom: 'calc(100% + 10px)', left: '50%', transform: 'translateX(-50%)', background: '#fff', color: '#1a1408', fontSize: '13px', fontWeight: 400, letterSpacing: 'normal', textTransform: 'none', fontFamily: 'Barlow', borderRadius: '10px', padding: '12px 16px', whiteSpace: 'normal', width: '220px', zIndex: 10, pointerEvents: 'none', boxShadow: '0 4px 20px rgba(26,20,8,0.15)', border: '1px solid rgba(26,20,8,0.08)', lineHeight: '1.5' }}>
+                    Agree on pickup location with the seller via message.
                   </span>
                 </span>
               )}
