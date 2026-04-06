@@ -13,6 +13,7 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [message, setMessage] = useState('')
   const [listings, setListings] = useState<any[]>([])
+  const [favorites, setFavorites] = useState<any[]>([])
   const [bankName, setBankName] = useState('')
   const [bankIban, setBankIban] = useState('')
   const [bankBic, setBankBic] = useState('')
@@ -54,6 +55,10 @@ export default function ProfilePage() {
 
       supabase.from('listings').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).then(({ data }) => {
         setListings(data || [])
+      })
+
+      supabase.from('favorites').select('listing_id, listings(*)').eq('user_id', user.id).order('created_at', { ascending: false }).then(({ data }) => {
+        setFavorites((data || []).map((f: any) => f.listings).filter(Boolean))
       })
     })
   }, [])
@@ -320,6 +325,31 @@ export default function ProfilePage() {
           <button className="profile-signout-btn" onClick={() => supabase.auth.signOut().then(() => window.location.href = '/login')}>
             Sign out
           </button>
+        </div>
+
+        {/* SAVED ITEMS */}
+        <div className="profile-section">
+          <h2 className="profile-section-title">Saved items</h2>
+          {favorites.length === 0 && <p className="profile-empty">No saved items yet. Tap ★ on any listing to save it.</p>}
+          <div className="profile-listings">
+            {favorites.map((listing: any) => (
+              <a key={listing.id} href={`/listings/${listing.id}`} className="profile-listing-link">
+                <div className="profile-listing-card">
+                  {listing.images && listing.images.length > 0 ? (
+                    <img src={listing.images[0]} alt={listing.title} className="profile-listing-img" />
+                  ) : (
+                    <div className="profile-listing-no-img" />
+                  )}
+                  <div className="profile-listing-info">
+                    <p className="profile-listing-title">{listing.title}</p>
+                    <p className="profile-listing-meta">
+                      {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''}{listing.location ? ` · ${listing.location}` : ''}
+                    </p>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
 
         {/* MY LISTINGS */}

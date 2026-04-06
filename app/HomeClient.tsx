@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
+import FavoriteButton from '@/app/components/FavoriteButton'
 
 interface Category {
   key: string
@@ -185,11 +186,14 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
           {listings.map((listing: any) => (
             <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
               <div className="listing-card">
-                {listing.images && listing.images.length > 0 ? (
-                  <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
-                ) : (
-                  <div className="listing-card-no-img">No image</div>
-                )}
+                <div style={{ position: 'relative' }}>
+                  {listing.images && listing.images.length > 0 ? (
+                    <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
+                  ) : (
+                    <div className="listing-card-no-img">No image</div>
+                  )}
+                  <FavoriteButton listingId={listing.id} />
+                </div>
                 <div className="listing-card-body">
                   <h3 className="listing-card-title">{listing.title}</h3>
                   {listing.category && (
