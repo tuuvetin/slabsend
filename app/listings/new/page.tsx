@@ -38,7 +38,8 @@ const packageSizes = [
   ]
 
 function centerAspectCrop(width: number, height: number) {
-  return centerCrop(makeAspectCrop({ unit: '%', width: 90 }, 1, width, height), width, height)
+  // Free crop — select 90% of image, preserving original aspect ratio
+  return centerCrop({ unit: '%', width: 90, height: 90 }, width, height)
 }
 
 async function getCroppedBlob(imgEl: HTMLImageElement, crop: PixelCrop): Promise<Blob> {
@@ -199,9 +200,9 @@ export default function NewListingPage() {
           <p style={{ color: '#f0ead8', fontFamily: 'Barlow Condensed', fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>
             Photo {cropIndex + 1} / {cropQueue.length} — Drag to crop
           </p>
-          <div style={{ maxWidth: '90vw', maxHeight: '60vh', overflow: 'hidden' }}>
-            <ReactCrop crop={crop} onChange={c => setCrop(c)} onComplete={c => setCompletedCrop(c)} aspect={1}>
-              <img ref={imgRef} src={cropQueue[cropIndex].src} onLoad={onImageLoad} style={{ maxWidth: '80vw', maxHeight: '55vh', display: 'block' }} alt="crop" />
+          <div style={{ maxWidth: '94vw', maxHeight: '75vh', overflow: 'auto' }}>
+            <ReactCrop crop={crop} onChange={c => setCrop(c)} onComplete={c => setCompletedCrop(c)}>
+              <img ref={imgRef} src={cropQueue[cropIndex].src} onLoad={onImageLoad} style={{ maxWidth: '90vw', maxHeight: '70vh', display: 'block' }} alt="crop" />
             </ReactCrop>
           </div>
           <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
