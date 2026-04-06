@@ -330,31 +330,6 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* SAVED ITEMS */}
-        <div className="profile-section">
-          <h2 className="profile-section-title">Saved items</h2>
-          {favorites.length === 0 && <p className="profile-empty">No saved items yet. Tap ★ on any listing to save it.</p>}
-          <div className="profile-listings">
-            {favorites.map((listing: any) => (
-              <a key={listing.id} href={`/listings/${listing.id}`} className="profile-listing-link">
-                <div className="profile-listing-card">
-                  {listing.images && listing.images.length > 0 ? (
-                    <img src={listing.images[0]} alt={listing.title} className="profile-listing-img" />
-                  ) : (
-                    <div className="profile-listing-no-img" />
-                  )}
-                  <div className="profile-listing-info">
-                    <p className="profile-listing-title">{listing.title}</p>
-                    <p className="profile-listing-meta">
-                      {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''}{listing.location ? ` · ${listing.location}` : ''}
-                    </p>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-
         {/* MY LISTINGS */}
         <div className="profile-section">
           <h2 className="profile-section-title">My listings</h2>
@@ -376,6 +351,31 @@ export default function ProfilePage() {
                     {listing.listing_type === 'rent' && (
                       <span className="listing-rental-badge" style={{ fontSize: '10px', padding: '2px 8px' }}>For rent</span>
                     )}
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* SAVED ITEMS */}
+        <div className="profile-section">
+          <h2 className="profile-section-title">Saved items</h2>
+          {favorites.length === 0 && <p className="profile-empty">No saved items yet. Tap ★ on any listing to save it.</p>}
+          <div className="profile-listings">
+            {favorites.map((listing: any) => (
+              <a key={listing.id} href={`/listings/${listing.id}`} className="profile-listing-link">
+                <div className="profile-listing-card">
+                  {listing.images && listing.images.length > 0 ? (
+                    <img src={listing.images[0]} alt={listing.title} className="profile-listing-img" />
+                  ) : (
+                    <div className="profile-listing-no-img" />
+                  )}
+                  <div className="profile-listing-info">
+                    <p className="profile-listing-title">{listing.title}</p>
+                    <p className="profile-listing-meta">
+                      {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''}{listing.location ? ` · ${listing.location}` : ''}
+                    </p>
                   </div>
                 </div>
               </a>
