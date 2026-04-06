@@ -303,7 +303,7 @@ export default function ListingPage() {
               {listing.pickup_enabled && (
                 <div className="info-tooltip-wrap" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '20px', padding: '5px 12px', color: '#1a1408', cursor: 'default' }}>
                   📍 Pickup
-                  <div className="info-tooltip" style={{ right: 'auto', left: 0 }}>
+                  <div className="info-tooltip pickup-tooltip" style={{ right: 'auto', left: 0 }}>
                     Agree on pickup location with the seller via message.
                   </div>
                 </div>

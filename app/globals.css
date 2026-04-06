@@ -467,6 +467,8 @@ body {
   display: block;
 }
 .info-tooltip-wrap:focus { outline: none; }
+.pickup-tooltip { text-transform: none !important; font-family: 'Barlow', sans-serif !important; letter-spacing: normal !important; font-weight: 400 !important; }
+.pickup-tooltip::after { display: none !important; }
 .price-tooltip {
   bottom: auto !important;
   top: calc(100% + 6px) !important;
