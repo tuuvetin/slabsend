@@ -57,8 +57,11 @@ export default function ProfilePage() {
         setListings(data || [])
       })
 
-      supabase.from('favorites').select('listing_id, listings(*)').eq('user_id', user.id).order('created_at', { ascending: false }).then(({ data }) => {
-        setFavorites((data || []).map((f: any) => f.listings).filter(Boolean))
+      supabase.from('favorites').select('listing_id').eq('user_id', user.id).order('created_at', { ascending: false }).then(async ({ data: favData }) => {
+        const ids = (favData || []).map((f: any) => f.listing_id)
+        if (ids.length === 0) return
+        const { data: listingData } = await supabase.from('listings').select('*').in('id', ids)
+        setFavorites(listingData || [])
       })
     })
   }, [])
