@@ -94,9 +94,9 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             <p className="home-hero-eyebrow">Slabsend — Pre-owned climbing gear</p>
           </div>
           <div className="home-action-boxes">
-            <a href="/listings/new?type=sell" className="home-action-box-sm accent">
+            <a href="/listings/new" className="home-action-box-sm accent">
               <span className="home-action-arrow">↗</span>
-              <div className="home-action-label-sm">Sell</div>
+              <div className="home-action-label-sm">Sell / Rent</div>
               <div className="home-action-desc-sm">List your gear</div>
             </a>
             <a href="/listings" className="home-action-box-sm">
@@ -104,10 +104,10 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               <div className="home-action-label-sm">Buy</div>
               <div className="home-action-desc-sm">Browse listings</div>
             </a>
-            <a href="/listings/new?type=rent" className="home-action-box-sm blue">
+            <a href="/listings?tab=rent" className="home-action-box-sm blue">
               <span className="home-action-arrow">↗</span>
               <div className="home-action-label-sm">Rent</div>
-              <div className="home-action-desc-sm">Rent or offer gear</div>
+              <div className="home-action-desc-sm">Browse rentals</div>
             </a>
             <a href="/service" className="home-action-box-sm">
               <span className="home-action-arrow">↗</span>
