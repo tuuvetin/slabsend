@@ -10,7 +10,7 @@ const conditionLabels: Record<string, string> = {
   'Uusi': 'New', 'Erinomainen': 'Excellent', 'Hyvä': 'Good', 'Tyydyttävä': 'Fair', 'Huono': 'Poor',
 }
 
-const ADMINS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com']
+const ADMINS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']
 
 export default function ListingPage() {
   const params = useParams()
