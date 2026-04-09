@@ -25,7 +25,13 @@ const europeanCountries = [
 
 function parseCategories(raw: string | null | undefined): string[] {
   if (!raw) return []
-  try { return JSON.parse(raw) } catch { return [raw] }
+  try {
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    if (parsed.length === 0) return []
+    if (typeof parsed[0] === 'string') return parsed
+    return parsed.map((i: any) => i.name).filter(Boolean)
+  } catch { return [raw] }
 }
 
 export default function ServicePage() {

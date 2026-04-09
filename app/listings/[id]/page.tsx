@@ -32,6 +32,7 @@ export default function ListingPage() {
   const [buyerOrderId, setBuyerOrderId] = useState<number | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [togglingSOLD, setTogglingSOLD] = useState(false)
+  const [selectedServices, setSelectedServices] = useState<string[]>([])
   const supabase = createClient()
 
   useEffect(() => {
@@ -220,11 +221,20 @@ export default function ListingPage() {
   const images: string[] = listing.images || []
   const sellerName = sellerProfile?.username || sellerProfile?.full_name || ''
 
-  function parseCategories(raw: string | null): string[] {
+  // Parse service items — supports both old string[] and new {name,price}[] format
+  function parseServiceItems(raw: string | null): { name: string; price: number }[] {
     if (!raw) return []
-    try { return JSON.parse(raw) } catch { return [raw] }
+    try {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) {
+        if (parsed.length === 0) return []
+        if (typeof parsed[0] === 'string') return parsed.map((n: string) => ({ name: n, price: 0 }))
+        return parsed
+      }
+    } catch {}
+    return []
   }
-  const serviceCategories = isService ? parseCategories(listing.category) : []
+  const serviceItems = isService ? parseServiceItems(listing.category) : []
 
   return (
     <div className="listing-detail-page">
@@ -322,18 +332,9 @@ export default function ListingPage() {
             : isService ? null : <p className="listing-detail-price">{listing.price} €</p>
           }
 
-          {/* SERVICE: show categories as tags + location as address */}
+          {/* SERVICE: selectable items with pricing */}
           {isService && (
             <>
-              {serviceCategories.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '10px 0 14px' }}>
-                  {serviceCategories.map(cat => (
-                    <span key={cat} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '20px', background: 'rgba(252,112,56,0.1)', color: '#FC7038', border: '1px solid rgba(252,112,56,0.25)' }}>
-                      {cat}
-                    </span>
-                  ))}
-                </div>
-              )}
               {(listing.city || listing.country) && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px' }}>
                   <span style={{ fontSize: '16px' }}>📍</span>
@@ -343,6 +344,45 @@ export default function ListingPage() {
                       {[listing.city, listing.country].filter(Boolean).join(', ')}
                     </p>
                   </div>
+                </div>
+              )}
+              {serviceItems.length > 0 && (
+                <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+                    Select services
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {serviceItems.map(item => {
+                      const checked = selectedServices.includes(item.name)
+                      return (
+                        <label key={item.name} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => setSelectedServices(prev =>
+                              prev.includes(item.name) ? prev.filter(s => s !== item.name) : [...prev, item.name]
+                            )}
+                            style={{ width: '18px', height: '18px', accentColor: '#FC7038', flexShrink: 0 }}
+                          />
+                          <span style={{ flex: 1, fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 600, color: '#1a1408', letterSpacing: '0.04em' }}>
+                            {item.name}
+                          </span>
+                          <span style={{ fontFamily: 'Barlow Condensed', fontSize: '15px', fontWeight: 700, color: item.price > 0 ? '#FC7038' : '#9a9080' }}>
+                            {item.price > 0 ? `${item.price} €` : 'Price on request'}
+                          </span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                  {selectedServices.length > 0 && (() => {
+                    const total = serviceItems.filter(i => selectedServices.includes(i.name)).reduce((s, i) => s + i.price, 0)
+                    return (
+                      <div style={{ borderTop: '1px solid rgba(26,20,8,0.1)', marginTop: '14px', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a7060' }}>Total</span>
+                        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '22px', fontWeight: 700, color: '#1a1408' }}>{total} €</span>
+                      </div>
+                    )
+                  })()}
                 </div>
               )}
             </>
@@ -413,7 +453,7 @@ export default function ListingPage() {
           {/* BUYER ACTIONS — piilotetaan jos myyty tai tilaus on jo olemassa */}
           {!listing.sold && !order && currentUser && currentUser.id !== listing.user_id && (
             <div className="listing-contact">
-              {!isRental && (
+              {!isRental && !isService && (
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
                     <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ flex: 1 }}>
@@ -437,6 +477,42 @@ export default function ListingPage() {
                   </div>
                 </div>
               )}
+
+              {isService && serviceItems.length > 0 && (() => {
+                const total = serviceItems.filter(i => selectedServices.includes(i.name)).reduce((s, i) => s + i.price, 0)
+                const hasSelection = selectedServices.length > 0
+                return (
+                  <div style={{ marginBottom: '16px' }}>
+                    <button
+                      className="form-submit"
+                      disabled={buyLoading || !hasSelection || total === 0}
+                      onClick={() => {
+                        if (!hasSelection || total === 0) return
+                        setBuyLoading(true)
+                        fetch('/api/stripe/checkout', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ listingId: listing.id, amount: total }),
+                        }).then(r => r.json()).then(data => {
+                          if (data.url) window.location.href = data.url
+                          else { alert(data.error || 'Payment error'); setBuyLoading(false) }
+                        })
+                      }}
+                      style={{ width: '100%', marginBottom: '8px', opacity: (!hasSelection || total === 0) ? 0.5 : 1 }}
+                    >
+                      {buyLoading ? 'Loading...' : hasSelection && total > 0 ? `Buy now — ${(total * 1.08).toFixed(2)} €` : 'Select services above'}
+                    </button>
+                    {hasSelection && total > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)' }}>
+                        <span style={{ fontSize: '14px' }}>🛡️</span>
+                        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em' }}>
+                          Buyer protection included — {(total * 0.08).toFixed(2)} €
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
 
               {showOffer && (
                 <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '8px', padding: '16px', marginBottom: '16px' }}>

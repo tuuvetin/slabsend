@@ -79,7 +79,7 @@ export default function NewListingPage() {
   const [category, setCategory] = useState('')
   const [subcategory, setSubcategory] = useState('')
   const [condition, setCondition] = useState('')
-  const [selectedServiceTypes, setSelectedServiceTypes] = useState<string[]>([])
+  const [servicePrices, setServicePrices] = useState<Record<string, string>>({})
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [shippingEnabled, setShippingEnabled] = useState(false)
@@ -108,13 +108,15 @@ export default function NewListingPage() {
     setCategory('')
     setSubcategory('')
     setCondition('')
-    setSelectedServiceTypes([])
+    setServicePrices({})
   }
 
   const toggleServiceType = (t: string) => {
-    setSelectedServiceTypes(prev =>
-      prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]
-    )
+    setServicePrices(prev => {
+      const next = { ...prev }
+      if (t in next) { delete next[t] } else { next[t] = '' }
+      return next
+    })
   }
 
   const handleImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,7 +177,8 @@ export default function NewListingPage() {
   const handleSubmit = async () => {
     if (!country) { setMessage('Please select a country.'); return }
     if (!city.trim()) { setMessage('Please enter a city.'); return }
-    if (listingType === 'service' && selectedServiceTypes.length === 0) { setMessage('Please select at least one service type.'); return }
+    const serviceItems = Object.entries(servicePrices).map(([name, p]) => ({ name, price: parseFloat(p) || 0 }))
+    if (listingType === 'service' && serviceItems.length === 0) { setMessage('Please select at least one service type.'); return }
     if (listingType !== 'service' && shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
@@ -193,10 +196,10 @@ export default function NewListingPage() {
 
     const { error } = await supabase.from('listings').insert({
       user_id: user.id, title, description,
-      price: price ? parseInt(price) : null,
+      price: listingType === 'service' ? null : (price ? parseInt(price) : null),
       location: `${city}, ${country}`,
       country, city,
-      category: listingType === 'service' ? JSON.stringify(selectedServiceTypes) : category,
+      category: listingType === 'service' ? JSON.stringify(serviceItems) : category,
       subcategory: listingType !== 'service' ? subcategory : null,
       condition: listingType !== 'service' ? condition : null,
       images: imageUrls,
@@ -215,7 +218,7 @@ export default function NewListingPage() {
       setTitle(''); setDescription(''); setPrice('')
       setCountry(''); setCity('')
       setCategory(''); setSubcategory(''); setCondition('')
-      setSelectedServiceTypes([])
+      setServicePrices({})
       setCroppedFiles([]); setCropQueue([])
       setShippingEnabled(false); setPickupEnabled(false); setPackageSize(''); setPackageWeight('')
     }
@@ -287,12 +290,14 @@ export default function NewListingPage() {
       )}
       <textarea className="form-input form-textarea" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
 
-      <div className="price-input-row">
-        <input className="form-input" placeholder={priceLabel} value={price} onChange={e => setPrice(e.target.value)} type="number" style={{ marginBottom: 0 }} />
-        {listingType === 'rent' && (
-          <span className="price-period-label">€ / {rentalPeriods.find(p => p.value === rentalPeriod)?.label.replace('Per ', '') || 'day'}</span>
-        )}
-      </div>
+      {listingType !== 'service' && (
+        <div className="price-input-row">
+          <input className="form-input" placeholder={priceLabel} value={price} onChange={e => setPrice(e.target.value)} type="number" style={{ marginBottom: 0 }} />
+          {listingType === 'rent' && (
+            <span className="price-period-label">€ / {rentalPeriods.find(p => p.value === rentalPeriod)?.label.replace('Per ', '') || 'day'}</span>
+          )}
+        </div>
+      )}
 
       <div className="location-row">
         <select className="form-input" value={country} onChange={e => setCountry(e.target.value)} style={{ marginBottom: 0 }}>
@@ -303,30 +308,37 @@ export default function NewListingPage() {
       </div>
 
       {listingType === 'service' ? (
-        <div style={{ marginBottom: '12px' }}>
-          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
-            Service type (select all that apply)
+        <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+            Services offered &amp; pricing
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {serviceTypeOptions.map(t => {
-              const active = selectedServiceTypes.includes(t)
+              const active = t in servicePrices
               return (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => toggleServiceType(t)}
-                  style={{
-                    fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700,
-                    letterSpacing: '0.08em', textTransform: 'uppercase',
-                    padding: '8px 16px', borderRadius: '20px', cursor: 'pointer',
-                    border: active ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.18)',
-                    background: active ? '#FC7038' : '#F5F3E6',
-                    color: active ? '#F5F3E6' : '#7a7060',
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  {t}
-                </button>
+                <div key={t} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <input
+                    type="checkbox"
+                    checked={active}
+                    onChange={() => toggleServiceType(t)}
+                    style={{ width: '18px', height: '18px', accentColor: '#FC7038', flexShrink: 0, cursor: 'pointer' }}
+                  />
+                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 600, color: active ? '#1a1408' : '#9a9080', flex: 1, cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleServiceType(t)}>
+                    {t}
+                  </span>
+                  {active && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={servicePrices[t]}
+                        onChange={e => setServicePrices(prev => ({ ...prev, [t]: e.target.value }))}
+                        style={{ fontFamily: 'Barlow', fontSize: '14px', width: '90px', padding: '6px 10px', background: '#fff', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', color: '#1a1408', textAlign: 'right' }}
+                      />
+                      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', color: '#7a7060' }}>€</span>
+                    </div>
+                  )}
+                </div>
               )
             })}
           </div>
