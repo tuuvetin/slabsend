@@ -24,10 +24,11 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
   const [catErrors, setCatErrors] = useState<Record<string, boolean>>({})
   const [searchVal, setSearchVal] = useState('')
   const [placeholder, setPlaceholder] = useState('Search for gear, brand or category...')
+  const [cursor, setCursor] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    const words = ['Scarpa..', 'Crash pads..', 'T-shirts..', 'Climbing shoes..', 'Harness..', 'La Sportiva..']
+    const words = ['Scarpa..', 'Crash pads..', 'T-shirts..', 'Climbing shoes..', 'Harness..', 'La Sportiva..', 'Rent a crashpad..']
     let wordIdx = 0
     let charIdx = 0
     let deleting = false
@@ -40,7 +41,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
         setPlaceholder(word.slice(0, charIdx))
         if (charIdx === word.length) {
           deleting = true
-          timer = setTimeout(tick, 1800)
+          timer = setTimeout(tick, 2400)
           return
         }
       } else {
@@ -56,6 +57,11 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
 
     timer = setTimeout(tick, 1200)
     return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    const blink = setInterval(() => setCursor(c => !c), 500)
+    return () => clearInterval(blink)
   }, [])
 
   const handleSearch = (e: React.FormEvent) => {
@@ -124,7 +130,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             type="text"
             value={searchVal}
             onChange={e => setSearchVal(e.target.value)}
-            placeholder={searchVal ? 'Search for gear, brand or category...' : placeholder}
+            placeholder={searchVal ? 'Search for gear, brand or category...' : `${placeholder}${cursor ? '|' : ' '}`}
             className="home-hero-search-input"
           />
           <button type="submit" className="home-hero-search-btn">
