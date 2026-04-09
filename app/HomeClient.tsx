@@ -24,7 +24,6 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
   const [catErrors, setCatErrors] = useState<Record<string, boolean>>({})
   const [searchVal, setSearchVal] = useState('')
   const [placeholder, setPlaceholder] = useState('Search for gear, brand or category...')
-  const [cursor, setCursor] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -59,10 +58,6 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
     return () => clearTimeout(timer)
   }, [])
 
-  useEffect(() => {
-    const blink = setInterval(() => setCursor(c => !c), 500)
-    return () => clearInterval(blink)
-  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -130,7 +125,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             type="text"
             value={searchVal}
             onChange={e => setSearchVal(e.target.value)}
-            placeholder={searchVal ? 'Search for gear, brand or category...' : `${placeholder}${cursor ? '|' : ' '}`}
+            placeholder={searchVal ? 'Search for gear, brand or category...' : placeholder}
             className="home-hero-search-input"
           />
           <button type="submit" className="home-hero-search-btn">
