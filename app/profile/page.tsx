@@ -24,6 +24,15 @@ export default function ProfilePage() {
   const [passwordMessage, setPasswordMessage] = useState('')
   const [passwordSaving, setPasswordSaving] = useState(false)
 
+  // Profile page customization
+  const [bio, setBio] = useState('')
+  const [heroUrl, setHeroUrl] = useState('')
+  const [galleryImages, setGalleryImages] = useState<string[]>([])
+  const [heroUploading, setHeroUploading] = useState(false)
+  const [galleryUploading, setGalleryUploading] = useState<boolean[]>([false, false, false])
+  const heroInputRef = useRef<HTMLInputElement>(null)
+  const galleryInputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)]
+
   // Crop
   const [cropSrc, setCropSrc] = useState<string | null>(null)
   const [crop, setCrop] = useState<Crop>()
@@ -50,6 +59,9 @@ export default function ProfilePage() {
           setBankIban(data.bank_iban || '')
           setBankBic(data.bank_bic || '')
           setBankCountry(data.bank_country || '')
+          setBio(data.bio || '')
+          setHeroUrl(data.hero_url || '')
+          setGalleryImages(data.gallery_images || [])
         }
       })
 
@@ -89,7 +101,8 @@ export default function ProfilePage() {
         user_id: user.id,
         username: usernameSet ? username : username,
         full_name: fullName,
-        location
+        location,
+        bio: bio.trim() || null,
       },
       { onConflict: 'user_id' }
     )
@@ -193,6 +206,41 @@ export default function ProfilePage() {
     setAvatarUploading(false)
   }
 
+  const handleHeroUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+    setHeroUploading(true)
+    const path = `avatars/${user.id}_hero.jpg`
+    const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true, contentType: file.type })
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+      const url = `${publicUrl}?t=${Date.now()}`
+      await supabase.from('profiles').upsert({ user_id: user.id, hero_url: url }, { onConflict: 'user_id' })
+      setHeroUrl(url)
+    }
+    setHeroUploading(false)
+  }
+
+  const handleGalleryUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+    setGalleryUploading(prev => { const n = [...prev]; n[index] = true; return n })
+    const path = `avatars/${user.id}_gallery_${index}.jpg`
+    const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true, contentType: file.type })
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+      const url = `${publicUrl}?t=${Date.now()}`
+      const updated = [...galleryImages]
+      updated[index] = url
+      // Pad array to ensure correct length
+      while (updated.length <= index) updated.push('')
+      const cleaned = updated.filter(Boolean)
+      await supabase.from('profiles').upsert({ user_id: user.id, gallery_images: cleaned }, { onConflict: 'user_id' })
+      setGalleryImages(cleaned)
+    }
+    setGalleryUploading(prev => { const n = [...prev]; n[index] = false; return n })
+  }
+
   if (!user) return <p className="listing-loading">Loading...</p>
 
   return (
@@ -262,10 +310,77 @@ export default function ProfilePage() {
 
           <input className="form-input" placeholder="Full name" value={fullName} onChange={e => setFullName(e.target.value)} />
           <input className="form-input" placeholder="Location" value={location} onChange={e => setLocation(e.target.value)} />
+          <textarea
+            className="form-input"
+            placeholder="Bio — tell something about yourself (optional)"
+            value={bio}
+            onChange={e => setBio(e.target.value)}
+            style={{ resize: 'vertical', minHeight: '80px', fontFamily: 'Barlow', fontSize: '14px' }}
+          />
           <button className="form-submit" onClick={handleSave}>Save changes</button>
           {message && (
             <p className={`form-message ${message.startsWith('Error') ? 'error' : 'success'}`}>{message}</p>
           )}
+
+          {/* PROFILE PAGE CUSTOMIZATION */}
+          <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
+            <h2 className="profile-section-title">Profile page</h2>
+            <p style={{ fontSize: '13px', color: '#7a7060', lineHeight: '1.5', marginBottom: '16px' }}>
+              Personalise your public seller profile with a cover image and photos.
+            </p>
+
+            {/* HERO IMAGE */}
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '8px' }}>Cover image</p>
+            <div
+              onClick={() => heroInputRef.current?.click()}
+              style={{ width: '100%', height: '110px', borderRadius: '10px', overflow: 'hidden', background: heroUrl ? 'transparent' : '#e8e0d0', border: '2px dashed rgba(26,20,8,0.15)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', position: 'relative' }}
+            >
+              {heroUrl ? (
+                <>
+                  <img src={heroUrl} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff' }}>
+                      {heroUploading ? 'Uploading...' : 'Change cover'}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9a9080' }}>
+                  {heroUploading ? 'Uploading...' : '+ Add cover image'}
+                </span>
+              )}
+            </div>
+            <input ref={heroInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleHeroUpload} />
+
+            {/* GALLERY */}
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '8px' }}>Gallery (up to 3 photos)</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '4px' }}>
+              {[0,1,2].map(i => (
+                <div key={i}>
+                  <div
+                    onClick={() => galleryInputRefs[i].current?.click()}
+                    style={{ aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', background: galleryImages[i] ? 'transparent' : '#e8e0d0', border: '2px dashed rgba(26,20,8,0.15)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
+                  >
+                    {galleryImages[i] ? (
+                      <>
+                        <img src={galleryImages[i]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#fff' }}>
+                            {galleryUploading[i] ? '...' : 'Change'}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '20px', color: '#9a9080' }}>
+                        {galleryUploading[i] ? '…' : '+'}
+                      </span>
+                    )}
+                  </div>
+                  <input ref={galleryInputRefs[i]} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleGalleryUpload(i, e)} />
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
             <h2 className="profile-section-title">Bank account for payouts</h2>

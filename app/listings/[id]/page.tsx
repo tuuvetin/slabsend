@@ -1,6 +1,7 @@
 'use client'
 import RentalCalendar from '@/app/components/RentalCalendar'
 import FavoriteButton from '@/app/components/FavoriteButton'
+import ReviewForm from '@/app/components/ReviewForm'
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
@@ -28,6 +29,7 @@ export default function ListingPage() {
   const [order, setOrder] = useState<any>(null)
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [confirmDone, setConfirmDone] = useState(false)
+  const [buyerOrderId, setBuyerOrderId] = useState<number | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export default function ListingPage() {
         const cached = localStorage.getItem(`order_${params.id}`)
         if (cached) {
           const parsedOrder = JSON.parse(cached)
-          if (parsedOrder.status === 'paid') setOrder(parsedOrder)
+          if (parsedOrder.status === 'paid') { setOrder(parsedOrder); setBuyerOrderId(parsedOrder.id) }
         }
       }
 
@@ -87,6 +89,7 @@ export default function ListingPage() {
             .single()
           if (orderData) {
             setOrder(orderData)
+            setBuyerOrderId(orderData.id)
             localStorage.setItem(`order_${params.id}`, JSON.stringify(orderData))
           }
         }
@@ -285,6 +288,10 @@ export default function ListingPage() {
                 The seller will receive their payment shortly.
               </p>
             </div>
+          )}
+
+          {buyerOrderId && currentUser && listing && (
+            <ReviewForm orderId={buyerOrderId} sellerId={listing.user_id} />
           )}
 
           {isRental && <span className="listing-rental-badge">For rent</span>}
