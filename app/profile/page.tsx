@@ -46,10 +46,22 @@ export default function ProfilePage() {
       if (!user) { window.location.href = '/login'; return }
       setUser(user)
 
-      supabase.from('profiles').select('*').eq('user_id', user.id).single().then(({ data }) => {
+      supabase.from('profiles').select('*').eq('user_id', user.id).single().then(async ({ data }) => {
+        // If profile is missing or username not set, restore from auth metadata
+        const metaUsername = user.user_metadata?.username || ''
+        if (!data || !data.username) {
+          if (metaUsername) {
+            await supabase.from('profiles').upsert(
+              { user_id: user.id, username: metaUsername },
+              { onConflict: 'user_id' }
+            )
+            setUsername(metaUsername)
+            setUsernameSet(true)
+          }
+        }
         if (data) {
-          setUsername(data.username || '')
-          setUsernameSet(!!data.username)
+          setUsername(data.username || metaUsername)
+          setUsernameSet(!!(data.username || metaUsername))
           setFullName(data.full_name || '')
           setLocation(data.location || '')
           setCountry(data.country || '')
@@ -234,7 +246,7 @@ export default function ProfilePage() {
           <div style={{ position: 'relative' }} onClick={() => fileInputRef.current?.click()}>
             {avatarUrl
               ? <img src={avatarUrl} alt="Avatar" className="seller-hero-av" style={{ cursor: 'pointer' }} />
-              : <div className="seller-hero-av-placeholder" style={{ cursor: 'pointer' }}>{(fullName || user.email || '?')[0].toUpperCase()}</div>
+              : <div className="seller-hero-av-placeholder" style={{ cursor: 'pointer' }}>{(fullName || username || '?')[0].toUpperCase()}</div>
             }
             <div className="seller-hero-av-edit">✏️</div>
           </div>
@@ -247,7 +259,7 @@ export default function ProfilePage() {
         {/* NAME ROW */}
         <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid rgba(26,20,8,0.1)' }}>
           <h1 className="profile-name">{fullName || username || 'Your profile'}</h1>
-          <p className="profile-email">{user.email}</p>
+          <p className="profile-email" style={{ fontSize: '12px', color: '#b0a898' }}>{user.email} <span style={{ opacity: 0.6 }}>· only visible to you</span></p>
         </div>
 
       {/* CROP-TYÖKALU */}

@@ -50,10 +50,11 @@ export default function LoginPage() {
       if (error) { setMessage(error.message); return }
 
       if (data.user) {
-        await supabase.from('profiles').upsert(
+        const { error: profileError } = await supabase.from('profiles').upsert(
           { user_id: data.user.id, username: username.trim().toLowerCase(), location: location.trim() },
           { onConflict: 'user_id' }
         )
+        if (profileError) console.error('Profile creation error:', profileError.message)
       }
       setMessage('Check your email to confirm your account!')
     } else {
