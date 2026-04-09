@@ -96,7 +96,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
           <div className="home-action-boxes">
             <a href="/listings/new" className="home-action-box-sm accent">
               <span className="home-action-arrow">↗</span>
-              <div className="home-action-label-sm">Sell / Rent</div>
+              <div className="home-action-label-sm">Sell</div>
               <div className="home-action-desc-sm">List your gear</div>
             </a>
             <a href="/listings" className="home-action-box-sm">
