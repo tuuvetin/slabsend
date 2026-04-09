@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
@@ -9,6 +9,13 @@ const categories: Record<string, string[]> = {
   'Shoes': ['Climbing shoes', 'Approach shoes', 'Mountain boots', 'Other shoes'],
   'Gear': ['Harnesses', 'Ropes', 'Alpine climbing', 'Ice climbing', 'Helmets', 'Crash pads', 'Chalk bags & brushes', 'Training equipment', 'Other gear'],
   'Wall equipment': ['Climbing holds', 'Safety mats', 'Wall materials'],
+}
+
+const serviceCategories: Record<string, string[]> = {
+  'Shoe resoling': ['Resoling', 'Rand repair', 'Full rebuild', 'Other'],
+  'Gear repair': ['Harness repair', 'Rope inspection & retiring', 'Helmet inspection', 'Crampon sharpening', 'Other repair'],
+  'Inspection': ['Harness inspection', 'Rope inspection', 'General gear inspection'],
+  'General service': ['Gear cleaning', 'Custom alterations', 'Other service'],
 }
 
 const conditions = ['New', 'Excellent', 'Good', 'Fair', 'Poor']
@@ -38,7 +45,8 @@ const packageSizes = [
   ]
 
 function centerAspectCrop(width: number, height: number) {
-  return centerCrop(makeAspectCrop({ unit: '%', width: 90 }, 1, width, height), width, height)
+  // Free crop — select 90% of image, preserving original aspect ratio
+  return centerCrop({ unit: '%', width: 90, height: 90 }, width, height)
 }
 
 async function getCroppedBlob(imgEl: HTMLImageElement, crop: PixelCrop): Promise<Blob> {
@@ -57,7 +65,7 @@ async function getCroppedBlob(imgEl: HTMLImageElement, crop: PixelCrop): Promise
 }
 
 export default function NewListingPage() {
-  const [listingType, setListingType] = useState<'sell' | 'rent'>('sell')
+  const [listingType, setListingType] = useState<'sell' | 'rent' | 'service'>('sell')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
@@ -70,6 +78,7 @@ export default function NewListingPage() {
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [shippingEnabled, setShippingEnabled] = useState(false)
+  const [pickupEnabled, setPickupEnabled] = useState(false)
   const [packageSize, setPackageSize] = useState('')
   const [packageWeight, setPackageWeight] = useState('')
 
@@ -82,6 +91,19 @@ export default function NewListingPage() {
   const [showCropper, setShowCropper] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
   const supabase = createClient()
+
+  // Read ?type=service from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('type') === 'service') setListingType('service')
+  }, [])
+
+  const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
+    setListingType(type)
+    setCategory('')
+    setSubcategory('')
+    setCondition('')
+  }
 
   const handleImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
@@ -141,7 +163,7 @@ export default function NewListingPage() {
   const handleSubmit = async () => {
     if (!country) { setMessage('Please select a country.'); return }
     if (!city.trim()) { setMessage('Please enter a city.'); return }
-    if (shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
+    if (listingType !== 'service' && shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { window.location.href = '/login'; return }
@@ -158,15 +180,17 @@ export default function NewListingPage() {
 
     const { error } = await supabase.from('listings').insert({
       user_id: user.id, title, description,
-      price: parseInt(price),
+      price: price ? parseInt(price) : null,
       location: `${city}, ${country}`,
-      country, city, category, subcategory, condition,
+      country, city, category, subcategory,
+      condition: listingType !== 'service' ? condition : null,
       images: imageUrls,
       listing_type: listingType,
       rental_period: listingType === 'rent' ? rentalPeriod : null,
-      shipping_enabled: shippingEnabled,
-      package_size: shippingEnabled ? packageSize : null,
-      package_weight: shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
+      shipping_enabled: listingType !== 'service' ? shippingEnabled : false,
+      pickup_enabled: listingType !== 'service' ? pickupEnabled : false,
+      package_size: listingType !== 'service' && shippingEnabled ? packageSize : null,
+      package_weight: listingType !== 'service' && shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
     })
 
     setLoading(false)
@@ -177,13 +201,17 @@ export default function NewListingPage() {
       setCountry(''); setCity('')
       setCategory(''); setSubcategory(''); setCondition('')
       setCroppedFiles([]); setCropQueue([])
-      setShippingEnabled(false); setPackageSize(''); setPackageWeight('')
+      setShippingEnabled(false); setPickupEnabled(false); setPackageSize(''); setPackageWeight('')
     }
   }
 
   const priceLabel = listingType === 'rent'
     ? rentalPeriods.find(p => p.value === rentalPeriod)?.label || 'Per day'
+    : listingType === 'service'
+    ? 'Starting price (€) — optional'
     : 'Price (€)'
+
+  const activeCategoryMap = listingType === 'service' ? serviceCategories : categories
 
   return (
     <div className="new-listing-page">
@@ -199,9 +227,9 @@ export default function NewListingPage() {
           <p style={{ color: '#f0ead8', fontFamily: 'Barlow Condensed', fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>
             Photo {cropIndex + 1} / {cropQueue.length} — Drag to crop
           </p>
-          <div style={{ maxWidth: '90vw', maxHeight: '60vh', overflow: 'hidden' }}>
-            <ReactCrop crop={crop} onChange={c => setCrop(c)} onComplete={c => setCompletedCrop(c)} aspect={1}>
-              <img ref={imgRef} src={cropQueue[cropIndex].src} onLoad={onImageLoad} style={{ maxWidth: '80vw', maxHeight: '55vh', display: 'block' }} alt="crop" />
+          <div style={{ maxWidth: '94vw', maxHeight: '75vh', overflow: 'auto' }}>
+            <ReactCrop crop={crop} onChange={c => setCrop(c)} onComplete={c => setCompletedCrop(c)}>
+              <img ref={imgRef} src={cropQueue[cropIndex].src} onLoad={onImageLoad} style={{ maxWidth: '90vw', maxHeight: '70vh', display: 'block' }} alt="crop" />
             </ReactCrop>
           </div>
           <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
@@ -212,8 +240,9 @@ export default function NewListingPage() {
       )}
 
       <div className="listing-type-toggle">
-        <button className={`listing-type-btn ${listingType === 'sell' ? 'active' : ''}`} onClick={() => setListingType('sell')}>For sale</button>
-        <button className={`listing-type-btn ${listingType === 'rent' ? 'active rent' : ''}`} onClick={() => setListingType('rent')}>For rent</button>
+        <button className={`listing-type-btn ${listingType === 'sell' ? 'active' : ''}`} onClick={() => handleTypeChange('sell')}>For sale</button>
+        <button className={`listing-type-btn ${listingType === 'rent' ? 'active rent' : ''}`} onClick={() => handleTypeChange('rent')}>For rent</button>
+        <button className={`listing-type-btn ${listingType === 'service' ? 'active service' : ''}`} onClick={() => handleTypeChange('service')}>Service</button>
       </div>
 
       {listingType === 'rent' && (
@@ -248,75 +277,97 @@ export default function NewListingPage() {
       </div>
 
       <select className="form-input" value={category} onChange={e => { setCategory(e.target.value); setSubcategory('') }}>
-        <option value="">Select category</option>
-        {Object.keys(categories).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+        <option value="">{listingType === 'service' ? 'Select service type' : 'Select category'}</option>
+        {Object.keys(activeCategoryMap).map(cat => <option key={cat} value={cat}>{cat}</option>)}
       </select>
 
       {category && (
         <select className="form-input" value={subcategory} onChange={e => setSubcategory(e.target.value)}>
           <option value="">Select subcategory</option>
-          {categories[category].map(sub => <option key={sub} value={sub}>{sub}</option>)}
+          {activeCategoryMap[category]?.map(sub => <option key={sub} value={sub}>{sub}</option>)}
         </select>
       )}
 
-      <select className="form-input" value={condition} onChange={e => setCondition(e.target.value)}>
-        <option value="">Select condition</option>
-        {conditions.map(c => <option key={c} value={c}>{c}</option>)}
-      </select>
+      {listingType !== 'service' && (
+        <select className="form-input" value={condition} onChange={e => setCondition(e.target.value)}>
+          <option value="">Select condition</option>
+          {conditions.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+      )}
 
-      {/* SHIPPING */}
-      <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-          <input
-            type="checkbox"
-            checked={shippingEnabled}
-            onChange={e => setShippingEnabled(e.target.checked)}
-            style={{ width: '18px', height: '18px', accentColor: '#FC7038' }}
-          />
-          <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
-            Offer shipping
-          </span>
-        </label>
-        <p style={{ fontSize: '12px', color: '#7a7060', marginTop: '6px', marginLeft: '28px' }}>
-          Buyers can choose shipping at checkout. You'll receive a shipping label by email.
-        </p>
+      {/* SHIPPING + PICKUP — not shown for service listings */}
+      {listingType !== 'service' && (
+        <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+            Delivery options
+          </p>
 
-        {shippingEnabled && (
-          <div style={{ marginTop: '14px', marginLeft: '28px' }}>
-            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
-              Package size
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '14px' }}>
-              {packageSizes.map(size => (
-                <button
-                  key={size.value}
-                  onClick={() => setPackageSize(size.value)}
-                  style={{
-                    fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700,
-                    letterSpacing: '0.08em', textTransform: 'uppercase',
-                    padding: '10px 8px', borderRadius: '8px', cursor: 'pointer',
-                    border: packageSize === size.value ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)',
-                    background: packageSize === size.value ? '#FC7038' : '#fff',
-                    color: packageSize === size.value ? '#F5F3E6' : '#1a1408',
-                    textAlign: 'center'
-                  }}
-                >
-                  <div>{size.label}</div>
-                  <div style={{ fontSize: '10px', fontWeight: 400, marginTop: '2px', opacity: 0.8 }}>{size.desc}</div>
-                </button>
-              ))}
-            </div>
+          {/* PICKUP */}
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '12px' }}>
             <input
-              className="form-input"
-              type="number"
-              placeholder="Weight in kg (e.g. 0.5)"
-              value={packageWeight}
-              onChange={e => setPackageWeight(e.target.value)}
-              style={{ marginBottom: 0 }}
+              type="checkbox"
+              checked={pickupEnabled}
+              onChange={e => setPickupEnabled(e.target.checked)}
+              style={{ width: '18px', height: '18px', accentColor: '#FC7038' }}
             />
-          </div>
-        )}
-      </div>
+            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
+              Pickup
+            </span>
+          </label>
+
+          {/* SHIPPING */}
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={shippingEnabled}
+              onChange={e => setShippingEnabled(e.target.checked)}
+              style={{ width: '18px', height: '18px', accentColor: '#FC7038' }}
+            />
+            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
+              Shipping
+            </span>
+          </label>
+          <p style={{ fontSize: '12px', color: '#7a7060', marginTop: '6px', marginLeft: '28px' }}>
+            Buyers can choose shipping at checkout. You'll receive a shipping label by email.
+          </p>
+
+          {shippingEnabled && (
+            <div style={{ marginTop: '14px', marginLeft: '28px' }}>
+              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
+                Package size
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '14px' }}>
+                {packageSizes.map(size => (
+                  <button
+                    key={size.value}
+                    onClick={() => setPackageSize(size.value)}
+                    style={{
+                      fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700,
+                      letterSpacing: '0.08em', textTransform: 'uppercase',
+                      padding: '10px 8px', borderRadius: '8px', cursor: 'pointer',
+                      border: packageSize === size.value ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)',
+                      background: packageSize === size.value ? '#FC7038' : '#fff',
+                      color: packageSize === size.value ? '#F5F3E6' : '#1a1408',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <div>{size.label}</div>
+                    <div style={{ fontSize: '10px', fontWeight: 400, marginTop: '2px', opacity: 0.8 }}>{size.desc}</div>
+                  </button>
+                ))}
+              </div>
+              <input
+                className="form-input"
+                type="number"
+                placeholder="Weight in kg (e.g. 0.5)"
+                value={packageWeight}
+                onChange={e => setPackageWeight(e.target.value)}
+                style={{ marginBottom: 0 }}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="form-images">
         <label className="form-label">Photos (max 5)</label>

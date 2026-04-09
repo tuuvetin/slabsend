@@ -1,5 +1,7 @@
 'use client'
 import RentalCalendar from '@/app/components/RentalCalendar'
+import FavoriteButton from '@/app/components/FavoriteButton'
+import ReviewForm from '@/app/components/ReviewForm'
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
@@ -27,6 +29,7 @@ export default function ListingPage() {
   const [order, setOrder] = useState<any>(null)
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [confirmDone, setConfirmDone] = useState(false)
+  const [buyerOrderId, setBuyerOrderId] = useState<number | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -41,7 +44,7 @@ export default function ListingPage() {
         const cached = localStorage.getItem(`order_${params.id}`)
         if (cached) {
           const parsedOrder = JSON.parse(cached)
-          if (parsedOrder.status === 'paid') setOrder(parsedOrder)
+          if (parsedOrder.status === 'paid') { setOrder(parsedOrder); setBuyerOrderId(parsedOrder.id) }
         }
       }
 
@@ -86,6 +89,7 @@ export default function ListingPage() {
             .single()
           if (orderData) {
             setOrder(orderData)
+            setBuyerOrderId(orderData.id)
             localStorage.setItem(`order_${params.id}`, JSON.stringify(orderData))
           }
         }
@@ -231,7 +235,14 @@ export default function ListingPage() {
           {images.length > 0 ? (
             <div className="listing-images-grid">
               {images.map((url, i) => (
-                <img key={i} src={url} alt={listing.title} className={`listing-image ${i === 0 ? 'listing-image-main' : ''}`} onClick={() => setLightboxIndex(i)} style={{ cursor: 'pointer' }} />
+                i === 0 ? (
+                  <div key={i} style={{ position: 'relative' }}>
+                    <img src={url} alt={listing.title} className="listing-image listing-image-main" onClick={() => setLightboxIndex(i)} style={{ cursor: 'pointer', display: 'block', width: '100%' }} />
+                    <FavoriteButton listingId={listing.id} />
+                  </div>
+                ) : (
+                  <img key={i} src={url} alt={listing.title} className="listing-image" onClick={() => setLightboxIndex(i)} style={{ cursor: 'pointer' }} />
+                )
               ))}
             </div>
           ) : (
@@ -279,6 +290,10 @@ export default function ListingPage() {
             </div>
           )}
 
+          {buyerOrderId && currentUser && listing && (
+            <ReviewForm orderId={buyerOrderId} sellerId={listing.user_id} />
+          )}
+
           {isRental && <span className="listing-rental-badge">For rent</span>}
           <h1 className="listing-detail-title">{listing.title}</h1>
           <p className="listing-detail-price">{listing.price} €{isRental ? '/day' : ''}</p>
@@ -288,6 +303,25 @@ export default function ListingPage() {
             {listing.condition && <span className="listing-meta-item listing-meta-cond">{conditionLabels[listing.condition] || listing.condition}</span>}
           </div>
           {listing.description && <p className="listing-detail-desc">{listing.description}</p>}
+
+          {/* DELIVERY OPTIONS */}
+          {(listing.pickup_enabled || listing.shipping_enabled) && (
+            <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap' }}>
+              {listing.pickup_enabled && (
+                <div className="info-tooltip-wrap" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '20px', padding: '5px 12px', color: '#1a1408', cursor: 'default' }}>
+                  📍 Pickup
+                  <div className="info-tooltip pickup-tooltip" style={{ right: 'auto', left: 0 }}>
+                    Agree on pickup location with the seller via message.
+                  </div>
+                </div>
+              )}
+              {listing.shipping_enabled && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '20px', padding: '5px 12px', color: '#1a1408' }}>
+                  📦 Shipping
+                </span>
+              )}
+            </div>
+          )}
 
           {/* MYYJÄN PROFIILI */}
           {sellerName && (

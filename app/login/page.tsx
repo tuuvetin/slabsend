@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
+  const [country, setCountry] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
   const [message, setMessage] = useState('')
   const [logoUrl, setLogoUrl] = useState<string>('')
@@ -31,6 +32,7 @@ export default function LoginPage() {
   const handleSubmit = async () => {
     if (isSignUp) {
       if (!username.trim()) { setMessage('Username is required'); return }
+      if (!country) { setMessage('Please select your country'); return }
 
       const { data: existing } = await supabase
         .from('profiles')
@@ -48,10 +50,11 @@ export default function LoginPage() {
       if (error) { setMessage(error.message); return }
 
       if (data.user) {
-        await supabase.from('profiles').upsert(
-          { user_id: data.user.id, username: username.trim().toLowerCase() },
+        const { error: profileError } = await supabase.from('profiles').upsert(
+          { user_id: data.user.id, username: username.trim().toLowerCase(), country },
           { onConflict: 'user_id' }
         )
+        if (profileError) console.error('Profile creation error:', profileError.message)
       }
       setMessage('Check your email to confirm your account!')
     } else {
@@ -88,13 +91,57 @@ export default function LoginPage() {
         </p>
 
         {isSignUp && (
-          <input
-            className="form-input"
-            type="text"
-            placeholder="Username (unique, cannot be changed later)"
-            value={username}
-            onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-          />
+          <>
+            <input
+              className="form-input"
+              type="text"
+              placeholder="Username (unique, cannot be changed later)"
+              value={username}
+              onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+            />
+            <select
+              className="form-input"
+              value={country}
+              onChange={e => setCountry(e.target.value)}
+              style={{ color: country ? '#1a1408' : '#9a9080' }}
+            >
+              <option value="">Country *</option>
+              <option value="Finland">Finland</option>
+              <option value="Sweden">Sweden</option>
+              <option value="Norway">Norway</option>
+              <option value="Denmark">Denmark</option>
+              <option value="Estonia">Estonia</option>
+              <option value="Latvia">Latvia</option>
+              <option value="Lithuania">Lithuania</option>
+              <option value="Germany">Germany</option>
+              <option value="Austria">Austria</option>
+              <option value="Switzerland">Switzerland</option>
+              <option value="France">France</option>
+              <option value="Spain">Spain</option>
+              <option value="Italy">Italy</option>
+              <option value="Netherlands">Netherlands</option>
+              <option value="Belgium">Belgium</option>
+              <option value="Poland">Poland</option>
+              <option value="Czech Republic">Czech Republic</option>
+              <option value="United Kingdom">United Kingdom</option>
+              <option value="Ireland">Ireland</option>
+              <option value="Portugal">Portugal</option>
+              <option value="Greece">Greece</option>
+              <option value="Hungary">Hungary</option>
+              <option value="Slovakia">Slovakia</option>
+              <option value="Slovenia">Slovenia</option>
+              <option value="Croatia">Croatia</option>
+              <option value="Romania">Romania</option>
+              <option value="Bulgaria">Bulgaria</option>
+              <option value="Iceland">Iceland</option>
+              <option value="United States">United States</option>
+              <option value="Canada">Canada</option>
+              <option value="Australia">Australia</option>
+              <option value="New Zealand">New Zealand</option>
+              <option value="Japan">Japan</option>
+              <option value="Other">Other</option>
+            </select>
+          </>
         )}
 
         <input
@@ -129,7 +176,7 @@ export default function LoginPage() {
 
         <button
           className="login-switch-btn"
-          onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setUsername('') }}
+          onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setUsername(''); setCountry('') }}
         >
           {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
         </button>

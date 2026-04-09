@@ -10,9 +10,11 @@ export default function ProfilePage() {
   const [usernameSet, setUsernameSet] = useState(false)
   const [fullName, setFullName] = useState('')
   const [location, setLocation] = useState('')
+  const [country, setCountry] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [message, setMessage] = useState('')
   const [listings, setListings] = useState<any[]>([])
+  const [favorites, setFavorites] = useState<any[]>([])
   const [bankName, setBankName] = useState('')
   const [bankIban, setBankIban] = useState('')
   const [bankBic, setBankBic] = useState('')
@@ -22,6 +24,12 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState('')
   const [passwordMessage, setPasswordMessage] = useState('')
   const [passwordSaving, setPasswordSaving] = useState(false)
+
+  // Profile page customization
+  const [bio, setBio] = useState('')
+  const [heroUrl, setHeroUrl] = useState('')
+  const [heroUploading, setHeroUploading] = useState(false)
+  const heroInputRef = useRef<HTMLInputElement>(null)
 
   // Crop
   const [cropSrc, setCropSrc] = useState<string | null>(null)
@@ -38,22 +46,44 @@ export default function ProfilePage() {
       if (!user) { window.location.href = '/login'; return }
       setUser(user)
 
-      supabase.from('profiles').select('*').eq('user_id', user.id).single().then(({ data }) => {
+      supabase.from('profiles').select('*').eq('user_id', user.id).single().then(async ({ data }) => {
+        // If profile is missing or username not set, restore from auth metadata
+        const metaUsername = user.user_metadata?.username || ''
+        if (!data || !data.username) {
+          if (metaUsername) {
+            await supabase.from('profiles').upsert(
+              { user_id: user.id, username: metaUsername },
+              { onConflict: 'user_id' }
+            )
+            setUsername(metaUsername)
+            setUsernameSet(true)
+          }
+        }
         if (data) {
-          setUsername(data.username || '')
-          setUsernameSet(!!data.username)
+          setUsername(data.username || metaUsername)
+          setUsernameSet(!!(data.username || metaUsername))
           setFullName(data.full_name || '')
           setLocation(data.location || '')
+          setCountry(data.country || '')
           setAvatarUrl(data.avatar_url || '')
           setBankName(data.bank_name || '')
           setBankIban(data.bank_iban || '')
           setBankBic(data.bank_bic || '')
           setBankCountry(data.bank_country || '')
+          setBio(data.bio || '')
+          setHeroUrl(data.hero_url || '')
         }
       })
 
       supabase.from('listings').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).then(({ data }) => {
         setListings(data || [])
+      })
+
+      supabase.from('favorites').select('listing_id').eq('user_id', user.id).order('created_at', { ascending: false }).then(async ({ data: favData }) => {
+        const ids = (favData || []).map((f: any) => f.listing_id)
+        if (ids.length === 0) return
+        const { data: listingData } = await supabase.from('listings').select('*').in('id', ids)
+        setFavorites(listingData || [])
       })
     })
   }, [])
@@ -81,7 +111,9 @@ export default function ProfilePage() {
         user_id: user.id,
         username: usernameSet ? username : username,
         full_name: fullName,
-        location
+        location,
+        country: country || null,
+        bio: bio.trim() || null,
       },
       { onConflict: 'user_id' }
     )
@@ -185,29 +217,50 @@ export default function ProfilePage() {
     setAvatarUploading(false)
   }
 
+  const handleHeroUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+    setHeroUploading(true)
+    const path = `avatars/${user.id}_hero.jpg`
+    const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true, contentType: file.type })
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+      const url = `${publicUrl}?t=${Date.now()}`
+      await supabase.from('profiles').upsert({ user_id: user.id, hero_url: url }, { onConflict: 'user_id' })
+      setHeroUrl(url)
+    }
+    setHeroUploading(false)
+  }
+
   if (!user) return <p className="listing-loading">Loading...</p>
 
   return (
-    <div className="profile-page">
-
-      <div className="profile-header">
-        <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => fileInputRef.current?.click()}>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="Avatar" style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(26,20,8,0.1)' }} />
-          ) : (
-            <div className="profile-avatar">
-              {(fullName || user.email || '?')[0].toUpperCase()}
-            </div>
-          )}
-          <div style={{ position: 'absolute', bottom: 0, right: 0, background: '#FC7038', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #F5F3E6', fontSize: '11px' }}>✏️</div>
+    <>
+      {/* HERO */}
+      <div className="seller-hero-wrap">
+        <div className="seller-hero">
+          {heroUrl && <img src={heroUrl} alt="Cover" className="seller-hero-img" />}
+          <div className="seller-hero-gradient" />
         </div>
-        <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileSelect} />
-
-        <div>
-          <h1 className="profile-name">{fullName || username || 'Your profile'}</h1>
-          <p className="profile-email">{user.email}</p>
+        <div className="seller-hero-av-wrap">
+          <div style={{ position: 'relative' }} onClick={() => fileInputRef.current?.click()}>
+            {avatarUrl
+              ? <img src={avatarUrl} alt="Avatar" className="seller-hero-av" style={{ cursor: 'pointer' }} />
+              : <div className="seller-hero-av-placeholder" style={{ cursor: 'pointer' }}>{(fullName || username || '?')[0].toUpperCase()}</div>
+            }
+            <div className="seller-hero-av-edit">✏️</div>
+          </div>
         </div>
       </div>
+      <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileSelect} />
+
+      <div className="profile-page" style={{ paddingTop: '72px' }}>
+
+        {/* NAME ROW */}
+        <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid rgba(26,20,8,0.1)' }}>
+          <h1 className="profile-name">{fullName || username || 'Your profile'}</h1>
+          <p className="profile-email" style={{ fontSize: '12px', color: '#b0a898' }}>{user.email} <span style={{ opacity: 0.6 }}>· only visible to you</span></p>
+        </div>
 
       {/* CROP-TYÖKALU */}
       {cropSrc && (
@@ -253,16 +306,97 @@ export default function ProfilePage() {
           </div>
 
           <input className="form-input" placeholder="Full name" value={fullName} onChange={e => setFullName(e.target.value)} />
-          <input className="form-input" placeholder="Location" value={location} onChange={e => setLocation(e.target.value)} />
+          <select
+            className="form-input"
+            value={country}
+            onChange={e => setCountry(e.target.value)}
+            style={{ color: country ? '#1a1408' : '#9a9080' }}
+          >
+            <option value="">Country</option>
+            <option value="Finland">Finland</option>
+            <option value="Sweden">Sweden</option>
+            <option value="Norway">Norway</option>
+            <option value="Denmark">Denmark</option>
+            <option value="Estonia">Estonia</option>
+            <option value="Latvia">Latvia</option>
+            <option value="Lithuania">Lithuania</option>
+            <option value="Germany">Germany</option>
+            <option value="Austria">Austria</option>
+            <option value="Switzerland">Switzerland</option>
+            <option value="France">France</option>
+            <option value="Spain">Spain</option>
+            <option value="Italy">Italy</option>
+            <option value="Netherlands">Netherlands</option>
+            <option value="Belgium">Belgium</option>
+            <option value="Poland">Poland</option>
+            <option value="Czech Republic">Czech Republic</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Ireland">Ireland</option>
+            <option value="Portugal">Portugal</option>
+            <option value="Greece">Greece</option>
+            <option value="Hungary">Hungary</option>
+            <option value="Slovakia">Slovakia</option>
+            <option value="Slovenia">Slovenia</option>
+            <option value="Croatia">Croatia</option>
+            <option value="Romania">Romania</option>
+            <option value="Bulgaria">Bulgaria</option>
+            <option value="Iceland">Iceland</option>
+            <option value="United States">United States</option>
+            <option value="Canada">Canada</option>
+            <option value="Australia">Australia</option>
+            <option value="New Zealand">New Zealand</option>
+            <option value="Japan">Japan</option>
+            <option value="Other">Other</option>
+          </select>
+          <input className="form-input" placeholder="City" value={location} onChange={e => setLocation(e.target.value)} />
+          <textarea
+            className="form-input"
+            placeholder="Bio — tell something about yourself (optional)"
+            value={bio}
+            onChange={e => setBio(e.target.value)}
+            style={{ resize: 'vertical', minHeight: '80px', fontFamily: 'Barlow', fontSize: '14px' }}
+          />
           <button className="form-submit" onClick={handleSave}>Save changes</button>
           {message && (
             <p className={`form-message ${message.startsWith('Error') ? 'error' : 'success'}`}>{message}</p>
           )}
 
+          {/* PROFILE PAGE CUSTOMIZATION */}
+          <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
+            <h2 className="profile-section-title">Profile page</h2>
+
+            {/* HERO IMAGE */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', margin: 0 }}>Cover image</p>
+              <p style={{ fontSize: '11px', color: '#b0a898', margin: 0 }}>Recommended: 1920 × 400 px</p>
+            </div>
+            <div
+              onClick={() => heroInputRef.current?.click()}
+              style={{ width: '100%', height: '110px', borderRadius: '10px', overflow: 'hidden', background: heroUrl ? 'transparent' : '#e8e0d0', border: '2px dashed rgba(26,20,8,0.15)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px', position: 'relative' }}
+            >
+              {heroUrl ? (
+                <>
+                  <img src={heroUrl} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff' }}>
+                      {heroUploading ? 'Uploading...' : 'Change cover'}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9a9080' }}>
+                  {heroUploading ? 'Uploading...' : '+ Add cover image'}
+                </span>
+              )}
+            </div>
+            <input ref={heroInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleHeroUpload} />
+            <button className="form-submit" onClick={handleSave} style={{ marginTop: '10px' }}>Save changes</button>
+          </div>
+
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
             <h2 className="profile-section-title">Bank account for payouts</h2>
             <p style={{ fontSize: '13px', color: '#7a7060', lineHeight: '1.5', marginBottom: '16px' }}>
-              When you sell an item, we'll transfer your payment to the bank account below. We support all European banks — IBAN transfers via Wise or Holvi.
+              When you sell an item, we'll transfer your payment to the bank account below. If you have any questions, email us at <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a>
             </p>
 
             <input
@@ -322,35 +456,66 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* MY LISTINGS */}
-        <div className="profile-section">
-          <h2 className="profile-section-title">My listings</h2>
-          {listings.length === 0 && <p className="profile-empty">No listings yet.</p>}
-          <div className="profile-listings">
-            {listings.map(listing => (
-              <a key={listing.id} href={`/listings/${listing.id}`} className="profile-listing-link">
-                <div className="profile-listing-card">
-                  {listing.images && listing.images.length > 0 ? (
-                    <img src={listing.images[0]} alt={listing.title} className="profile-listing-img" />
-                  ) : (
-                    <div className="profile-listing-no-img" />
-                  )}
-                  <div className="profile-listing-info">
-                    <p className="profile-listing-title">{listing.title}</p>
-                    <p className="profile-listing-meta">
-                      {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''} · {listing.location}
-                    </p>
-                    {listing.listing_type === 'rent' && (
-                      <span className="listing-rental-badge" style={{ fontSize: '10px', padding: '2px 8px' }}>For rent</span>
+        {/* RIGHT COLUMN: MY LISTINGS + SAVED ITEMS */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+
+          {/* SAVED ITEMS */}
+          <div className="profile-section">
+            <h2 className="profile-section-title">Saved items</h2>
+            {favorites.length === 0 && <p className="profile-empty">No saved items yet. Tap ★ on any listing to save it.</p>}
+            <div className="profile-listings">
+              {favorites.map((listing: any) => (
+                <a key={listing.id} href={`/listings/${listing.id}`} className="profile-listing-link">
+                  <div className="profile-listing-card">
+                    {listing.images && listing.images.length > 0 ? (
+                      <img src={listing.images[0]} alt={listing.title} className="profile-listing-img" />
+                    ) : (
+                      <div className="profile-listing-no-img" />
                     )}
+                    <div className="profile-listing-info">
+                      <p className="profile-listing-title">{listing.title}</p>
+                      <p className="profile-listing-meta">
+                        {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''}{listing.location ? ` · ${listing.location}` : ''}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </a>
-            ))}
+                </a>
+              ))}
+            </div>
           </div>
+
+          {/* MY LISTINGS */}
+          <div className="profile-section">
+            <h2 className="profile-section-title">My listings</h2>
+            {listings.length === 0 && <p className="profile-empty">No listings yet.</p>}
+            <div className="profile-listings">
+              {listings.map(listing => (
+                <a key={listing.id} href={`/listings/${listing.id}`} className="profile-listing-link">
+                  <div className="profile-listing-card">
+                    {listing.images && listing.images.length > 0 ? (
+                      <img src={listing.images[0]} alt={listing.title} className="profile-listing-img" />
+                    ) : (
+                      <div className="profile-listing-no-img" />
+                    )}
+                    <div className="profile-listing-info">
+                      <p className="profile-listing-title">{listing.title}</p>
+                      <p className="profile-listing-meta">
+                        {listing.price} €{listing.listing_type === 'rent' ? '/day' : ''} · {listing.location}
+                      </p>
+                      {listing.listing_type === 'rent' && (
+                        <span className="listing-rental-badge" style={{ fontSize: '10px', padding: '2px 8px' }}>For rent</span>
+                      )}
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
         </div>
 
       </div>
     </div>
+    </>
   )
 }

@@ -1,7 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
+import FavoriteButton from '@/app/components/FavoriteButton'
 
 interface Category {
   key: string
@@ -22,7 +23,41 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
   const [heroError, setHeroError] = useState(false)
   const [catErrors, setCatErrors] = useState<Record<string, boolean>>({})
   const [searchVal, setSearchVal] = useState('')
+  const [placeholder, setPlaceholder] = useState('Search for gear, brand or category...')
   const router = useRouter()
+
+  useEffect(() => {
+    const words = ['Scarpa..', 'Crash pads..', 'T-shirts..', 'Climbing shoes..', 'Harness..', 'La Sportiva..', 'Rent a crashpad..']
+    let wordIdx = 0
+    let charIdx = 0
+    let deleting = false
+    let timer: ReturnType<typeof setTimeout>
+
+    const tick = () => {
+      const word = words[wordIdx]
+      if (!deleting) {
+        charIdx++
+        setPlaceholder(word.slice(0, charIdx))
+        if (charIdx === word.length) {
+          deleting = true
+          timer = setTimeout(tick, 2400)
+          return
+        }
+      } else {
+        charIdx--
+        setPlaceholder(word.slice(0, charIdx))
+        if (charIdx === 0) {
+          deleting = false
+          wordIdx = (wordIdx + 1) % words.length
+        }
+      }
+      timer = setTimeout(tick, deleting ? 45 : 90)
+    }
+
+    timer = setTimeout(tick, 1200)
+    return () => clearTimeout(timer)
+  }, [])
+
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,11 +90,11 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
         <div className="home-hero-dim-full" />
         <div className="home-hero-content-full">
           <div className="home-hero-text">
-            <p className="home-hero-eyebrow">Slabsend — Pre-owned climbing gear</p>
             <h1 className="home-hero-title">Buy. Sell.<br/>Rent. Climb.</h1>
+            <p className="home-hero-eyebrow">Slabsend — Pre-owned climbing gear</p>
           </div>
           <div className="home-action-boxes">
-            <a href="/listings/new?type=sell" className="home-action-box-sm accent">
+            <a href="/listings/new" className="home-action-box-sm accent">
               <span className="home-action-arrow">↗</span>
               <div className="home-action-label-sm">Sell</div>
               <div className="home-action-desc-sm">List your gear</div>
@@ -69,10 +104,10 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               <div className="home-action-label-sm">Buy</div>
               <div className="home-action-desc-sm">Browse listings</div>
             </a>
-            <a href="/listings/new?type=rent" className="home-action-box-sm blue">
+            <a href="/listings?tab=rent" className="home-action-box-sm blue">
               <span className="home-action-arrow">↗</span>
               <div className="home-action-label-sm">Rent</div>
-              <div className="home-action-desc-sm">Rent or offer gear</div>
+              <div className="home-action-desc-sm">Browse rentals</div>
             </a>
             <a href="/service" className="home-action-box-sm">
               <span className="home-action-arrow">↗</span>
@@ -90,7 +125,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             type="text"
             value={searchVal}
             onChange={e => setSearchVal(e.target.value)}
-            placeholder="Search for gear, brand or category..."
+            placeholder={searchVal ? 'Search for gear, brand or category...' : placeholder}
             className="home-hero-search-input"
           />
           <button type="submit" className="home-hero-search-btn">
@@ -185,11 +220,14 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
           {listings.map((listing: any) => (
             <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
               <div className="listing-card">
-                {listing.images && listing.images.length > 0 ? (
-                  <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
-                ) : (
-                  <div className="listing-card-no-img">No image</div>
-                )}
+                <div style={{ position: 'relative' }}>
+                  {listing.images && listing.images.length > 0 ? (
+                    <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
+                  ) : (
+                    <div className="listing-card-no-img">No image</div>
+                  )}
+                  <FavoriteButton listingId={listing.id} />
+                </div>
                 <div className="listing-card-body">
                   <h3 className="listing-card-title">{listing.title}</h3>
                   {listing.category && (
