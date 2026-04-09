@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import NavBar from './NavBar'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata: Metadata = {
   title: 'Slabsend',
@@ -46,6 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </footer>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
