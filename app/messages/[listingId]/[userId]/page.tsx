@@ -190,10 +190,10 @@ export default function ConversationPage() {
       {/* HEADER */}
       <div className="conversation-header">
         <a href="/messages" className="conversation-back-btn">← Messages</a>
-        <div className="conversation-header-center">
+        <a href={`/sellers/${otherUserId}`} className="conversation-header-center" style={{ textDecoration: 'none' }}>
           <Avatar userId={otherUserId} size={32} />
           <span className="conversation-header-name">{otherName}</span>
-        </div>
+        </a>
         <div style={{ width: 90 }} />
       </div>
 
