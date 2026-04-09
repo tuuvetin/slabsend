@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import FavoriteButton from '@/app/components/FavoriteButton'
 
 const serviceTypes = [
   'Shoe resoling',
@@ -99,53 +100,48 @@ export default function ServicePage() {
         </div>
       )}
 
-      <div className="service-grid">
+      <div className="listings-grid">
         {filtered.map(listing => {
-          const image = listing.images?.[0]
-          const location = [listing.city, listing.country].filter(Boolean).join(', ')
           const cats = parseCategories(listing.category)
           const visibleCats = cats.slice(0, 2)
           const extraCount = cats.length - 2
+          const location = [listing.city, listing.country].filter(Boolean).join(', ')
 
           return (
-            <a key={listing.id} href={`/listings/${listing.id}`} className="service-card-link-wrap">
-              <div className="service-card service-card-dark">
-                {image && (
-                  <div className="service-card-image">
-                    <img src={image} alt={listing.title} />
-                  </div>
-                )}
-                <div className="service-card-body">
-                  <div className="service-card-header">
-                    <h3 className="service-card-name">{listing.title}</h3>
-                    {listing.price && (
-                      <span className="service-card-price">from €{listing.price}</span>
-                    )}
-                  </div>
+            <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
+              <div className="listing-card">
+                <div style={{ position: 'relative' }}>
+                  {listing.images && listing.images.length > 0 ? (
+                    <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
+                  ) : (
+                    <div className="listing-card-no-img">No image</div>
+                  )}
+                  <FavoriteButton listingId={listing.id} />
+                </div>
+                <div className="listing-card-body">
+                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#F5F3E6', background: '#1a1408', display: 'inline-block', padding: '2px 8px', borderRadius: 4, marginBottom: 6 }}>
+                    Service
+                  </p>
+                  <h3 className="listing-card-title">{listing.title}</h3>
 
                   {cats.length > 0 && (
-                    <div className="service-card-tags">
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
                       {visibleCats.map(cat => (
-                        <span key={cat} className="service-card-tag">{cat}</span>
+                        <span key={cat} className="listing-card-cat" style={{ margin: 0, background: 'rgba(26,20,8,0.06)', padding: '1px 7px', borderRadius: 20 }}>{cat}</span>
                       ))}
                       {extraCount > 0 && (
-                        <span className="service-card-tag service-card-tag-more">+{extraCount}</span>
+                        <span className="listing-card-cat" style={{ margin: 0, background: 'rgba(26,20,8,0.06)', padding: '1px 7px', borderRadius: 20 }}>+{extraCount}</span>
                       )}
                     </div>
                   )}
 
-                  {listing.description && (
-                    <p className="service-card-desc">
-                      {listing.description.length > 90 ? listing.description.substring(0, 90) + '…' : listing.description}
-                    </p>
-                  )}
-
-                  {location && (
-                    <div className="service-card-location">
-                      <span>📍</span>
-                      <span>{location}</span>
-                    </div>
-                  )}
+                  {listing.price
+                    ? <p className="listing-card-price">from {listing.price} €</p>
+                    : <p className="listing-card-price" style={{ color: '#c0b8a8' }}>Price on request</p>
+                  }
+                  <p className="listing-card-meta">
+                    {location && <span className="listing-card-loc">📍 {location}</span>}
+                  </p>
                 </div>
               </div>
             </a>

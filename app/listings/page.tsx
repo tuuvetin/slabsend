@@ -74,6 +74,9 @@ export default async function ListingsPage({
                   {listing.sold && (
                     <p style={{ fontFamily: 'Barlow Condensed', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#fff', background: '#aa2200', display: 'inline-block', padding: '2px 8px', borderRadius: 4, marginBottom: 6 }}>Sold</p>
                   )}
+                  {!listing.sold && listing.listing_type === 'rent' && (
+                    <p style={{ fontFamily: 'Barlow Condensed', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#F5F3E6', background: '#5a7a84', display: 'inline-block', padding: '2px 8px', borderRadius: 4, marginBottom: 6 }}>Rent</p>
+                  )}
                   <h3 className="listing-card-title">{listing.title}</h3>
                   {listing.category && (
                     <p className="listing-card-cat">
