@@ -104,6 +104,11 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               <div className="home-action-label-sm">Buy</div>
               <div className="home-action-desc-sm">Browse listings</div>
             </a>
+            <a href="/listings?tab=rent" className="home-action-box-sm blue">
+              <span className="home-action-arrow">↗</span>
+              <div className="home-action-label-sm">Rent</div>
+              <div className="home-action-desc-sm">Browse rentals</div>
+            </a>
             <a href="/service" className="home-action-box-sm">
               <span className="home-action-arrow">↗</span>
               <div className="home-action-label-sm">Service</div>
