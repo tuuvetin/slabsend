@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 import FavoriteButton from '@/app/components/FavoriteButton'
@@ -23,7 +23,40 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
   const [heroError, setHeroError] = useState(false)
   const [catErrors, setCatErrors] = useState<Record<string, boolean>>({})
   const [searchVal, setSearchVal] = useState('')
+  const [placeholder, setPlaceholder] = useState('Search for gear, brand or category...')
   const router = useRouter()
+
+  useEffect(() => {
+    const words = ['Scarpa', 'Crash pads', 'T-shirts', 'Climbing shoes', 'Harness', 'La Sportiva']
+    let wordIdx = 0
+    let charIdx = 0
+    let deleting = false
+    let timer: ReturnType<typeof setTimeout>
+
+    const tick = () => {
+      const word = words[wordIdx]
+      if (!deleting) {
+        charIdx++
+        setPlaceholder(word.slice(0, charIdx))
+        if (charIdx === word.length) {
+          deleting = true
+          timer = setTimeout(tick, 1800)
+          return
+        }
+      } else {
+        charIdx--
+        setPlaceholder(word.slice(0, charIdx))
+        if (charIdx === 0) {
+          deleting = false
+          wordIdx = (wordIdx + 1) % words.length
+        }
+      }
+      timer = setTimeout(tick, deleting ? 45 : 90)
+    }
+
+    timer = setTimeout(tick, 1200)
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -91,7 +124,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             type="text"
             value={searchVal}
             onChange={e => setSearchVal(e.target.value)}
-            placeholder="Search for gear, brand or category..."
+            placeholder={searchVal ? 'Search for gear, brand or category...' : placeholder}
             className="home-hero-search-input"
           />
           <button type="submit" className="home-hero-search-btn">
