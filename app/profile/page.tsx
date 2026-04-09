@@ -10,6 +10,7 @@ export default function ProfilePage() {
   const [usernameSet, setUsernameSet] = useState(false)
   const [fullName, setFullName] = useState('')
   const [location, setLocation] = useState('')
+  const [country, setCountry] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [message, setMessage] = useState('')
   const [listings, setListings] = useState<any[]>([])
@@ -54,6 +55,7 @@ export default function ProfilePage() {
           setUsernameSet(!!data.username)
           setFullName(data.full_name || '')
           setLocation(data.location || '')
+          setCountry(data.country || '')
           setAvatarUrl(data.avatar_url || '')
           setBankName(data.bank_name || '')
           setBankIban(data.bank_iban || '')
@@ -102,6 +104,7 @@ export default function ProfilePage() {
         username: usernameSet ? username : username,
         full_name: fullName,
         location,
+        country: country || null,
         bio: bio.trim() || null,
       },
       { onConflict: 'user_id' }
@@ -309,7 +312,49 @@ export default function ProfilePage() {
           </div>
 
           <input className="form-input" placeholder="Full name" value={fullName} onChange={e => setFullName(e.target.value)} />
-          <input className="form-input" placeholder="Location" value={location} onChange={e => setLocation(e.target.value)} />
+          <input className="form-input" placeholder="Location (city)" value={location} onChange={e => setLocation(e.target.value)} />
+          <select
+            className="form-input"
+            value={country}
+            onChange={e => setCountry(e.target.value)}
+            style={{ color: country ? '#1a1408' : '#9a9080' }}
+          >
+            <option value="">Country</option>
+            <option value="Finland">Finland</option>
+            <option value="Sweden">Sweden</option>
+            <option value="Norway">Norway</option>
+            <option value="Denmark">Denmark</option>
+            <option value="Estonia">Estonia</option>
+            <option value="Latvia">Latvia</option>
+            <option value="Lithuania">Lithuania</option>
+            <option value="Germany">Germany</option>
+            <option value="Austria">Austria</option>
+            <option value="Switzerland">Switzerland</option>
+            <option value="France">France</option>
+            <option value="Spain">Spain</option>
+            <option value="Italy">Italy</option>
+            <option value="Netherlands">Netherlands</option>
+            <option value="Belgium">Belgium</option>
+            <option value="Poland">Poland</option>
+            <option value="Czech Republic">Czech Republic</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Ireland">Ireland</option>
+            <option value="Portugal">Portugal</option>
+            <option value="Greece">Greece</option>
+            <option value="Hungary">Hungary</option>
+            <option value="Slovakia">Slovakia</option>
+            <option value="Slovenia">Slovenia</option>
+            <option value="Croatia">Croatia</option>
+            <option value="Romania">Romania</option>
+            <option value="Bulgaria">Bulgaria</option>
+            <option value="Iceland">Iceland</option>
+            <option value="United States">United States</option>
+            <option value="Canada">Canada</option>
+            <option value="Australia">Australia</option>
+            <option value="New Zealand">New Zealand</option>
+            <option value="Japan">Japan</option>
+            <option value="Other">Other</option>
+          </select>
           <textarea
             className="form-input"
             placeholder="Bio — tell something about yourself (optional)"

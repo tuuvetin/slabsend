@@ -72,8 +72,10 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
               {displayName}
             </h1>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
-              {profile?.location && (
-                <span style={{ fontSize: '13px', color: '#7a7060' }}>📍 {profile.location}</span>
+              {(profile?.location || profile?.country) && (
+                <span style={{ fontSize: '13px', color: '#7a7060' }}>
+                  📍 {[profile.location, profile.country].filter(Boolean).join(', ')}
+                </span>
               )}
               <span style={{ fontSize: '13px', color: '#9a9080' }}>
                 {listings?.length || 0} listing{listings?.length !== 1 ? 's' : ''}
