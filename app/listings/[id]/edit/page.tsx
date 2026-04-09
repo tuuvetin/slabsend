@@ -13,6 +13,7 @@ const categories: Record<string, string[]> = {
 }
 
 const conditions = ['New', 'Excellent', 'Good', 'Fair', 'Poor']
+const ADMINS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']
 
 const europeanCountries = [
   'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
@@ -79,8 +80,9 @@ export default function EditListingPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { window.location.href = '/login'; return }
+      const isAdmin = ADMINS.includes(user.email || '')
       supabase.from('listings').select('*').eq('id', params.id).single().then(({ data }) => {
-        if (!data || data.user_id !== user.id) { window.location.href = '/listings'; return }
+        if (!data || (!isAdmin && data.user_id !== user.id)) { window.location.href = '/listings'; return }
         setTitle(data.title || '')
         setDescription(data.description || '')
         setPrice(data.price?.toString() || '')

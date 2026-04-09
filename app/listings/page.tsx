@@ -69,6 +69,15 @@ export default async function ListingsPage({
                     <div className="listing-card-no-img">No image</div>
                   )}
                   <FavoriteButton listingId={listing.id} />
+                  {isAdmin && (
+                    <a
+                      href={`/listings/${listing.id}/edit`}
+                      onClick={e => e.stopPropagation()}
+                      style={{ position: 'absolute', top: '8px', left: '8px', background: '#1a1408', color: '#FC7038', fontFamily: 'Barlow Condensed', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', textDecoration: 'none', zIndex: 2 }}
+                    >
+                      ✏️ Edit
+                    </a>
+                  )}
                 </div>
                 <div className="listing-card-body">
                   {listing.sold && (

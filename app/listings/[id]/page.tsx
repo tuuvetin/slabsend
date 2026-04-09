@@ -30,6 +30,8 @@ export default function ListingPage() {
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [confirmDone, setConfirmDone] = useState(false)
   const [buyerOrderId, setBuyerOrderId] = useState<number | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [togglingSOLD, setTogglingSOLD] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -38,6 +40,7 @@ export default function ListingPage() {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user)
+      if (user) setIsAdmin(ADMINS.includes(user.email || ''))
 
       // localStorage tarkistetaan vain kirjautuneelle käyttäjälle
       if (user) {
@@ -130,7 +133,9 @@ export default function ListingPage() {
       }).filter(Boolean)
       if (paths.length > 0) await supabase.storage.from('listing-images').remove(paths)
     }
-    const { error } = await supabase.from('listings').delete().eq('id', listing.id).eq('user_id', currentUser.id)
+    const isAdmin = ADMINS.includes(currentUser.email || '')
+    const deleteQuery = supabase.from('listings').delete().eq('id', listing.id)
+    const { error } = isAdmin ? await deleteQuery : await deleteQuery.eq('user_id', currentUser.id)
     if (error) { alert('Error deleting listing: ' + error.message); setDeleting(false); return }
     window.location.href = '/listings'
   }
@@ -197,6 +202,14 @@ export default function ListingPage() {
     setConfirmLoading(false)
     setConfirmDone(true)
     setOrder(null)
+  }
+
+  const handleToggleSold = async () => {
+    if (!listing) return
+    setTogglingSOLD(true)
+    const { error } = await supabase.from('listings').update({ sold: !listing.sold }).eq('id', listing.id)
+    if (!error) setListing({ ...listing, sold: !listing.sold })
+    setTogglingSOLD(false)
   }
 
   if (loading) return <p className="listing-loading">Loading...</p>
@@ -466,8 +479,22 @@ export default function ListingPage() {
             </div>
           )}
 
-          {currentUser && currentUser.id === listing.user_id && (
+          {currentUser && (currentUser.id === listing.user_id || isAdmin) && (
             <div className="listing-owner-actions">
+              {isAdmin && (
+                <div style={{ background: '#1a1408', borderRadius: '8px', padding: '12px 14px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#FC7038' }}>
+                    🔑 Admin
+                  </span>
+                  <button
+                    onClick={handleToggleSold}
+                    disabled={togglingSOLD}
+                    style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: listing.sold ? '#2a6a2a' : '#aa2200', color: '#F5F3E6', border: 'none', borderRadius: '6px', padding: '6px 16px' }}
+                  >
+                    {togglingSOLD ? '...' : listing.sold ? 'Mark as available' : 'Mark as sold'}
+                  </button>
+                </div>
+              )}
               <button className="listing-edit-btn" onClick={() => window.location.href = `/listings/${listing.id}/edit`}>Edit listing</button>
               <button className="listing-delete-btn" onClick={handleDelete} disabled={deleting}>{deleting ? 'Deleting...' : 'Delete listing'}</button>
             </div>
