@@ -42,7 +42,6 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
   }
 
   const displayName = profile?.username || profile?.full_name || 'Seller'
-  const gallery: string[] = profile?.gallery_images || []
 
   return (
     <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 0 60px' }}>
@@ -96,17 +95,6 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
             )}
           </div>
         </div>
-
-        {/* GALLERY */}
-        {gallery.length > 0 && (
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '28px' }}>
-            {gallery.map((url, i) => (
-              <div key={i} style={{ flex: 1, aspectRatio: '1', borderRadius: '10px', overflow: 'hidden', background: '#e8e0d0' }}>
-                <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* LISTINGS */}
         <h2 style={{ fontFamily: 'Barlow Condensed', fontSize: '16px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '14px' }}>
