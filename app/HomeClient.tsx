@@ -27,7 +27,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
   const router = useRouter()
 
   useEffect(() => {
-    const words = ['Scarpa', 'Crash pads', 'T-shirts', 'Climbing shoes', 'Harness', 'La Sportiva']
+    const words = ['Scarpa..', 'Crash pads..', 'T-shirts..', 'Climbing shoes..', 'Harness..', 'La Sportiva..']
     let wordIdx = 0
     let charIdx = 0
     let deleting = false
