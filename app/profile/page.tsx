@@ -225,7 +225,15 @@ export default function ProfilePage() {
   return (
     <div className="profile-page">
 
-      <div className="profile-header">
+      {/* HERO PREVIEW */}
+      {heroUrl && (
+        <div style={{ width: '100%', height: '200px', position: 'relative', overflow: 'hidden', marginBottom: '0' }}>
+          <img src={heroUrl} alt="Cover" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0) 40%, rgba(0,0,0,0.4) 100%)' }} />
+        </div>
+      )}
+
+      <div className="profile-header" style={{ marginTop: heroUrl ? '-32px' : undefined, position: 'relative', zIndex: 1 }}>
         <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => fileInputRef.current?.click()}>
           {avatarUrl ? (
             <img src={avatarUrl} alt="Avatar" style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(26,20,8,0.1)' }} />
@@ -372,6 +380,7 @@ export default function ProfilePage() {
               )}
             </div>
             <input ref={heroInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleHeroUpload} />
+            <button className="form-submit" onClick={handleSave} style={{ marginTop: '10px' }}>Save changes</button>
           </div>
 
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
