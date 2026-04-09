@@ -96,6 +96,7 @@ body {
 .listing-type-btn.active.rent { background: #5a7a84; color: #F5F3E6; }
 .form-input { font-family: 'Barlow', sans-serif; display: block; width: 100%; margin-bottom: 12px; padding: 11px 14px; background: #F5F3E6; color: #1a1408; border: 1px solid rgba(26, 20, 8, 0.18); border-radius: 8px; font-size: 14px; }
 .form-input::placeholder { color: #9a9080; }
+select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px; font-family: 'Barlow', sans-serif; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
 .form-textarea { height: 110px; resize: vertical; }
 .form-images { margin-bottom: 16px; }
 .form-label { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #7a7060; margin-bottom: 8px; }
