@@ -225,9 +225,11 @@ export default function ProfilePage() {
   return (
     <>
       {/* HERO */}
-      <div className="seller-hero">
-        {heroUrl && <img src={heroUrl} alt="Cover" className="seller-hero-img" />}
-        <div className="seller-hero-gradient" />
+      <div className="seller-hero-wrap">
+        <div className="seller-hero">
+          {heroUrl && <img src={heroUrl} alt="Cover" className="seller-hero-img" />}
+          <div className="seller-hero-gradient" />
+        </div>
         <div className="seller-hero-av-wrap">
           <div style={{ position: 'relative' }} onClick={() => fileInputRef.current?.click()}>
             {avatarUrl

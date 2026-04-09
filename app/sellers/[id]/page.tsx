@@ -46,9 +46,11 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
   return (
     <>
       {/* HERO */}
-      <div className="seller-hero">
-        {profile?.hero_url && <img src={profile.hero_url} alt="" className="seller-hero-img" />}
-        <div className="seller-hero-gradient" />
+      <div className="seller-hero-wrap">
+        <div className="seller-hero">
+          {profile?.hero_url && <img src={profile.hero_url} alt="" className="seller-hero-img" />}
+          <div className="seller-hero-gradient" />
+        </div>
         <div className="seller-hero-av-wrap">
           {profile?.avatar_url
             ? <img src={profile.avatar_url} alt={displayName} className="seller-hero-av" />
