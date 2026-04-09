@@ -294,7 +294,6 @@ export default function ProfilePage() {
           </div>
 
           <input className="form-input" placeholder="Full name" value={fullName} onChange={e => setFullName(e.target.value)} />
-          <input className="form-input" placeholder="Location (city)" value={location} onChange={e => setLocation(e.target.value)} />
           <select
             className="form-input"
             value={country}
@@ -337,6 +336,7 @@ export default function ProfilePage() {
             <option value="Japan">Japan</option>
             <option value="Other">Other</option>
           </select>
+          <input className="form-input" placeholder="City" value={location} onChange={e => setLocation(e.target.value)} />
           <textarea
             className="form-input"
             placeholder="Bio — tell something about yourself (optional)"
