@@ -94,6 +94,7 @@ body {
 .listing-type-btn { font-family: 'Barlow Condensed', sans-serif; -webkit-flex: 1; flex: 1; padding: 12px; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; background: #F5F3E6; color: #9a9080; border: none; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; }
 .listing-type-btn.active { background: #FC7038; color: #F5F3E6; }
 .listing-type-btn.active.rent { background: #5a7a84; color: #F5F3E6; }
+.listing-type-btn.active.service { background: #1a1408; color: #FC7038; }
 .form-input { font-family: 'Barlow', sans-serif; display: block; width: 100%; margin-bottom: 12px; padding: 11px 14px; background: #F5F3E6; color: #1a1408; border: 1px solid rgba(26, 20, 8, 0.18); border-radius: 8px; font-size: 14px; }
 .form-input::placeholder { color: #9a9080; }
 select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px; font-family: 'Barlow', sans-serif; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
@@ -334,11 +335,24 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .service-empty { text-align: center; padding: 60px 0; color: #9a9080; }
 .service-empty p { margin-bottom: 6px; font-size: 15px; }
 .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.service-card { background: #F5F3E6; border: 1px solid rgba(26, 20, 8, 0.08); border-radius: 10px; padding: 22px; border-left: 4px solid #5a7a84; }
+.service-card-link-wrap { text-decoration: none; display: block; }
+.service-card { background: #F5F3E6; border: 1px solid rgba(26, 20, 8, 0.08); border-radius: 10px; padding: 22px; border-left: 4px solid #5a7a84; overflow: hidden; }
+.service-card-dark { background: #1a1408; border: 1px solid rgba(252, 112, 56, 0.2); border-left: 4px solid #FC7038; padding: 0; -webkit-transition: transform 0.15s, box-shadow 0.15s; transition: transform 0.15s, box-shadow 0.15s; }
+.service-card-link-wrap:hover .service-card-dark { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+.service-card-image { width: 100%; aspect-ratio: 16/9; overflow: hidden; }
+.service-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-transition: transform 0.3s; transition: transform 0.3s; }
+.service-card-link-wrap:hover .service-card-image img { transform: scale(1.04); }
+.service-card-body { padding: 18px 20px 20px; }
 .service-card-header { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; -webkit-align-items: flex-start; align-items: flex-start; margin-bottom: 10px; }
 .service-card-name { font-family: 'Barlow', sans-serif; font-size: 16px; font-weight: 600; color: #1a1408; margin-bottom: 4px; }
+.service-card-dark .service-card-name { color: #F5F3E6; }
 .service-card-type { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5a7a84; }
+.service-card-dark .service-card-type { color: #FC7038; opacity: 0.85; }
+.service-card-price { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #FC7038; white-space: nowrap; }
 .service-card-desc { font-size: 13px; color: #5a5040; line-height: 1.55; margin-bottom: 14px; }
+.service-card-dark .service-card-desc { color: rgba(245,243,230,0.6); }
+.service-card-location { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 5px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: #9a9080; margin-top: 10px; }
+.service-card-dark .service-card-location { color: rgba(245,243,230,0.5); }
 .service-card-meta { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 4px; font-size: 12px; color: #9a9080; }
 .service-card-link { font-size: 12px; color: #FC7038; text-decoration: none; }
 .service-delete-btn { font-family: 'Barlow Condensed', sans-serif; background: transparent; color: #aa2200; border: 1px solid #aa2200; padding: 4px 10px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: 4px; -webkit-transition: all 0.15s; transition: all 0.15s; }
