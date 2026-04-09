@@ -151,6 +151,15 @@ body {
 .profile-signout-btn { font-family: 'Barlow Condensed', sans-serif; width: 100%; padding: 12px; margin-top: 12px; background: transparent; color: #9a9080; border: 1px solid rgba(26, 20, 8, 0.15); border-radius: 8px; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; }
 .profile-signout-btn:hover { border-color: #aa2200; color: #aa2200; }
 .profile-empty { color: #9a9080; font-size: 14px; }
+
+/* ── SELLER / PROFILE HERO ── */
+.seller-hero { position: relative; height: 260px; background: linear-gradient(135deg, #3a5460 0%, #1a1408 100%); border-radius: 0 0 28px 28px; overflow: hidden; }
+.seller-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
+.seller-hero-gradient { position: absolute; inset: 0; background: linear-gradient(160deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.55) 100%); }
+.seller-hero-av-wrap { position: absolute; bottom: -46px; left: 36px; z-index: 2; }
+.seller-hero-av { width: 92px; height: 92px; border-radius: 50%; object-fit: cover; border: 4px solid #F5F3E6; background: #F5F3E6; display: block; }
+.seller-hero-av-placeholder { width: 92px; height: 92px; border-radius: 50%; background: #FC7038; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 700; color: #F5F3E6; border: 4px solid #F5F3E6; }
+.seller-hero-av-edit { position: absolute; bottom: 2px; right: 2px; background: #FC7038; border-radius: 50%; width: 26px; height: 26px; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; border: 2px solid #F5F3E6; font-size: 12px; cursor: pointer; }
 .profile-listings { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 12px; }
 .profile-listing-link { text-decoration: none; color: inherit; }
 .profile-listing-card { display: -webkit-flex; display: flex; gap: 14px; -webkit-align-items: center; align-items: center; background: #F5F3E6; border-radius: 8px; padding: 12px; border: 1px solid rgba(26, 20, 8, 0.08); -webkit-transition: -webkit-transform 0.15s; transition: transform 0.15s; }
@@ -542,6 +551,11 @@ body {
   .listing-detail-page { padding: 20px 16px 40px; }
   .profile-grid { grid-template-columns: 1fr; gap: 32px; }
   .profile-page { padding: 24px 16px 40px; }
+  .seller-hero { height: 190px; border-radius: 0 0 18px 18px; }
+  .seller-hero-av-wrap { bottom: -38px; left: 20px; }
+  .seller-hero-av, .seller-hero-av-placeholder { width: 76px; height: 76px; }
+  .seller-hero-av-placeholder { font-size: 28px; }
+  .seller-hero-av-edit { width: 22px; height: 22px; font-size: 10px; }
   .service-grid { grid-template-columns: 1fr; }
   .service-page { padding: 24px 16px 40px; }
   .new-listing-page { margin: 24px auto; padding: 0 16px 40px; }

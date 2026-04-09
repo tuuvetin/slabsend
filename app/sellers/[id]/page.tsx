@@ -44,56 +44,50 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
   const displayName = profile?.username || profile?.full_name || 'Seller'
 
   return (
-    <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 0 60px' }}>
-
-      {/* HERO BANNER */}
-      {profile?.hero_url ? (
-        <div style={{ width: '100%', height: '220px', position: 'relative', overflow: 'hidden', borderRadius: '0 0 12px 12px', marginBottom: '24px' }}>
-          <img src={profile.hero_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0) 40%, rgba(0,0,0,0.45) 100%)' }} />
+    <>
+      {/* HERO */}
+      <div className="seller-hero">
+        {profile?.hero_url && <img src={profile.hero_url} alt="" className="seller-hero-img" />}
+        <div className="seller-hero-gradient" />
+        <div className="seller-hero-av-wrap">
+          {profile?.avatar_url
+            ? <img src={profile.avatar_url} alt={displayName} className="seller-hero-av" />
+            : <div className="seller-hero-av-placeholder">{displayName[0].toUpperCase()}</div>
+          }
         </div>
-      ) : (
-        <div style={{ width: '100%', height: '100px', background: 'linear-gradient(135deg, #3a5460 0%, #1a1408 100%)', borderRadius: '0 0 12px 12px', marginBottom: '24px' }} />
-      )}
+      </div>
 
-      {/* PROFILE HEADER */}
-      <div style={{ padding: '0 24px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '18px', marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid rgba(26,20,8,0.1)' }}>
-          {profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt={displayName} style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #F5F3E6', flexShrink: 0, marginTop: profile?.hero_url ? '-36px' : 0, background: '#F5F3E6' }} />
-          ) : (
-            <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: '#FC7038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', fontWeight: 700, color: '#F5F3E6', fontFamily: 'Barlow Condensed', border: '3px solid #F5F3E6', flexShrink: 0, marginTop: profile?.hero_url ? '-36px' : 0 }}>
-              {displayName[0].toUpperCase()}
-            </div>
-          )}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h1 style={{ fontFamily: 'Barlow Condensed', fontSize: '26px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408', margin: '0 0 4px' }}>
-              {displayName}
-            </h1>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
-              {(profile?.location || profile?.country) && (
-                <span style={{ fontSize: '13px', color: '#7a7060' }}>
-                  📍 {[profile.location, profile.country].filter(Boolean).join(', ')}
-                </span>
-              )}
-              <span style={{ fontSize: '13px', color: '#9a9080' }}>
-                {listings?.length || 0} listing{listings?.length !== 1 ? 's' : ''}
+      {/* CONTENT */}
+      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '72px 24px 60px' }}>
+
+        {/* PROFILE INFO */}
+        <div style={{ marginBottom: '28px', paddingBottom: '24px', borderBottom: '1px solid rgba(26,20,8,0.1)' }}>
+          <h1 style={{ fontFamily: 'Barlow Condensed', fontSize: '28px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408', margin: '0 0 8px' }}>
+            {displayName}
+          </h1>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
+            {(profile?.location || profile?.country) && (
+              <span style={{ fontSize: '13px', color: '#7a7060' }}>
+                📍 {[profile.location, profile.country].filter(Boolean).join(', ')}
               </span>
-              {avgRating !== null && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <StarDisplay rating={avgRating} size={14} />
-                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', color: '#7a7060', fontWeight: 600 }}>
-                    {avgRating.toFixed(1)} ({reviews.length})
-                  </span>
+            )}
+            <span style={{ fontSize: '13px', color: '#9a9080' }}>
+              {listings?.length || 0} listing{listings?.length !== 1 ? 's' : ''}
+            </span>
+            {avgRating !== null && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <StarDisplay rating={avgRating} size={14} />
+                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', color: '#7a7060', fontWeight: 600 }}>
+                  {avgRating.toFixed(1)} ({reviews.length})
                 </span>
-              )}
-            </div>
-            {profile?.bio && (
-              <p style={{ fontSize: '14px', color: '#3a3428', lineHeight: 1.6, marginTop: '10px', marginBottom: 0 }}>
-                {profile.bio}
-              </p>
+              </span>
             )}
           </div>
+          {profile?.bio && (
+            <p style={{ fontSize: '14px', color: '#3a3428', lineHeight: 1.6, marginTop: '12px', marginBottom: 0 }}>
+              {profile.bio}
+            </p>
+          )}
         </div>
 
         {/* LISTINGS */}
@@ -193,6 +187,6 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
         )}
 
       </div>
-    </div>
+    </>
   )
 }

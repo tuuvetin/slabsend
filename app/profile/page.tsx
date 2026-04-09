@@ -10,7 +10,6 @@ export default function ProfilePage() {
   const [usernameSet, setUsernameSet] = useState(false)
   const [fullName, setFullName] = useState('')
   const [location, setLocation] = useState('')
-  const [locationSet, setLocationSet] = useState(false)
   const [country, setCountry] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [message, setMessage] = useState('')
@@ -53,7 +52,6 @@ export default function ProfilePage() {
           setUsernameSet(!!data.username)
           setFullName(data.full_name || '')
           setLocation(data.location || '')
-          setLocationSet(!!data.location)
           setCountry(data.country || '')
           setAvatarUrl(data.avatar_url || '')
           setBankName(data.bank_name || '')
@@ -225,34 +223,30 @@ export default function ProfilePage() {
   if (!user) return <p className="listing-loading">Loading...</p>
 
   return (
-    <div className="profile-page">
-
-      {/* HERO PREVIEW */}
-      {heroUrl && (
-        <div style={{ width: '100%', height: '200px', position: 'relative', overflow: 'hidden', marginBottom: '0' }}>
-          <img src={heroUrl} alt="Cover" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0) 40%, rgba(0,0,0,0.4) 100%)' }} />
+    <>
+      {/* HERO */}
+      <div className="seller-hero">
+        {heroUrl && <img src={heroUrl} alt="Cover" className="seller-hero-img" />}
+        <div className="seller-hero-gradient" />
+        <div className="seller-hero-av-wrap">
+          <div style={{ position: 'relative' }} onClick={() => fileInputRef.current?.click()}>
+            {avatarUrl
+              ? <img src={avatarUrl} alt="Avatar" className="seller-hero-av" style={{ cursor: 'pointer' }} />
+              : <div className="seller-hero-av-placeholder" style={{ cursor: 'pointer' }}>{(fullName || user.email || '?')[0].toUpperCase()}</div>
+            }
+            <div className="seller-hero-av-edit">✏️</div>
+          </div>
         </div>
-      )}
+      </div>
+      <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileSelect} />
 
-      <div className="profile-header" style={{ marginTop: heroUrl ? '-32px' : undefined, position: 'relative', zIndex: 1 }}>
-        <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => fileInputRef.current?.click()}>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="Avatar" style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(26,20,8,0.1)' }} />
-          ) : (
-            <div className="profile-avatar">
-              {(fullName || user.email || '?')[0].toUpperCase()}
-            </div>
-          )}
-          <div style={{ position: 'absolute', bottom: 0, right: 0, background: '#FC7038', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #F5F3E6', fontSize: '11px' }}>✏️</div>
-        </div>
-        <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileSelect} />
+      <div className="profile-page" style={{ paddingTop: '72px' }}>
 
-        <div>
+        {/* NAME ROW */}
+        <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid rgba(26,20,8,0.1)' }}>
           <h1 className="profile-name">{fullName || username || 'Your profile'}</h1>
           <p className="profile-email">{user.email}</p>
         </div>
-      </div>
 
       {/* CROP-TYÖKALU */}
       {cropSrc && (
@@ -298,21 +292,7 @@ export default function ProfilePage() {
           </div>
 
           <input className="form-input" placeholder="Full name" value={fullName} onChange={e => setFullName(e.target.value)} />
-          <div>
-            <input
-              className="form-input"
-              placeholder="Location (city)"
-              value={location}
-              onChange={e => !locationSet && setLocation(e.target.value)}
-              readOnly={locationSet}
-              style={{ opacity: locationSet ? 0.6 : 1, cursor: locationSet ? 'not-allowed' : 'text' }}
-            />
-            {locationSet && (
-              <p style={{ fontSize: '11px', color: '#9a9080', marginTop: '-8px', marginBottom: '12px', lineHeight: 1.5 }}>
-                If your location changes, contact <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a> and we'll make the update for you.
-              </p>
-            )}
-          </div>
+          <input className="form-input" placeholder="Location (city)" value={location} onChange={e => setLocation(e.target.value)} />
           <select
             className="form-input"
             value={country}
@@ -522,5 +502,6 @@ export default function ProfilePage() {
 
       </div>
     </div>
+    </>
   )
 }
