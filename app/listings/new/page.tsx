@@ -282,7 +282,7 @@ export default function NewListingPage() {
       />
       {listingType === 'service' && (
         <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '6px', marginTop: '4px' }}>
-          What services do you offer?
+          Free description — write whatever you want
         </p>
       )}
       <textarea className="form-input form-textarea" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
