@@ -203,8 +203,15 @@ export default function ListingPage() {
   if (!listing) return <p className="listing-loading">Listing not found.</p>
 
   const isRental = listing.listing_type === 'rent'
+  const isService = listing.listing_type === 'service'
   const images: string[] = listing.images || []
   const sellerName = sellerProfile?.username || sellerProfile?.full_name || ''
+
+  function parseCategories(raw: string | null): string[] {
+    if (!raw) return []
+    try { return JSON.parse(raw) } catch { return [raw] }
+  }
+  const serviceCategories = isService ? parseCategories(listing.category) : []
 
   return (
     <div className="listing-detail-page">
@@ -295,13 +302,48 @@ export default function ListingPage() {
           )}
 
           {isRental && <span className="listing-rental-badge">For rent</span>}
+          {isService && <span className="listing-rental-badge" style={{ background: '#1a1408', color: '#FC7038' }}>Service</span>}
           <h1 className="listing-detail-title">{listing.title}</h1>
-          <p className="listing-detail-price">{listing.price} €{isRental ? '/day' : ''}</p>
-          <div className="listing-detail-meta">
-            {listing.location && <span className="listing-meta-item">📍 {listing.location}</span>}
-            {listing.category && <span className="listing-meta-item">{listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}</span>}
-            {listing.condition && <span className="listing-meta-item listing-meta-cond">{conditionLabels[listing.condition] || listing.condition}</span>}
-          </div>
+          {listing.price
+            ? <p className="listing-detail-price">{isService ? `from ${listing.price} €` : `${listing.price} €${isRental ? '/day' : ''}`}</p>
+            : isService ? null : <p className="listing-detail-price">{listing.price} €</p>
+          }
+
+          {/* SERVICE: show categories as tags + location as address */}
+          {isService && (
+            <>
+              {serviceCategories.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '10px 0 14px' }}>
+                  {serviceCategories.map(cat => (
+                    <span key={cat} style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '20px', background: 'rgba(252,112,56,0.1)', color: '#FC7038', border: '1px solid rgba(252,112,56,0.25)' }}>
+                      {cat}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {(listing.city || listing.country) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '16px' }}>📍</span>
+                  <div>
+                    <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', margin: '0 0 2px' }}>Location</p>
+                    <p style={{ fontFamily: 'Barlow', fontSize: '14px', fontWeight: 600, color: '#1a1408', margin: 0 }}>
+                      {[listing.city, listing.country].filter(Boolean).join(', ')}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* REGULAR listing meta */}
+          {!isService && (
+            <div className="listing-detail-meta">
+              {listing.location && <span className="listing-meta-item">📍 {listing.location}</span>}
+              {listing.category && <span className="listing-meta-item">{listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}</span>}
+              {listing.condition && <span className="listing-meta-item listing-meta-cond">{conditionLabels[listing.condition] || listing.condition}</span>}
+            </div>
+          )}
+
           {listing.description && <p className="listing-detail-desc">{listing.description}</p>}
 
           {/* DELIVERY OPTIONS */}

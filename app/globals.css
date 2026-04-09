@@ -351,6 +351,9 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .service-card-price { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #FC7038; white-space: nowrap; }
 .service-card-desc { font-size: 13px; color: #5a5040; line-height: 1.55; margin-bottom: 14px; }
 .service-card-dark .service-card-desc { color: rgba(245,243,230,0.6); }
+.service-card-tags { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.service-card-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; background: rgba(252,112,56,0.15); color: #FC7038; border: 1px solid rgba(252,112,56,0.3); white-space: nowrap; }
+.service-card-tag-more { background: rgba(245,243,230,0.08); color: rgba(245,243,230,0.5); border-color: rgba(245,243,230,0.15); }
 .service-card-location { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 5px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: #9a9080; margin-top: 10px; }
 .service-card-dark .service-card-location { color: rgba(245,243,230,0.5); }
 .service-card-meta { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 4px; font-size: 12px; color: #9a9080; }

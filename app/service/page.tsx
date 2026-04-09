@@ -5,12 +5,15 @@ import { createClient } from '@/utils/supabase/client'
 const serviceTypes = [
   'Shoe resoling',
   'Gear repair',
-  'Inspection',
+  'Harness inspection',
+  'Rope inspection',
+  'Gear cleaning',
+  'Custom alterations',
   'General service',
+  'Other',
 ]
 
 const europeanCountries = [
-  'All of Europe',
   'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
   'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary',
   'Iceland', 'Ireland', 'Italy', 'Latvia', 'Liechtenstein', 'Lithuania',
@@ -18,6 +21,11 @@ const europeanCountries = [
   'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland',
   'United Kingdom',
 ]
+
+function parseCategories(raw: string | null | undefined): string[] {
+  if (!raw) return []
+  try { return JSON.parse(raw) } catch { return [raw] }
+}
 
 export default function ServicePage() {
   const [services, setServices] = useState<any[]>([])
@@ -44,7 +52,7 @@ export default function ServicePage() {
 
   useEffect(() => {
     let result = services
-    if (filterType) result = result.filter(s => s.category === filterType)
+    if (filterType) result = result.filter(s => parseCategories(s.category).includes(filterType))
     if (filterCountry) result = result.filter(s => s.country === filterCountry)
     setFiltered(result)
   }, [filterType, filterCountry, services])
@@ -76,7 +84,7 @@ export default function ServicePage() {
         </select>
         <select className="listings-select" value={filterCountry} onChange={e => setFilterCountry(e.target.value)}>
           <option value="">All countries</option>
-          {europeanCountries.filter(c => c !== 'All of Europe').map(c => (
+          {europeanCountries.map(c => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
@@ -95,6 +103,9 @@ export default function ServicePage() {
         {filtered.map(listing => {
           const image = listing.images?.[0]
           const location = [listing.city, listing.country].filter(Boolean).join(', ')
+          const cats = parseCategories(listing.category)
+          const visibleCats = cats.slice(0, 2)
+          const extraCount = cats.length - 2
 
           return (
             <a key={listing.id} href={`/listings/${listing.id}`} className="service-card-link-wrap">
@@ -106,21 +117,29 @@ export default function ServicePage() {
                 )}
                 <div className="service-card-body">
                   <div className="service-card-header">
-                    <div>
-                      <h3 className="service-card-name">{listing.title}</h3>
-                      {listing.category && (
-                        <span className="service-card-type">{listing.category}{listing.subcategory ? ` · ${listing.subcategory}` : ''}</span>
-                      )}
-                    </div>
+                    <h3 className="service-card-name">{listing.title}</h3>
                     {listing.price && (
                       <span className="service-card-price">from €{listing.price}</span>
                     )}
                   </div>
+
+                  {cats.length > 0 && (
+                    <div className="service-card-tags">
+                      {visibleCats.map(cat => (
+                        <span key={cat} className="service-card-tag">{cat}</span>
+                      ))}
+                      {extraCount > 0 && (
+                        <span className="service-card-tag service-card-tag-more">+{extraCount}</span>
+                      )}
+                    </div>
+                  )}
+
                   {listing.description && (
                     <p className="service-card-desc">
-                      {listing.description.length > 100 ? listing.description.substring(0, 100) + '…' : listing.description}
+                      {listing.description.length > 90 ? listing.description.substring(0, 90) + '…' : listing.description}
                     </p>
                   )}
+
                   {location && (
                     <div className="service-card-location">
                       <span>📍</span>

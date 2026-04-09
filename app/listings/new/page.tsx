@@ -11,12 +11,16 @@ const categories: Record<string, string[]> = {
   'Wall equipment': ['Climbing holds', 'Safety mats', 'Wall materials'],
 }
 
-const serviceCategories: Record<string, string[]> = {
-  'Shoe resoling': ['Resoling', 'Rand repair', 'Full rebuild', 'Other'],
-  'Gear repair': ['Harness repair', 'Rope inspection & retiring', 'Helmet inspection', 'Crampon sharpening', 'Other repair'],
-  'Inspection': ['Harness inspection', 'Rope inspection', 'General gear inspection'],
-  'General service': ['Gear cleaning', 'Custom alterations', 'Other service'],
-}
+const serviceTypeOptions = [
+  'Shoe resoling',
+  'Gear repair',
+  'Harness inspection',
+  'Rope inspection',
+  'Gear cleaning',
+  'Custom alterations',
+  'General service',
+  'Other',
+]
 
 const conditions = ['New', 'Excellent', 'Good', 'Fair', 'Poor']
 
@@ -75,6 +79,7 @@ export default function NewListingPage() {
   const [category, setCategory] = useState('')
   const [subcategory, setSubcategory] = useState('')
   const [condition, setCondition] = useState('')
+  const [selectedServiceTypes, setSelectedServiceTypes] = useState<string[]>([])
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [shippingEnabled, setShippingEnabled] = useState(false)
@@ -103,6 +108,13 @@ export default function NewListingPage() {
     setCategory('')
     setSubcategory('')
     setCondition('')
+    setSelectedServiceTypes([])
+  }
+
+  const toggleServiceType = (t: string) => {
+    setSelectedServiceTypes(prev =>
+      prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]
+    )
   }
 
   const handleImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,6 +175,7 @@ export default function NewListingPage() {
   const handleSubmit = async () => {
     if (!country) { setMessage('Please select a country.'); return }
     if (!city.trim()) { setMessage('Please enter a city.'); return }
+    if (listingType === 'service' && selectedServiceTypes.length === 0) { setMessage('Please select at least one service type.'); return }
     if (listingType !== 'service' && shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
@@ -182,7 +195,9 @@ export default function NewListingPage() {
       user_id: user.id, title, description,
       price: price ? parseInt(price) : null,
       location: `${city}, ${country}`,
-      country, city, category, subcategory,
+      country, city,
+      category: listingType === 'service' ? JSON.stringify(selectedServiceTypes) : category,
+      subcategory: listingType !== 'service' ? subcategory : null,
       condition: listingType !== 'service' ? condition : null,
       images: imageUrls,
       listing_type: listingType,
@@ -200,6 +215,7 @@ export default function NewListingPage() {
       setTitle(''); setDescription(''); setPrice('')
       setCountry(''); setCity('')
       setCategory(''); setSubcategory(''); setCondition('')
+      setSelectedServiceTypes([])
       setCroppedFiles([]); setCropQueue([])
       setShippingEnabled(false); setPickupEnabled(false); setPackageSize(''); setPackageWeight('')
     }
@@ -211,7 +227,7 @@ export default function NewListingPage() {
     ? 'Starting price (€) — optional'
     : 'Price (€)'
 
-  const activeCategoryMap = listingType === 'service' ? serviceCategories : categories
+  const activeCategoryMap = categories
 
   return (
     <div className="new-listing-page">
@@ -258,7 +274,17 @@ export default function NewListingPage() {
         </div>
       )}
 
-      <input className="form-input" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
+      <input
+        className="form-input"
+        placeholder={listingType === 'service' ? 'Business / company name' : 'Title'}
+        value={title}
+        onChange={e => setTitle(e.target.value)}
+      />
+      {listingType === 'service' && (
+        <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '6px', marginTop: '4px' }}>
+          What services do you offer?
+        </p>
+      )}
       <textarea className="form-input form-textarea" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
 
       <div className="price-input-row">
@@ -276,16 +302,48 @@ export default function NewListingPage() {
         <input className="form-input" placeholder="City" value={city} onChange={e => setCity(e.target.value)} style={{ marginBottom: 0 }} />
       </div>
 
-      <select className="form-input" value={category} onChange={e => { setCategory(e.target.value); setSubcategory('') }}>
-        <option value="">{listingType === 'service' ? 'Select service type' : 'Select category'}</option>
-        {Object.keys(activeCategoryMap).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-      </select>
-
-      {category && (
-        <select className="form-input" value={subcategory} onChange={e => setSubcategory(e.target.value)}>
-          <option value="">Select subcategory</option>
-          {activeCategoryMap[category]?.map(sub => <option key={sub} value={sub}>{sub}</option>)}
-        </select>
+      {listingType === 'service' ? (
+        <div style={{ marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
+            Service type (select all that apply)
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {serviceTypeOptions.map(t => {
+              const active = selectedServiceTypes.includes(t)
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => toggleServiceType(t)}
+                  style={{
+                    fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700,
+                    letterSpacing: '0.08em', textTransform: 'uppercase',
+                    padding: '8px 16px', borderRadius: '20px', cursor: 'pointer',
+                    border: active ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.18)',
+                    background: active ? '#FC7038' : '#F5F3E6',
+                    color: active ? '#F5F3E6' : '#7a7060',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {t}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ) : (
+        <>
+          <select className="form-input" value={category} onChange={e => { setCategory(e.target.value); setSubcategory('') }}>
+            <option value="">Select category</option>
+            {Object.keys(activeCategoryMap).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+          </select>
+          {category && (
+            <select className="form-input" value={subcategory} onChange={e => setSubcategory(e.target.value)}>
+              <option value="">Select subcategory</option>
+              {activeCategoryMap[category]?.map(sub => <option key={sub} value={sub}>{sub}</option>)}
+            </select>
+          )}
+        </>
       )}
 
       {listingType !== 'service' && (
