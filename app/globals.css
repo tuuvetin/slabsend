@@ -42,7 +42,7 @@ body {
 }
 .sb-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1408; text-decoration: none; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; height: 100%; }
 .sb-logo span { color: #FC7038; }
-.sb-nav-links { display: -webkit-flex; display: flex; gap: 32px; }
+.sb-nav-links { display: -webkit-flex; display: flex; gap: 32px; position: absolute; left: 50%; transform: translateX(-50%); }
 .sb-nav-link { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #7a7060; text-decoration: none; -webkit-transition: color 0.15s; transition: color 0.15s; }
 .sb-nav-link:hover { color: #1a1408; }
 .sb-nav-right { display: -webkit-flex; display: flex; gap: 10px; -webkit-align-items: center; align-items: center; }
