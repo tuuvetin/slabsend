@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
+  const [location, setLocation] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
   const [message, setMessage] = useState('')
   const [logoUrl, setLogoUrl] = useState<string>('')
@@ -31,6 +32,7 @@ export default function LoginPage() {
   const handleSubmit = async () => {
     if (isSignUp) {
       if (!username.trim()) { setMessage('Username is required'); return }
+      if (!location.trim()) { setMessage('Location is required'); return }
 
       const { data: existing } = await supabase
         .from('profiles')
@@ -49,7 +51,7 @@ export default function LoginPage() {
 
       if (data.user) {
         await supabase.from('profiles').upsert(
-          { user_id: data.user.id, username: username.trim().toLowerCase() },
+          { user_id: data.user.id, username: username.trim().toLowerCase(), location: location.trim() },
           { onConflict: 'user_id' }
         )
       }
@@ -88,13 +90,22 @@ export default function LoginPage() {
         </p>
 
         {isSignUp && (
-          <input
-            className="form-input"
-            type="text"
-            placeholder="Username (unique, cannot be changed later)"
-            value={username}
-            onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-          />
+          <>
+            <input
+              className="form-input"
+              type="text"
+              placeholder="Username (unique, cannot be changed later)"
+              value={username}
+              onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+            />
+            <input
+              className="form-input"
+              type="text"
+              placeholder="Location * (city, e.g. Helsinki)"
+              value={location}
+              onChange={e => setLocation(e.target.value)}
+            />
+          </>
         )}
 
         <input
@@ -129,7 +140,7 @@ export default function LoginPage() {
 
         <button
           className="login-switch-btn"
-          onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setUsername('') }}
+          onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setUsername(''); setLocation('') }}
         >
           {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
         </button>

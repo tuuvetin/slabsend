@@ -10,6 +10,7 @@ export default function ProfilePage() {
   const [usernameSet, setUsernameSet] = useState(false)
   const [fullName, setFullName] = useState('')
   const [location, setLocation] = useState('')
+  const [locationSet, setLocationSet] = useState(false)
   const [country, setCountry] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [message, setMessage] = useState('')
@@ -52,6 +53,7 @@ export default function ProfilePage() {
           setUsernameSet(!!data.username)
           setFullName(data.full_name || '')
           setLocation(data.location || '')
+          setLocationSet(!!data.location)
           setCountry(data.country || '')
           setAvatarUrl(data.avatar_url || '')
           setBankName(data.bank_name || '')
@@ -296,7 +298,21 @@ export default function ProfilePage() {
           </div>
 
           <input className="form-input" placeholder="Full name" value={fullName} onChange={e => setFullName(e.target.value)} />
-          <input className="form-input" placeholder="Location (city)" value={location} onChange={e => setLocation(e.target.value)} />
+          <div>
+            <input
+              className="form-input"
+              placeholder="Location (city)"
+              value={location}
+              onChange={e => !locationSet && setLocation(e.target.value)}
+              readOnly={locationSet}
+              style={{ opacity: locationSet ? 0.6 : 1, cursor: locationSet ? 'not-allowed' : 'text' }}
+            />
+            {locationSet && (
+              <p style={{ fontSize: '11px', color: '#9a9080', marginTop: '-8px', marginBottom: '12px', lineHeight: 1.5 }}>
+                If your location changes, contact <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a> and we'll make the update for you.
+              </p>
+            )}
+          </div>
           <select
             className="form-input"
             value={country}
