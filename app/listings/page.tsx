@@ -72,7 +72,6 @@ export default async function ListingsPage({
                   {isAdmin && (
                     <a
                       href={`/listings/${listing.id}/edit`}
-                      onClick={e => e.stopPropagation()}
                       style={{ position: 'absolute', top: '8px', left: '8px', background: '#1a1408', color: '#FC7038', fontFamily: 'Barlow Condensed', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', textDecoration: 'none', zIndex: 2 }}
                     >
                       ✏️ Edit
@@ -93,9 +92,12 @@ export default async function ListingsPage({
                     </p>
                   )}
                   <p className="listing-card-price">
-                    {listing.price} €{listing.listing_type === 'rent' && listing.rental_period ? `/${listing.rental_period}` : ''}
+                    {listing.listing_type === 'service'
+                      ? (listing.price ? `from ${listing.price} €` : '')
+                      : `${listing.price} €${listing.listing_type === 'rent' && listing.rental_period ? `/${listing.rental_period}` : ''}`
+                    }
                   </p>
-                  {listing.listing_type !== 'rent' && (
+                  {listing.listing_type !== 'rent' && listing.listing_type !== 'service' && listing.price && (
                     <p className="listing-card-price-total">
                       {(listing.price * 1.08).toFixed(2)} € incl. <PriceTooltipIcon />
                     </p>
