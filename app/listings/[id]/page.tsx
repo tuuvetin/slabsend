@@ -422,6 +422,10 @@ export default function ListingPage() {
                   <span>Unit price</span>
                   <span>€{listing.price}{isRental ? `/${listing.rental_period || 'day'}` : ''}</span>
                 </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>🛡️ Buyer protection</span>
+                  <span>€{(listing.price * 0.08).toFixed(2)}</span>
+                </div>
                 {listing.shipping_enabled && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
                     <span>📦 Shipping</span>
@@ -439,18 +443,26 @@ export default function ListingPage() {
                   <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a7060' }}>Total price</span>
                   <span style={{ fontFamily: 'Barlow Condensed', fontSize: '26px', fontWeight: 700, color: '#1a1408' }}>€{(listing.price * 1.08).toFixed(2)}</span>
                 </div>
-                <p style={{ fontSize: '11px', color: '#9a9080', margin: '4px 0 0', textAlign: 'right' }}>incl. buyer protection</p>
               </>
             )}
 
             {/* SERVICE total */}
             {isService && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '4px' }}>
-                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a7060' }}>Total</span>
-                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '26px', fontWeight: 700, color: '#1a1408' }}>
-                  {hasServiceSelection ? `€${(serviceTotal * 1.08).toFixed(2)}` : '—'}
-                </span>
-              </div>
+              <>
+                {hasServiceSelection && serviceTotal > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>🛡️ Buyer protection</span>
+                    <span>€{(serviceTotal * 0.08).toFixed(2)}</span>
+                  </div>
+                )}
+                <div style={{ height: '1px', background: 'rgba(26,20,8,0.1)', margin: '12px 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a7060' }}>Total</span>
+                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '26px', fontWeight: 700, color: '#1a1408' }}>
+                    {hasServiceSelection && serviceTotal > 0 ? `€${(serviceTotal * 1.08).toFixed(2)}` : '—'}
+                  </span>
+                </div>
+              </>
             )}
           </div>
 
@@ -459,32 +471,58 @@ export default function ListingPage() {
             <>
               {/* Buy now — sell */}
               {!isRental && !isService && (
-                <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ width: '100%', marginBottom: '10px' }}>
-                  {buyLoading ? 'Loading...' : 'Buy now'}
-                </button>
+                <>
+                  <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ width: '100%', marginBottom: '8px' }}>
+                    {buyLoading ? 'Loading...' : `Buy now — €${(listing.price * 1.08).toFixed(2)}`}
+                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)', marginBottom: '10px', position: 'relative' }} className="info-tooltip-wrap">
+                    <span style={{ fontSize: '14px' }}>🛡️</span>
+                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em', flex: 1 }}>
+                      Buyer protection included — €{(listing.price * 0.08).toFixed(2)}
+                    </span>
+                    <button className="info-btn">i</button>
+                    <div className="info-tooltip">
+                      Your purchase is protected. The seller receives payment only after you confirm the item is as described. If something goes wrong, contact info@slabsend.com within 48h.
+                    </div>
+                  </div>
+                </>
               )}
 
               {/* Buy now — service */}
               {isService && serviceItems.length > 0 && (
-                <button
-                  className="form-submit"
-                  disabled={buyLoading || !hasServiceSelection || serviceTotal === 0}
-                  onClick={() => {
-                    if (!hasServiceSelection || serviceTotal === 0) return
-                    setBuyLoading(true)
-                    fetch('/api/stripe/checkout', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ listingId: listing.id, amount: serviceTotal }),
-                    }).then(r => r.json()).then(d => {
-                      if (d.url) window.location.href = d.url
-                      else { alert(d.error || 'Payment error'); setBuyLoading(false) }
-                    })
-                  }}
-                  style={{ width: '100%', marginBottom: '10px', opacity: (!hasServiceSelection || serviceTotal === 0) ? 0.45 : 1 }}
-                >
-                  {buyLoading ? 'Loading...' : hasServiceSelection && serviceTotal > 0 ? 'Buy now' : 'Select services above'}
-                </button>
+                <>
+                  <button
+                    className="form-submit"
+                    disabled={buyLoading || !hasServiceSelection || serviceTotal === 0}
+                    onClick={() => {
+                      if (!hasServiceSelection || serviceTotal === 0) return
+                      setBuyLoading(true)
+                      fetch('/api/stripe/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ listingId: listing.id, amount: serviceTotal }),
+                      }).then(r => r.json()).then(d => {
+                        if (d.url) window.location.href = d.url
+                        else { alert(d.error || 'Payment error'); setBuyLoading(false) }
+                      })
+                    }}
+                    style={{ width: '100%', marginBottom: '8px', opacity: (!hasServiceSelection || serviceTotal === 0) ? 0.45 : 1 }}
+                  >
+                    {buyLoading ? 'Loading...' : hasServiceSelection && serviceTotal > 0 ? `Buy now — €${(serviceTotal * 1.08).toFixed(2)}` : 'Select services above'}
+                  </button>
+                  {hasServiceSelection && serviceTotal > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)', marginBottom: '10px', position: 'relative' }} className="info-tooltip-wrap">
+                      <span style={{ fontSize: '14px' }}>🛡️</span>
+                      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em', flex: 1 }}>
+                        Buyer protection included — €{(serviceTotal * 0.08).toFixed(2)}
+                      </span>
+                      <button className="info-btn">i</button>
+                      <div className="info-tooltip">
+                        Your purchase is protected. The seller receives payment only after you confirm the service was completed as described.
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Make an offer */}
@@ -497,14 +535,28 @@ export default function ListingPage() {
               {showOffer && (
                 <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '8px', padding: '16px', marginBottom: '10px' }}>
                   <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
-                    Your offer (asking: {listing.price} €)
+                    Your offer (asking price: {listing.price} €)
                   </p>
-                  <div style={{ display: 'flex', gap: '10px' }}>
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                     <input className="form-input" type="number" placeholder={`Max ${listing.price} €`} value={offerAmount} onChange={e => setOfferAmount(e.target.value)} style={{ marginBottom: 0 }} />
                     <button className="form-submit" onClick={handleSendOffer} disabled={offerLoading} style={{ width: 'auto', padding: '0 20px', whiteSpace: 'nowrap' }}>
-                      {offerLoading ? 'Sending...' : 'Send'}
+                      {offerLoading ? 'Sending...' : 'Send offer'}
                     </button>
                   </div>
+                  {offerAmount && !isNaN(Number(offerAmount)) && Number(offerAmount) > 0 && (
+                    <div style={{ background: '#fff', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.08)', padding: '10px 12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}>
+                        <span>Your offer</span><span>€{Number(offerAmount).toFixed(2)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}>
+                        <span>🛡️ Buyer protection</span><span>€{(Number(offerAmount) * 0.08).toFixed(2)}</span>
+                      </div>
+                      <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)', margin: '6px 0' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 700, color: '#1a1408' }}>
+                        <span>Total you pay</span><span>€{(Number(offerAmount) * 1.08).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
