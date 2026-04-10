@@ -122,10 +122,8 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .listing-detail-page { max-width: 1100px; margin: 0 auto; padding: 32px 32px 60px; }
 .listing-back { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #9a9080; text-decoration: none; -webkit-transition: color 0.15s; transition: color 0.15s; }
 .listing-back:hover { color: #FC7038; }
-.listing-detail-grid { display: grid; grid-template-columns: 1fr 420px; gap: 48px; margin-top: 28px; }
-.listing-images-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.listing-image { width: 100%; aspect-ratio: 1; -o-object-fit: cover; object-fit: cover; border-radius: 8px; display: block; }
-.listing-image-main { grid-column: 1 / -1; aspect-ratio: 4/3; }
+.listing-detail-grid { display: grid; grid-template-columns: 1fr 400px; gap: 52px; margin-top: 28px; align-items: start; }
+.listing-detail-info { position: sticky; top: 24px; }
 .listing-no-image { width: 100%; aspect-ratio: 4/3; background: #e8e6d8; border-radius: 8px; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; color: #9a9080; font-size: 14px; }
 .listing-rental-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: #5a7a84; color: #F5F3E6; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 12px; }
 .listing-detail-title { font-family: 'Barlow', sans-serif; font-size: 28px; font-weight: 600; color: #1a1408; margin-bottom: 10px; line-height: 1.2; }
@@ -568,6 +566,7 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
   .search-field-label { display: none !important; }
   .listing-detail-grid { grid-template-columns: 1fr; gap: 24px; }
   .listing-detail-page { padding: 20px 16px 40px; }
+  .listing-detail-info { position: static; }
   .profile-grid { grid-template-columns: 1fr; gap: 32px; }
   .profile-page { padding: 24px 16px 40px; }
   .seller-hero { height: 190px; border-radius: 0 0 18px 18px; }
