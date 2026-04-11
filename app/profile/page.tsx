@@ -303,7 +303,6 @@ export default function ProfilePage() {
             )}
           </div>
 
-          <input className="form-input" placeholder="Full name" value={fullName} onChange={e => setFullName(e.target.value)} />
           <select
             className="form-input"
             value={country}
