@@ -15,12 +15,8 @@ export default function ProfilePage() {
   const [message, setMessage] = useState('')
   const [listings, setListings] = useState<any[]>([])
   const [favorites, setFavorites] = useState<any[]>([])
-  const [bankName, setBankName] = useState('')
-  const [bankIban, setBankIban] = useState('')
-  const [bankBic, setBankBic] = useState('')
-  const [bankCountry, setBankCountry] = useState('')
-  const [bankMessage, setBankMessage] = useState('')
-  const [bankSaving, setBankSaving] = useState(false)
+  const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null)
+  const [stripeLoading, setStripeLoading] = useState(false)
   const [newPassword, setNewPassword] = useState('')
   const [passwordMessage, setPasswordMessage] = useState('')
   const [passwordSaving, setPasswordSaving] = useState(false)
@@ -66,13 +62,14 @@ export default function ProfilePage() {
           setLocation(data.location || '')
           setCountry(data.country || '')
           setAvatarUrl(data.avatar_url || '')
-          setBankName(data.bank_name || '')
-          setBankIban(data.bank_iban || '')
-          setBankBic(data.bank_bic || '')
-          setBankCountry(data.bank_country || '')
           setBio(data.bio || '')
           setHeroUrl(data.hero_url || '')
         }
+
+        // Check Stripe status
+        fetch('/api/stripe/status')
+          .then(r => r.json())
+          .then(({ verified }) => setStripeOnboarded(verified))
       })
 
       supabase.from('listings').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).then(({ data }) => {
@@ -133,16 +130,17 @@ export default function ProfilePage() {
     else { setPasswordMessage('Password updated!'); setNewPassword('') }
   }
 
-  const handleSaveBank = async () => {
-    if (!user) return
-    setBankSaving(true)
-    const { error } = await supabase.from('profiles').upsert(
-      { user_id: user.id, bank_name: bankName, bank_iban: bankIban.replace(/\s/g, '').toUpperCase(), bank_bic: bankBic.replace(/\s/g, '').toUpperCase(), bank_country: bankCountry },
-      { onConflict: 'user_id' }
-    )
-    setBankSaving(false)
-    if (error) setBankMessage('Error: ' + error.message)
-    else setBankMessage('Bank details saved!')
+  const handleConnectStripe = async () => {
+    setStripeLoading(true)
+    try {
+      const res = await fetch('/api/stripe/connect', { method: 'POST' })
+      const { url, error } = await res.json()
+      if (url) window.location.href = url
+      else setMessage(error || 'Something went wrong.')
+    } catch {
+      setMessage('Something went wrong.')
+    }
+    setStripeLoading(false)
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -394,43 +392,35 @@ export default function ProfilePage() {
           </div>
 
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
-            <h2 className="profile-section-title">Bank account for payouts</h2>
-            <p style={{ fontSize: '13px', color: '#7a7060', lineHeight: '1.5', marginBottom: '16px' }}>
-              When you sell an item, we'll transfer your payment to the bank account below. If you have any questions, email us at <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a>
-            </p>
-
-            <input
-              className="form-input"
-              placeholder="Full name (account holder)"
-              value={bankName}
-              onChange={e => setBankName(e.target.value)}
-            />
-            <input
-              className="form-input"
-              placeholder="IBAN (e.g. FI21 1234 5600 0007 85)"
-              value={bankIban}
-              onChange={e => setBankIban(e.target.value)}
-              style={{ fontFamily: 'monospace', letterSpacing: '0.05em' }}
-            />
-            <input
-              className="form-input"
-              placeholder="BIC / SWIFT code (e.g. OKOYFIHH)"
-              value={bankBic}
-              onChange={e => setBankBic(e.target.value)}
-              style={{ fontFamily: 'monospace', letterSpacing: '0.05em' }}
-            />
-            <input
-              className="form-input"
-              placeholder="Country (e.g. Finland)"
-              value={bankCountry}
-              onChange={e => setBankCountry(e.target.value)}
-            />
-
-            <button className="form-submit" onClick={handleSaveBank} disabled={bankSaving}>
-              {bankSaving ? 'Saving...' : 'Save bank details'}
-            </button>
-            {bankMessage && (
-              <p className={`form-message ${bankMessage.startsWith('Error') ? 'error' : 'success'}`}>{bankMessage}</p>
+            <h2 className="profile-section-title">Payments</h2>
+            {stripeOnboarded === null ? (
+              <p style={{ fontSize: '13px', color: '#9a9080' }}>Checking payment status...</p>
+            ) : stripeOnboarded ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#e6f4ea', border: '1px solid #a8d5b0', borderRadius: '8px', padding: '12px 16px', marginBottom: '12px' }}>
+                <span style={{ fontSize: '18px' }}>✅</span>
+                <div>
+                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a4a2a', margin: 0 }}>Stripe verified</p>
+                  <p style={{ fontSize: '12px', color: '#3a7a4a', margin: '2px 0 0' }}>Your account is set up to receive payments.</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p style={{ fontSize: '13px', color: '#7a7060', lineHeight: '1.5', marginBottom: '16px' }}>
+                  Connect your Stripe account to receive payments when you sell items. This is a one-time setup — you only need to do it once.
+                </p>
+                <button className="form-submit" onClick={handleConnectStripe} disabled={stripeLoading}>
+                  {stripeLoading ? 'Redirecting...' : 'Connect Stripe →'}
+                </button>
+              </>
+            )}
+            {stripeOnboarded && (
+              <button
+                onClick={handleConnectStripe}
+                disabled={stripeLoading}
+                style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#9a9080', border: '1px solid rgba(26,20,8,0.15)', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', marginTop: '8px' }}
+              >
+                {stripeLoading ? 'Redirecting...' : 'Manage Stripe account'}
+              </button>
             )}
           </div>
 
