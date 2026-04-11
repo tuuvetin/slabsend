@@ -346,13 +346,6 @@ export default function ProfilePage() {
             <option value="Other">Other</option>
           </select>
           <input className="form-input" placeholder="City" value={location} onChange={e => setLocation(e.target.value)} />
-          <textarea
-            className="form-input"
-            placeholder="Bio — tell something about yourself (optional)"
-            value={bio}
-            onChange={e => setBio(e.target.value)}
-            style={{ resize: 'vertical', minHeight: '80px', fontFamily: 'Barlow', fontSize: '14px' }}
-          />
           <button className="form-submit" onClick={handleSave}>Save changes</button>
           {message && (
             <p className={`form-message ${message.startsWith('Error') ? 'error' : 'success'}`}>{message}</p>
@@ -387,6 +380,14 @@ export default function ProfilePage() {
               )}
             </div>
             <input ref={heroInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleHeroUpload} />
+
+            <textarea
+              className="form-input"
+              placeholder="Bio — tell something about yourself (optional)"
+              value={bio}
+              onChange={e => setBio(e.target.value)}
+              style={{ resize: 'vertical', minHeight: '80px', fontFamily: 'Barlow', fontSize: '14px', marginTop: '12px' }}
+            />
             <button className="form-submit" onClick={handleSave} style={{ marginTop: '10px' }}>Save changes</button>
           </div>
 
