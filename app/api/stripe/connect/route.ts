@@ -17,41 +17,35 @@ export async function POST() {
 
   let accountId = profile?.stripe_account_id
 
-  if (!accountId) {
-    const account = await stripe.accounts.create({
-      type: 'express',
-      country: 'FI',
-      email: user.email,
-      business_type: 'individual',
-      individual: {
+  try {
+    if (!accountId) {
+      const account = await stripe.accounts.create({
+        type: 'express',
+        country: 'FI',
         email: user.email,
-      },
-      settings: {
-        payouts: {
-          schedule: {
-            interval: 'manual',
-          },
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
         },
-      },
-      capabilities: {
-        card_payments: { requested: true },
-        transfers: { requested: true },
-      },
+      })
+      accountId = account.id
+
+      await supabase.from('profiles').upsert(
+        { user_id: user.id, stripe_account_id: accountId },
+        { onConflict: 'user_id' }
+      )
+    }
+
+    const accountLink = await stripe.accountLinks.create({
+      account: accountId,
+      refresh_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/new?stripe=refresh`,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/new?stripe=success`,
+      type: 'account_onboarding',
     })
-    accountId = account.id
 
-    await supabase.from('profiles').upsert(
-      { user_id: user.id, stripe_account_id: accountId },
-      { onConflict: 'user_id' }
-    )
+    return NextResponse.json({ url: accountLink.url })
+  } catch (err: any) {
+    console.error('Stripe connect error:', err)
+    return NextResponse.json({ error: err?.message || 'Stripe error' }, { status: 500 })
   }
-
-  const accountLink = await stripe.accountLinks.create({
-    account: accountId,
-    refresh_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/new?stripe=refresh`,
-    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/new?stripe=success`,
-    type: 'account_onboarding',
-  })
-
-  return NextResponse.json({ url: accountLink.url })
 }

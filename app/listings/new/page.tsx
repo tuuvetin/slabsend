@@ -287,7 +287,7 @@ export default function NewListingPage() {
             letterSpacing: '0.06em', textTransform: 'uppercase', color: '#1a1408',
             textAlign: 'center', marginBottom: '14px',
           }}>
-            One-time payment setup required
+            One-time setup required
           </h2>
           <p style={{
             fontFamily: 'Barlow', fontSize: '14px', lineHeight: 1.6,
