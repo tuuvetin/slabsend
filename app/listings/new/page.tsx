@@ -4,6 +4,8 @@ import { createClient } from '@/utils/supabase/client'
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
+type StripeStatus = 'idle' | 'checking' | 'verified' | 'unverified'
+
 const categories: Record<string, string[]> = {
   'Clothing': ['T-Shirts', 'Hoodies', 'Pants', 'Shorts', 'Jackets', 'Other clothing'],
   'Shoes': ['Climbing shoes', 'Approach shoes', 'Mountain boots', 'Other shoes'],
@@ -86,6 +88,9 @@ export default function NewListingPage() {
   const [pickupEnabled, setPickupEnabled] = useState(false)
   const [packageSize, setPackageSize] = useState('')
   const [packageWeight, setPackageWeight] = useState('')
+  const [stripeStatus, setStripeStatus] = useState<StripeStatus>('idle')
+  const [stripeLoading, setStripeLoading] = useState(false)
+  const [stripeSuccess, setStripeSuccess] = useState(false)
 
   // Crop state
   const [cropQueue, setCropQueue] = useState<{ file: File; src: string }[]>([])
@@ -97,11 +102,42 @@ export default function NewListingPage() {
   const imgRef = useRef<HTMLImageElement>(null)
   const supabase = createClient()
 
-  // Read ?type=service from URL on mount
+  // Read URL params and check Stripe status on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('type') === 'service') setListingType('service')
+    if (params.get('stripe') === 'success') setStripeSuccess(true)
+
+    // Clean up stripe param from URL
+    if (params.has('stripe')) {
+      const clean = new URL(window.location.href)
+      clean.searchParams.delete('stripe')
+      window.history.replaceState({}, '', clean.toString())
+    }
+
+    // Check Stripe verification for logged-in users
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      setStripeStatus('checking')
+      fetch('/api/stripe/status')
+        .then(r => r.json())
+        .then(({ verified }) => setStripeStatus(verified ? 'verified' : 'unverified'))
+        .catch(() => setStripeStatus('idle'))
+    })
   }, [])
+
+  const handleSetupPayments = async () => {
+    setStripeLoading(true)
+    try {
+      const res = await fetch('/api/stripe/connect', { method: 'POST' })
+      const { url, error } = await res.json()
+      if (url) window.location.href = url
+      else setMessage(error || 'Something went wrong. Please try again.')
+    } catch {
+      setMessage('Something went wrong. Please try again.')
+    }
+    setStripeLoading(false)
+  }
 
   const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
     setListingType(type)
@@ -232,9 +268,84 @@ export default function NewListingPage() {
 
   const activeCategoryMap = categories
 
+  // Show Stripe gate for unverified logged-in users
+  if (stripeStatus === 'unverified') {
+    return (
+      <div className="new-listing-page">
+        <h1 className="new-listing-title">New listing</h1>
+        <div style={{
+          background: '#F5F3E6',
+          border: '1px solid rgba(26,20,8,0.12)',
+          borderRadius: '12px',
+          padding: '32px 28px',
+          maxWidth: '480px',
+          margin: '32px auto 0',
+        }}>
+          <div style={{ fontSize: '32px', marginBottom: '16px', textAlign: 'center' }}>🔐</div>
+          <h2 style={{
+            fontFamily: 'Barlow Condensed', fontSize: '20px', fontWeight: 700,
+            letterSpacing: '0.06em', textTransform: 'uppercase', color: '#1a1408',
+            textAlign: 'center', marginBottom: '14px',
+          }}>
+            One-time payment setup required
+          </h2>
+          <p style={{
+            fontFamily: 'Barlow', fontSize: '14px', lineHeight: 1.6,
+            color: '#3a3020', textAlign: 'center', marginBottom: '8px',
+          }}>
+            To post a listing on Slabsend, you need to verify your identity once through Stripe. This is required to receive payments securely.
+          </p>
+          <p style={{
+            fontFamily: 'Barlow', fontSize: '14px', lineHeight: 1.6,
+            color: '#7a7060', textAlign: 'center', marginBottom: '28px',
+          }}>
+            <strong style={{ color: '#1a1408' }}>You only need to do this once.</strong> After that, you can post listings freely.
+          </p>
+          <button
+            onClick={handleSetupPayments}
+            disabled={stripeLoading}
+            style={{
+              display: 'block', width: '100%',
+              fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700,
+              letterSpacing: '0.1em', textTransform: 'uppercase',
+              background: stripeLoading ? '#9a9080' : '#FC7038',
+              color: '#F5F3E6', border: 'none', borderRadius: '8px',
+              padding: '14px 24px', cursor: stripeLoading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {stripeLoading ? 'Redirecting...' : 'Set up payments with Stripe →'}
+          </button>
+          <p style={{
+            fontFamily: 'Barlow', fontSize: '12px', color: '#9a9080',
+            textAlign: 'center', marginTop: '14px',
+          }}>
+            Powered by Stripe — your data is handled securely and never stored by Slabsend.
+          </p>
+          {message && (
+            <p style={{ fontFamily: 'Barlow', fontSize: '13px', color: '#cc3300', textAlign: 'center', marginTop: '10px' }}>{message}</p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="new-listing-page">
       <h1 className="new-listing-title">New listing</h1>
+
+      {/* STRIPE SUCCESS BANNER */}
+      {stripeSuccess && (
+        <div style={{
+          background: '#e6f4ea', border: '1px solid #a8d5b0', borderRadius: '8px',
+          padding: '12px 16px', marginBottom: '16px',
+          display: 'flex', alignItems: 'center', gap: '10px',
+        }}>
+          <span style={{ fontSize: '18px' }}>✅</span>
+          <p style={{ fontFamily: 'Barlow', fontSize: '14px', color: '#1a4a2a', margin: 0 }}>
+            Payment account verified! You can now publish your listing.
+          </p>
+        </div>
+      )}
 
       {/* CROPPER MODAL */}
       {showCropper && cropQueue[cropIndex] && (
