@@ -79,10 +79,9 @@ const citiesByCountry: Record<string, string[]> = {
 }
 
 const packageSizes = [
-    { value: 'XS', label: 'XS', desc: 'Max 1kg · letter size' },
-    { value: 'S', label: 'S', desc: 'Max 5kg · small parcel' },
-    { value: 'M', label: 'M', desc: 'Max 10kg · medium parcel' },
-    { value: 'L', label: 'L', desc: 'Max 20kg · large parcel' },
+    { value: 'S', label: 'Small', desc: 'Fits in a large envelope' },
+    { value: 'M', label: 'Medium', desc: 'Fits in a shoe box' },
+    { value: 'L', label: 'Large', desc: 'Fits in a moving box' },
   ]
 
 function centerAspectCrop(width: number, height: number) {
@@ -570,15 +569,15 @@ export default function NewListingPage() {
               <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
                 Package size
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '14px' }}>
                 {packageSizes.map(size => (
                   <button
                     key={size.value}
                     onClick={() => setPackageSize(size.value)}
                     style={{
-                      fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700,
+                      fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700,
                       letterSpacing: '0.08em', textTransform: 'uppercase',
-                      padding: '10px 8px', borderRadius: '8px', cursor: 'pointer',
+                      padding: '14px 10px', borderRadius: '8px', cursor: 'pointer',
                       border: packageSize === size.value ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)',
                       background: packageSize === size.value ? '#FC7038' : '#fff',
                       color: packageSize === size.value ? '#F5F3E6' : '#1a1408',
