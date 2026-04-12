@@ -551,6 +551,7 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
   .home-hero-search-btn span { display: none; }
   .home-hero-search-btn { padding: 12px 16px; }
   .home-section { padding: 32px 16px 40px; }
+  .home-section.full-bleed .home-section-header { padding-left: 16px; padding-right: 16px; }
   .home-cat-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .home-cat-name { font-size: 15px; }
   .home-listings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
