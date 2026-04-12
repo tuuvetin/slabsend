@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { listingId, amount } = await req.json()
+  const { listingId, amount, shippingCost, shippingService } = await req.json()
 
   const { data: listing } = await supabase
     .from('listings')
@@ -20,40 +20,54 @@ export async function POST(req: Request) {
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
 
   const commissionRate = parseFloat(process.env.NEXT_PUBLIC_COMMISSION_RATE || '0.08')
-  const baseAmount = Math.round(amount * 100) // senttiä
+  const baseAmount = Math.round(amount * 100)
   const serviceFee = Math.round(baseAmount * commissionRate)
-  const totalAmount = baseAmount + serviceFee
+  const shippingCents = shippingCost ? Math.round(shippingCost * 100) : 0
+
+  const lineItems: any[] = [
+    {
+      price_data: {
+        currency: 'eur',
+        product_data: { name: listing.title },
+        unit_amount: baseAmount,
+      },
+      quantity: 1,
+    },
+    {
+      price_data: {
+        currency: 'eur',
+        product_data: { name: 'Slabsend service fee' },
+        unit_amount: serviceFee,
+      },
+      quantity: 1,
+    },
+  ]
+
+  if (shippingCents > 0) {
+    lineItems.push({
+      price_data: {
+        currency: 'eur',
+        product_data: { name: shippingService ? `Shipping — ${shippingService}` : 'Shipping' },
+        unit_amount: shippingCents,
+      },
+      quantity: 1,
+    })
+  }
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
-    line_items: [
-      {
-        price_data: {
-          currency: 'eur',
-          product_data: { name: listing.title },
-          unit_amount: baseAmount,
-        },
-        quantity: 1,
-      },
-      {
-        price_data: {
-          currency: 'eur',
-          product_data: { name: 'Slabsend service fee' },
-          unit_amount: serviceFee,
-        },
-        quantity: 1,
-      },
-    ],
+    line_items: lineItems,
     mode: 'payment',
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listingId}?payment=success`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listingId}?payment=cancelled`,
     metadata: {
-        listing_id: listingId,
-        seller_user_id: listing.user_id,
-        buyer_id: user.id,
-        base_amount: baseAmount.toString(),
-        service_fee: serviceFee.toString(),
-      },
+      listing_id: listingId,
+      seller_user_id: listing.user_id,
+      buyer_id: user.id,
+      base_amount: baseAmount.toString(),
+      service_fee: serviceFee.toString(),
+      shipping_cost: shippingCents.toString(),
+    },
   })
 
   return NextResponse.json({ url: session.url })
