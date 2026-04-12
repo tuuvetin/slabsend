@@ -165,6 +165,9 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             overflowX: 'auto',
             scrollSnapType: 'x mandatory',
             scrollbarWidth: 'none',
+            paddingLeft: '16px',
+            paddingRight: '16px',
+            scrollPaddingLeft: '16px',
           }}>
             {categories.map(cat => (
               <a key={cat.key} href={cat.href} className="home-cat-card" style={{ scrollSnapAlign: 'start' }}>
