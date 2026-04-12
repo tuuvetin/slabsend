@@ -33,6 +33,7 @@ export default function ListingPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [togglingSOLD, setTogglingSOLD] = useState(false)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [justPublished, setJustPublished] = useState(false)
   // Shipping
   const [shippingFrom, setShippingFrom] = useState<number | null>(null)
   const [showShippingModal, setShowShippingModal] = useState(false)
@@ -117,6 +118,10 @@ export default function ListingPage() {
 
       if (user) {
         const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.get('published') === 'true') {
+          setJustPublished(true)
+          window.history.replaceState({}, '', window.location.pathname)
+        }
         if (urlParams.get('payment') === 'success') {
           const { data: orderData } = await supabase
             .from('orders')
@@ -433,6 +438,19 @@ export default function ListingPage() {
       )}
 
       <a href="/listings" className="listing-back">← Back to listings</a>
+
+      {justPublished && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '10px',
+          background: '#e6f4ea', border: '1px solid #a8d5b0', borderRadius: '8px',
+          padding: '12px 16px', marginBottom: '16px',
+        }}>
+          <span style={{ fontSize: '16px' }}>🎉</span>
+          <p style={{ fontFamily: 'Barlow', fontSize: '14px', color: '#1a4a2a', margin: 0 }}>
+            Your listing is live!
+          </p>
+        </div>
+      )}
 
       <div className="listing-detail-grid">
 

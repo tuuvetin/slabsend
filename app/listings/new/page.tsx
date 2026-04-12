@@ -264,7 +264,7 @@ export default function NewListingPage() {
       }
     }
 
-    const { error } = await supabase.from('listings').insert({
+    const { data: newListing, error } = await supabase.from('listings').insert({
       user_id: user.id, title, description,
       price: listingType === 'service' ? null : (price ? parseInt(price) : null),
       location: `${city}, ${country}`,
@@ -279,12 +279,12 @@ export default function NewListingPage() {
       pickup_enabled: listingType !== 'service' ? pickupEnabled : false,
       package_size: listingType !== 'service' && shippingEnabled ? packageSize : null,
       package_weight: listingType !== 'service' && shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
-    })
+    }).select('id').single()
 
     setLoading(false)
     if (error) setMessage('Error: ' + error.message)
     else {
-      setMessage('Listing published!')
+      window.location.href = `/listings/${newListing.id}?published=true`
       setTitle(''); setDescription(''); setPrice('')
       setCountry(''); setCity('')
       setCategory(''); setSubcategory(''); setCondition('')
