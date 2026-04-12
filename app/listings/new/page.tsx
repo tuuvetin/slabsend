@@ -43,6 +43,41 @@ const europeanCountries = [
   'United Kingdom',
 ]
 
+const citiesByCountry: Record<string, string[]> = {
+  'Austria': ['Vienna','Graz','Linz','Salzburg','Innsbruck','Klagenfurt','Villach','Wels','St. Pölten','Dornbirn'],
+  'Belgium': ['Brussels','Antwerp','Ghent','Charleroi','Liège','Bruges','Namur','Leuven','Mons','Mechelen'],
+  'Bulgaria': ['Sofia','Plovdiv','Varna','Burgas','Ruse','Stara Zagora','Pleven','Sliven','Dobrich','Shumen'],
+  'Croatia': ['Zagreb','Split','Rijeka','Osijek','Zadar','Slavonski Brod','Pula','Karlovac','Varaždin','Šibenik'],
+  'Cyprus': ['Nicosia','Limassol','Larnaca','Famagusta','Paphos','Kyrenia'],
+  'Czech Republic': ['Prague','Brno','Ostrava','Plzeň','Liberec','Olomouc','Ústí nad Labem','České Budějovice','Hradec Králové','Pardubice'],
+  'Denmark': ['Copenhagen','Aarhus','Odense','Aalborg','Esbjerg','Randers','Kolding','Horsens','Vejle','Roskilde'],
+  'Estonia': ['Tallinn','Tartu','Narva','Pärnu','Kohtla-Järve','Viljandi','Rakvere','Maardu','Sillamäe','Kuressaare'],
+  'Finland': ['Helsinki','Espoo','Tampere','Vantaa','Oulu','Turku','Jyväskylä','Lahti','Kuopio','Kouvola','Pori','Joensuu','Lappeenranta','Hämeenlinna','Vaasa','Rovaniemi','Seinäjoki','Mikkeli','Kotka','Salo'],
+  'France': ['Paris','Marseille','Lyon','Toulouse','Nice','Nantes','Montpellier','Strasbourg','Bordeaux','Lille','Rennes','Reims','Le Havre','Saint-Étienne','Toulon','Grenoble','Dijon','Angers','Nîmes','Villeurbanne'],
+  'Germany': ['Berlin','Hamburg','Munich','Cologne','Frankfurt','Stuttgart','Düsseldorf','Leipzig','Dortmund','Essen','Bremen','Dresden','Hanover','Nuremberg','Duisburg','Bochum','Wuppertal','Bielefeld','Bonn','Münster'],
+  'Greece': ['Athens','Thessaloniki','Patras','Heraklion','Larissa','Volos','Rhodes','Ioannina','Chania','Chalcis'],
+  'Hungary': ['Budapest','Debrecen','Miskolc','Szeged','Pécs','Győr','Nyíregyháza','Kecskemét','Székesfehérvár','Szombathely'],
+  'Iceland': ['Reykjavik','Akureyri','Keflavik','Selfoss','Akranes','Ísafjörður'],
+  'Ireland': ['Dublin','Cork','Limerick','Galway','Waterford','Drogheda','Dundalk','Swords','Bray','Navan'],
+  'Italy': ['Rome','Milan','Naples','Turin','Palermo','Genoa','Bologna','Florence','Bari','Catania','Venice','Verona','Messina','Padua','Trieste','Taranto','Brescia','Parma','Prato','Modena'],
+  'Latvia': ['Riga','Daugavpils','Liepāja','Jelgava','Jūrmala','Ventspils','Rēzekne','Valmiera'],
+  'Liechtenstein': ['Vaduz','Schaan','Balzers','Triesen'],
+  'Lithuania': ['Vilnius','Kaunas','Klaipėda','Šiauliai','Panevėžys','Alytus','Marijampolė','Mažeikiai'],
+  'Luxembourg': ['Luxembourg City','Esch-sur-Alzette','Differdange','Dudelange','Ettelbruck'],
+  'Malta': ['Valletta','Birkirkara','Mosta','Qormi','Naxxar','Żabbar','San Ġwann','Fgura'],
+  'Netherlands': ['Amsterdam','Rotterdam','The Hague','Utrecht','Eindhoven','Tilburg','Groningen','Almere','Breda','Nijmegen','Leiden','Maastricht'],
+  'Norway': ['Oslo','Bergen','Trondheim','Stavanger','Drammen','Fredrikstad','Kristiansand','Tromsø','Sandnes','Ålesund'],
+  'Poland': ['Warsaw','Kraków','Łódź','Wrocław','Poznań','Gdańsk','Szczecin','Bydgoszcz','Lublin','Białystok','Katowice','Gdynia','Częstochowa','Radom','Toruń'],
+  'Portugal': ['Lisbon','Porto','Vila Nova de Gaia','Amadora','Braga','Coimbra','Funchal','Setúbal','Almada','Agualva-Cacém'],
+  'Romania': ['Bucharest','Cluj-Napoca','Timișoara','Iași','Constanța','Craiova','Brașov','Galați','Ploiești','Oradea'],
+  'Slovakia': ['Bratislava','Košice','Prešov','Žilina','Nitra','Banská Bystrica','Trnava','Martin','Trenčín','Poprad'],
+  'Slovenia': ['Ljubljana','Maribor','Celje','Kranj','Velenje','Koper','Novo Mesto','Ptuj'],
+  'Spain': ['Madrid','Barcelona','Valencia','Seville','Zaragoza','Málaga','Murcia','Palma','Las Palmas','Bilbao','Alicante','Córdoba','Valladolid','Vigo','Gijón','Hospitalet','Granada','Vitoria','La Coruña','Elche'],
+  'Sweden': ['Stockholm','Gothenburg','Malmö','Uppsala','Västerås','Örebro','Linköping','Helsingborg','Jönköping','Norrköping','Lund','Umeå','Gävle','Borås','Södertälje'],
+  'Switzerland': ['Zurich','Geneva','Basel','Bern','Lausanne','Winterthur','Lucerne','St. Gallen','Lugano','Biel'],
+  'United Kingdom': ['London','Birmingham','Leeds','Glasgow','Sheffield','Bradford','Edinburgh','Liverpool','Manchester','Bristol','Wakefield','Cardiff','Coventry','Nottingham','Leicester','Aberdeen','Belfast','Newcastle','Brighton','Plymouth'],
+}
+
 const packageSizes = [
     { value: 'XS', label: 'XS', desc: 'Max 1kg · letter size' },
     { value: 'S', label: 'S', desc: 'Max 5kg · small parcel' },
@@ -411,11 +446,26 @@ export default function NewListingPage() {
       )}
 
       <div className="location-row">
-        <select className="form-input" value={country} onChange={e => setCountry(e.target.value)} style={{ marginBottom: 0 }}>
+        <select className="form-input" value={country} onChange={e => { setCountry(e.target.value); setCity('') }} style={{ marginBottom: 0 }}>
           <option value="">Select country</option>
           {europeanCountries.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-        <input className="form-input" placeholder="City" value={city} onChange={e => setCity(e.target.value)} style={{ marginBottom: 0 }} />
+        <div style={{ position: 'relative', flex: 1, marginBottom: 0 }}>
+          <input
+            className="form-input"
+            placeholder="City"
+            value={city}
+            onChange={e => setCity(e.target.value)}
+            list={country ? `cities-${country}` : undefined}
+            style={{ marginBottom: 0, width: '100%' }}
+            autoComplete="off"
+          />
+          {country && citiesByCountry[country] && (
+            <datalist id={`cities-${country}`}>
+              {citiesByCountry[country].map(c => <option key={c} value={c} />)}
+            </datalist>
+          )}
+        </div>
       </div>
 
       {listingType === 'service' ? (
