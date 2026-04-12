@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { SUPPORTED_COUNTRIES } from '@/app/lib/countries'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 
@@ -106,40 +107,7 @@ export default function LoginPage() {
               style={{ color: country ? '#1a1408' : '#9a9080' }}
             >
               <option value="">Country *</option>
-              <option value="Finland">Finland</option>
-              <option value="Sweden">Sweden</option>
-              <option value="Norway">Norway</option>
-              <option value="Denmark">Denmark</option>
-              <option value="Estonia">Estonia</option>
-              <option value="Latvia">Latvia</option>
-              <option value="Lithuania">Lithuania</option>
-              <option value="Germany">Germany</option>
-              <option value="Austria">Austria</option>
-              <option value="Switzerland">Switzerland</option>
-              <option value="France">France</option>
-              <option value="Spain">Spain</option>
-              <option value="Italy">Italy</option>
-              <option value="Netherlands">Netherlands</option>
-              <option value="Belgium">Belgium</option>
-              <option value="Poland">Poland</option>
-              <option value="Czech Republic">Czech Republic</option>
-              <option value="United Kingdom">United Kingdom</option>
-              <option value="Ireland">Ireland</option>
-              <option value="Portugal">Portugal</option>
-              <option value="Greece">Greece</option>
-              <option value="Hungary">Hungary</option>
-              <option value="Slovakia">Slovakia</option>
-              <option value="Slovenia">Slovenia</option>
-              <option value="Croatia">Croatia</option>
-              <option value="Romania">Romania</option>
-              <option value="Bulgaria">Bulgaria</option>
-              <option value="Iceland">Iceland</option>
-              <option value="United States">United States</option>
-              <option value="Canada">Canada</option>
-              <option value="Australia">Australia</option>
-              <option value="New Zealand">New Zealand</option>
-              <option value="Japan">Japan</option>
-              <option value="Other">Other</option>
+              {SUPPORTED_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </>
         )}

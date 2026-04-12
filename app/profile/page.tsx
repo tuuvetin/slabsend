@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react'
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 import { createClient } from '@/utils/supabase/client'
+import { SUPPORTED_COUNTRIES } from '@/app/lib/countries'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null)
@@ -310,40 +311,7 @@ export default function ProfilePage() {
             style={{ color: country ? '#1a1408' : '#9a9080' }}
           >
             <option value="">Country</option>
-            <option value="Finland">Finland</option>
-            <option value="Sweden">Sweden</option>
-            <option value="Norway">Norway</option>
-            <option value="Denmark">Denmark</option>
-            <option value="Estonia">Estonia</option>
-            <option value="Latvia">Latvia</option>
-            <option value="Lithuania">Lithuania</option>
-            <option value="Germany">Germany</option>
-            <option value="Austria">Austria</option>
-            <option value="Switzerland">Switzerland</option>
-            <option value="France">France</option>
-            <option value="Spain">Spain</option>
-            <option value="Italy">Italy</option>
-            <option value="Netherlands">Netherlands</option>
-            <option value="Belgium">Belgium</option>
-            <option value="Poland">Poland</option>
-            <option value="Czech Republic">Czech Republic</option>
-            <option value="United Kingdom">United Kingdom</option>
-            <option value="Ireland">Ireland</option>
-            <option value="Portugal">Portugal</option>
-            <option value="Greece">Greece</option>
-            <option value="Hungary">Hungary</option>
-            <option value="Slovakia">Slovakia</option>
-            <option value="Slovenia">Slovenia</option>
-            <option value="Croatia">Croatia</option>
-            <option value="Romania">Romania</option>
-            <option value="Bulgaria">Bulgaria</option>
-            <option value="Iceland">Iceland</option>
-            <option value="United States">United States</option>
-            <option value="Canada">Canada</option>
-            <option value="Australia">Australia</option>
-            <option value="New Zealand">New Zealand</option>
-            <option value="Japan">Japan</option>
-            <option value="Other">Other</option>
+            {SUPPORTED_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <input className="form-input" placeholder="City" value={location} onChange={e => setLocation(e.target.value)} />
           <button className="form-submit" onClick={handleSave}>Save changes</button>

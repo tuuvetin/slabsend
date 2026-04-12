@@ -3,6 +3,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
+import { SUPPORTED_COUNTRIES } from '@/app/lib/countries'
 
 type StripeStatus = 'idle' | 'checking' | 'verified' | 'unverified'
 
@@ -34,14 +35,7 @@ const rentalPeriods = [
   { value: 'month', label: 'Per month' },
 ]
 
-const europeanCountries = [
-  'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
-  'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary',
-  'Iceland', 'Ireland', 'Italy', 'Latvia', 'Liechtenstein', 'Lithuania',
-  'Luxembourg', 'Malta', 'Netherlands', 'Norway', 'Poland', 'Portugal',
-  'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland',
-  'United Kingdom',
-]
+const europeanCountries = SUPPORTED_COUNTRIES
 
 const citiesByCountry: Record<string, string[]> = {
   'Austria': ['Vienna','Graz','Linz','Salzburg','Innsbruck','Klagenfurt','Villach','Wels','St. Pölten','Dornbirn'],
