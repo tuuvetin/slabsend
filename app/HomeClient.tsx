@@ -69,7 +69,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
       {/* HERO */}
       <div className="home-hero-full" style={{height: '640px', minHeight: '640px'}}>
         {!heroError && (
-          <img src={heroImageUrl} alt="Hero" className="home-hero-bg-img" onError={() => setHeroError(true)} />
+          <img src={heroImageUrl} alt="Hero" className="home-hero-bg-img" onError={() => setHeroError(true)} fetchPriority="high" loading="eager" />
         )}
         <svg className="home-topo" viewBox="0 0 1400 640" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
           <rect width="1400" height="640" fill="#3a5460"/>
