@@ -445,6 +445,9 @@ export default function NewListingPage() {
         </div>
       )}
 
+      <p style={{ fontFamily: 'Barlow', fontSize: '12px', color: '#9a9080', marginBottom: '6px' }}>
+        If your city isn't in the list, just type it in.
+      </p>
       <div className="location-row">
         <select className="form-input" value={country} onChange={e => { setCountry(e.target.value); setCity('') }} style={{ marginBottom: 0 }}>
           <option value="">Select country</option>
