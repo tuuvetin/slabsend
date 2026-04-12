@@ -24,10 +24,14 @@ export default function NavBar() {
     })
 
     const tryLogo = async () => {
+      const cached = sessionStorage.getItem('slabsend_logo')
+      if (cached) { setLogoUrl(cached); setLogoReady(true); return }
       for (const ext of ['png', 'svg', 'webp']) {
         const { data } = await supabase.storage.from('logo').list('', { search: `logo.${ext}` })
         if (data && data.length > 0) {
-          setLogoUrl(`${SUPABASE_URL}/storage/v1/object/public/logo/logo.${ext}?t=${Date.now()}`)
+          const url = `${SUPABASE_URL}/storage/v1/object/public/logo/logo.${ext}`
+          sessionStorage.setItem('slabsend_logo', url)
+          setLogoUrl(url)
           break
         }
       }

@@ -32,6 +32,13 @@ export default async function ListingsPage({
     ? await supabase.from('profiles').select('user_id, username, full_name, avatar_url').in('user_id', userIds)
     : { data: [] }
 
+  // Fetch all user favorites in one query
+  const favoriteIds = new Set<string>()
+  if (user) {
+    const { data: favs } = await supabase.from('favorites').select('listing_id').eq('user_id', user.id)
+    for (const f of favs || []) favoriteIds.add(String(f.listing_id))
+  }
+
   const profileMap: Record<string, any> = {}
   for (const p of profiles || []) profileMap[p.user_id] = p
 
@@ -68,7 +75,7 @@ export default async function ListingsPage({
                   ) : (
                     <div className="listing-card-no-img">No image</div>
                   )}
-                  <FavoriteButton listingId={listing.id} />
+                  <FavoriteButton listingId={listing.id} initialFavorited={favoriteIds.has(String(listing.id))} />
                   {isAdmin && (
                     <a
                       href={`/listings/${listing.id}/edit`}

@@ -8,7 +8,7 @@ const categories = [
   { key: 'wall', label: 'Wall equipment', subcategories: ['Climbing holds', 'Safety mats', 'Wall materials'], defaultBg: '#7a8a9a', href: '/listings?category=Wall+equipment' },
 ]
 
-export const revalidate = 0
+export const revalidate = 60
 
 export default async function Home() {
   const supabase = await createClient()

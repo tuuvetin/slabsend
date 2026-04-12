@@ -2,12 +2,14 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
-export default function FavoriteButton({ listingId }: { listingId: string }) {
-  const [isFavorited, setIsFavorited] = useState(false)
+export default function FavoriteButton({ listingId, initialFavorited }: { listingId: string; initialFavorited?: boolean }) {
+  const [isFavorited, setIsFavorited] = useState(initialFavorited ?? false)
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
+    // Only fetch if no initial value was passed (e.g. on listing detail page)
+    if (initialFavorited !== undefined) return
     const check = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
