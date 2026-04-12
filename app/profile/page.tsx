@@ -257,7 +257,7 @@ export default function ProfilePage() {
         {/* NAME ROW */}
         <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid rgba(26,20,8,0.1)' }}>
           <h1 className="profile-name">{fullName || username || 'Your profile'}</h1>
-          <p className="profile-email" style={{ fontSize: '12px', color: '#b0a898' }}>{user.email} <span style={{ opacity: 0.6 }}>· only visible to you</span></p>
+          <p className="profile-email" style={{ fontSize: '12px', color: '#b0a898' }}>{user.email} <span style={{ opacity: 0.6 }}>· used for login and notifications · not visible to other users</span></p>
         </div>
 
       {/* CROP-TYÖKALU */}
