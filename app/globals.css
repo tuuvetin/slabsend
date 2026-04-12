@@ -179,6 +179,11 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .login-subtitle { font-size: 14px; color: #9a9080; margin-bottom: 28px; line-height: 1.5; }
 .login-switch-btn { font-family: 'Barlow', sans-serif; width: 100%; padding: 12px; margin-top: 12px; background: transparent; color: #7a7060; border: none; font-size: 13px; cursor: pointer; text-decoration: underline; -webkit-transition: color 0.15s; transition: color 0.15s; }
 .login-switch-btn:hover { color: #FC7038; }
+.google-signin-btn { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; gap: 10px; width: 100%; padding: 11px 16px; background: #fff; border: 1px solid rgba(26,20,8,0.18); border-radius: 6px; font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 500; color: #1a1408; cursor: pointer; -webkit-transition: background 0.15s, border-color 0.15s; transition: background 0.15s, border-color 0.15s; margin-bottom: 4px; }
+.google-signin-btn:hover { background: #f8f6ee; border-color: rgba(26,20,8,0.3); }
+.login-divider { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 12px; margin: 16px 0 12px; color: #b0a890; font-size: 12px; }
+.login-divider::before, .login-divider::after { content: ''; -webkit-flex: 1; flex: 1; height: 1px; background: rgba(26,20,8,0.1); }
+.login-divider span { white-space: nowrap; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.1em; text-transform: uppercase; }
 
 /* ── MESSAGES PAGE ── */
 .messages-page { max-width: 700px; margin: 0 auto; padding: 40px 32px 60px; }
