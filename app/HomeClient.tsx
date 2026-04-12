@@ -144,14 +144,14 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
           <h2 className="home-section-title">Browse by category</h2>
           <a href="/listings" className="home-see-all">View all →</a>
         </div>
-        <div style={{ position: 'relative', paddingLeft: '32px', paddingRight: '32px' }}>
+        <div style={{ position: 'relative' }}>
           <button
             onClick={() => {
               const el = document.getElementById('cat-scroll')
               if (el) el.scrollBy({ left: -320, behavior: 'smooth' })
             }}
             style={{
-              position: 'absolute', left: '32px', top: '40%', transform: 'translateY(-50%)',
+              position: 'absolute', left: '4px', top: '40%', transform: 'translateY(-50%)',
               zIndex: 10, background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.15)',
               borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -203,7 +203,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               if (el) el.scrollBy({ left: 320, behavior: 'smooth' })
             }}
             style={{
-              position: 'absolute', right: '32px', top: '40%', transform: 'translateY(-50%)',
+              position: 'absolute', right: '4px', top: '40%', transform: 'translateY(-50%)',
               zIndex: 10, background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.15)',
               borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
