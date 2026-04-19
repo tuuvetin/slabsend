@@ -635,21 +635,6 @@ export default function ListingPage() {
                 </div>
               )}
 
-              {/* Rental calendar */}
-              {isRental && (
-                <RentalCalendar
-                  listingId={listing.id}
-                  pricePerDay={listing.price}
-                  rentalPeriod={listing.rental_period || 'day'}
-                  isOwner={currentUser?.id === listing.user_id}
-                  currentUserId={currentUser?.id}
-                  weeklyDiscountPct={listing.weekly_discount_pct || 0}
-                  monthlyDiscountPct={listing.monthly_discount_pct || 0}
-                  pickupHoursFrom={listing.pickup_hours_from || '09:00'}
-                  pickupHoursTo={listing.pickup_hours_to || '20:00'}
-                />
-              )}
-
               {/* Contact */}
               <div style={{ marginTop: '4px' }}>
                 {messageSent && <p className={`form-message ${messageSent.startsWith('Error') ? 'error' : 'success'}`} style={{ marginBottom: '8px' }}>{messageSent}</p>}
@@ -663,6 +648,21 @@ export default function ListingPage() {
 
           {!currentUser && !listing.sold && (
             <a href="/login" className="form-submit" style={{ display: 'block', textAlign: 'center', marginBottom: '10px' }}>Sign in to buy or contact seller</a>
+          )}
+
+          {/* Rental calendar — visible to both owner (toggle availability) and renters */}
+          {isRental && currentUser && (
+            <RentalCalendar
+              listingId={listing.id}
+              pricePerDay={listing.price}
+              rentalPeriod={listing.rental_period || 'day'}
+              isOwner={currentUser.id === listing.user_id}
+              currentUserId={currentUser.id}
+              weeklyDiscountPct={listing.weekly_discount_pct || 0}
+              monthlyDiscountPct={listing.monthly_discount_pct || 0}
+              pickupHoursFrom={listing.pickup_hours_from || '09:00'}
+              pickupHoursTo={listing.pickup_hours_to || '20:00'}
+            />
           )}
 
           {/* Owner / Admin actions */}
