@@ -472,7 +472,7 @@ export default function ListingPage() {
                   <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>Order breakdown</p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
                     <span>Unit price</span>
-                    <span>€{listing.price}{isRental ? `/${listing.rental_period || 'day'}` : ''}</span>
+                    <span>€{listing.price}{isRental ? '/day' : ''}</span>
                   </div>
                   {isRental && (listing.weekly_discount_pct > 0 || listing.monthly_discount_pct > 0) && (
                     <div style={{ fontSize: '12px', color: '#2a6a2a', marginBottom: '8px', background: '#f0f7f0', borderRadius: '6px', padding: '6px 10px' }}>

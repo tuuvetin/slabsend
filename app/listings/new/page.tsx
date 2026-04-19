@@ -27,13 +27,6 @@ const serviceTypeOptions = [
 
 const conditions = ['New', 'Excellent', 'Good', 'Fair', 'Poor']
 
-const rentalPeriods = [
-  { value: 'hour', label: 'Per hour' },
-  { value: 'day', label: 'Per day' },
-  { value: 'week', label: 'Per week' },
-  { value: 'weekend', label: 'Per weekend' },
-  { value: 'month', label: 'Per month' },
-]
 
 const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']
 
@@ -105,7 +98,6 @@ export default function NewListingPage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
-  const [rentalPeriod, setRentalPeriod] = useState('day')
   const [country, setCountry] = useState('Finland')
   const [city, setCity] = useState('')
   const [category, setCategory] = useState('')
@@ -285,7 +277,7 @@ export default function NewListingPage() {
       condition: listingType !== 'service' ? condition : null,
       images: imageUrls,
       listing_type: listingType,
-      rental_period: listingType === 'rent' ? rentalPeriod : null,
+      rental_period: listingType === 'rent' ? 'day' : null,
       shipping_enabled: listingType === 'sell' ? shippingEnabled : false,
       pickup_enabled: listingType === 'rent' ? true : (listingType !== 'service' ? pickupEnabled : false),
       package_size: listingType !== 'service' && shippingEnabled ? packageSize : null,
@@ -314,7 +306,7 @@ export default function NewListingPage() {
   }
 
   const priceLabel = listingType === 'rent'
-    ? rentalPeriods.find(p => p.value === rentalPeriod)?.label || 'Per day'
+    ? 'Price per day (€)'
     : listingType === 'service'
     ? 'Starting price (€) — optional'
     : 'Price (€)'
@@ -429,19 +421,6 @@ export default function NewListingPage() {
       </div>
 
       {listingType === 'rent' && (
-        <div className="rental-period-section">
-          <label className="form-label">Rental period</label>
-          <div className="rental-period-grid">
-            {rentalPeriods.map(period => (
-              <button key={period.value} className={`rental-period-btn ${rentalPeriod === period.value ? 'active' : ''}`} onClick={() => setRentalPeriod(period.value)}>
-                {period.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {listingType === 'rent' && (
         <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '12px' }}>
           <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
             Long-term discounts (optional)
@@ -505,7 +484,7 @@ export default function NewListingPage() {
         <div className="price-input-row">
           <input className="form-input" placeholder={priceLabel} value={price} onChange={e => setPrice(e.target.value)} type="number" style={{ marginBottom: 0 }} />
           {listingType === 'rent' && (
-            <span className="price-period-label">€ / {rentalPeriods.find(p => p.value === rentalPeriod)?.label.replace('Per ', '') || 'day'}</span>
+            <span className="price-period-label">€ / day</span>
           )}
         </div>
       )}
