@@ -40,12 +40,15 @@ export async function POST(req: Request) {
     // Merkitään ilmoitus myydyksi
     await supabaseAdmin.from('listings').update({ sold: true }).eq('id', listingId)
 
-    // Lasketaan summat
-    const totalAmount = (session.amount_total || 0) / 100
-    const baseAmount = parseFloat((session.metadata?.base_amount
-      ? parseInt(session.metadata.base_amount) / 100
-      : totalAmount / 1.08).toFixed(2))
-    const serviceFee = parseFloat((totalAmount - baseAmount).toFixed(2))
+    // Lasketaan summat (senttiinä)
+    const totalCents = session.amount_total || 0
+    const itemPriceCents = session.metadata?.base_amount ? parseInt(session.metadata.base_amount) : 0
+    const shippingCostCents = session.metadata?.shipping_cost ? parseInt(session.metadata.shipping_cost) : 0
+    const serviceFeeCents = session.metadata?.service_fee ? parseInt(session.metadata.service_fee) : 0
+    // Backwards compat
+    const totalAmount = totalCents / 100
+    const baseAmount = parseFloat((itemPriceCents / 100).toFixed(2))
+    const serviceFee = parseFloat((serviceFeeCents / 100).toFixed(2))
 
     // 48h auto-confirm
     const autoConfirmAt = new Date()
@@ -54,7 +57,34 @@ export async function POST(req: Request) {
     // Luodaan tilausnumero
     const orderNumber = generateOrderNumber()
 
+    // Ostajan osoite Stripe-sessiosta
+    const shippingDetails = session.shipping_details || session.customer_details
+    const buyerAddress = shippingDetails?.address || {}
+    const buyerPhone = session.customer_details?.phone || ''
+    const buyerCountry = (buyerAddress as any).country || session.metadata?.buyer_country || ''
+
+    // Haetaan ostajan profiiliosoite jos ei tule Stripestä
+    let buyerAddressStreet = (buyerAddress as any).line1 || ''
+    let buyerAddressPostcode = (buyerAddress as any).postal_code || ''
+    let buyerAddressCity = (buyerAddress as any).city || ''
+    let buyerPhoneFinal = buyerPhone
+
+    if (buyerId && (!buyerAddressStreet || !buyerPhoneFinal)) {
+      const { data: buyerProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('address_street, address_postcode, address_city, phone')
+        .eq('user_id', buyerId)
+        .maybeSingle()
+      if (buyerProfile) {
+        buyerAddressStreet = buyerAddressStreet || buyerProfile.address_street || ''
+        buyerAddressPostcode = buyerAddressPostcode || buyerProfile.address_postcode || ''
+        buyerAddressCity = buyerAddressCity || buyerProfile.address_city || ''
+        buyerPhoneFinal = buyerPhoneFinal || buyerProfile.phone || ''
+      }
+    }
+
     // Luodaan order
+    const orderNumber2 = orderNumber
     await supabaseAdmin.from('orders').insert({
       listing_id: parseInt(listingId),
       buyer_id: buyerId || null,
@@ -64,7 +94,19 @@ export async function POST(req: Request) {
       status: 'paid',
       stripe_session_id: session.id,
       auto_confirm_at: autoConfirmAt.toISOString(),
-      order_number: orderNumber,
+      order_number: orderNumber2,
+      // Uudet kentät
+      item_price_cents: itemPriceCents,
+      shipping_cost_cents: shippingCostCents,
+      service_fee_cents: serviceFeeCents,
+      total_cents: totalCents,
+      shipping_zone: session.metadata?.shipping_zone || null,
+      buyer_address_street: buyerAddressStreet,
+      buyer_address_postcode: buyerAddressPostcode,
+      buyer_address_city: buyerAddressCity,
+      buyer_country: buyerCountry,
+      buyer_phone: buyerPhoneFinal,
+      buyer_email: buyerEmail,
     })
 
     // Haetaan ilmoituksen tiedot

@@ -104,7 +104,7 @@ export default function NewListingPage() {
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [rentalPeriod, setRentalPeriod] = useState('day')
-  const [country, setCountry] = useState('')
+  const [country, setCountry] = useState('Finland')
   const [city, setCity] = useState('')
   const [category, setCategory] = useState('')
   const [subcategory, setSubcategory] = useState('')
@@ -239,14 +239,22 @@ export default function NewListingPage() {
   }
 
   const handleSubmit = async () => {
-    if (!country) { setMessage('Please select a country.'); return }
     if (!city.trim()) { setMessage('Please enter a city.'); return }
     const serviceItems = Object.entries(servicePrices).map(([name, p]) => ({ name, price: parseFloat(p) || 0 }))
     if (listingType === 'service' && serviceItems.length === 0) { setMessage('Please select at least one service type.'); return }
     if (listingType !== 'service' && shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
+    if (listingType !== 'service' && shippingEnabled && !packageWeight) { setMessage('Syötä paketin paino (kg).'); return }
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { window.location.href = '/login'; return }
+
+    // Tarkista että profiilissa on osoitetiedot
+    const { data: profile } = await supabase.from('profiles').select('address_street, address_postcode, address_city, phone').eq('user_id', user.id).single()
+    if (!profile?.address_street || !profile?.address_postcode || !profile?.address_city || !profile?.phone) {
+      setMessage('Täytä ensin kotiosoitteesi profiilisivulla ennen ilmoituksen julkaisua.')
+      setLoading(false)
+      return
+    }
 
     const imageUrls: string[] = []
     for (const image of croppedFiles) {
@@ -273,6 +281,8 @@ export default function NewListingPage() {
       pickup_enabled: listingType !== 'service' ? pickupEnabled : false,
       package_size: listingType !== 'service' && shippingEnabled ? packageSize : null,
       package_weight: listingType !== 'service' && shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
+      weight_kg: listingType !== 'service' && shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
+      shipping_from_country: 'FI',
     }).select('id').single()
 
     setLoading(false)
@@ -442,10 +452,9 @@ export default function NewListingPage() {
         If your city isn't in the list, just type it in.
       </p>
       <div className="location-row">
-        <select className="form-input" value={country} onChange={e => { setCountry(e.target.value); setCity('') }} style={{ marginBottom: 0 }}>
-          <option value="">Select country</option>
-          {europeanCountries.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        <div className="form-input" style={{ marginBottom: 0, background: '#f0ede3', color: '#7a7060', display: 'flex', alignItems: 'center', cursor: 'not-allowed' }}>
+          🇫🇮 Finland
+        </div>
         <div style={{ position: 'relative', flex: 1, marginBottom: 0 }}>
           <input
             className="form-input"
@@ -613,7 +622,7 @@ export default function NewListingPage() {
       </button>
 
       {message && (
-        <p className={`form-message ${message.startsWith('Error') || message.startsWith('Please') ? 'error' : 'success'}`}>
+        <p className={`form-message ${message.startsWith('Error') || message.startsWith('Please') || message.startsWith('Täytä') || message.startsWith('Syötä') ? 'error' : 'success'}`}>
           {message}
         </p>
       )}

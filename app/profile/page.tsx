@@ -12,6 +12,10 @@ export default function ProfilePage() {
   const [fullName, setFullName] = useState('')
   const [location, setLocation] = useState('')
   const [country, setCountry] = useState('')
+  const [addressStreet, setAddressStreet] = useState('')
+  const [addressPostcode, setAddressPostcode] = useState('')
+  const [addressCity, setAddressCity] = useState('')
+  const [phone, setPhone] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [message, setMessage] = useState('')
   const [listings, setListings] = useState<any[]>([])
@@ -65,6 +69,10 @@ export default function ProfilePage() {
           setAvatarUrl(data.avatar_url || '')
           setBio(data.bio || '')
           setHeroUrl(data.hero_url || '')
+          setAddressStreet(data.address_street || '')
+          setAddressPostcode(data.address_postcode || '')
+          setAddressCity(data.address_city || '')
+          setPhone(data.phone || '')
         }
 
         // Check Stripe status
@@ -112,6 +120,11 @@ export default function ProfilePage() {
         location,
         country: country || null,
         bio: bio.trim() || null,
+        address_street: addressStreet.trim() || null,
+        address_postcode: addressPostcode.trim() || null,
+        address_city: addressCity.trim() || null,
+        address_country: 'FI',
+        phone: phone.trim() || null,
       },
       { onConflict: 'user_id' }
     )
@@ -357,6 +370,26 @@ export default function ProfilePage() {
               style={{ resize: 'vertical', minHeight: '80px', fontFamily: 'Barlow', fontSize: '14px', marginTop: '12px' }}
             />
             <button className="form-submit" onClick={handleSave} style={{ marginTop: '10px' }}>Save changes</button>
+          </div>
+
+          <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
+            <h2 className="profile-section-title">Shipping address</h2>
+            <p style={{ fontSize: '12px', color: '#9a9080', marginBottom: '14px', lineHeight: 1.5 }}>
+              Näkyy lähetystietoina pakettitarrassa. Pakollinen ennen ilmoituksen julkaisua.
+            </p>
+            <input className="form-input" placeholder="Katuosoite *" value={addressStreet} onChange={e => setAddressStreet(e.target.value)} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '10px' }}>
+              <input className="form-input" placeholder="Postinumero *" value={addressPostcode} onChange={e => setAddressPostcode(e.target.value)} style={{ marginBottom: 0 }} />
+              <input className="form-input" placeholder="Kaupunki *" value={addressCity} onChange={e => setAddressCity(e.target.value)} style={{ marginBottom: 0 }} />
+            </div>
+            <input className="form-input" placeholder="Puhelinnumero * (+358...)" value={phone} onChange={e => setPhone(e.target.value)} style={{ marginTop: '10px' }} />
+            <div style={{ background: '#f0ede3', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '6px', padding: '10px 14px', marginBottom: '12px', fontSize: '12px', color: '#7a7060' }}>
+              🇫🇮 Maa: Suomi (toistaiseksi vain suomalaiset myyjät)
+            </div>
+            <button className="form-submit" onClick={handleSave}>Tallenna</button>
+            {message && (
+              <p className={`form-message ${message.startsWith('Error') ? 'error' : 'success'}`}>{message}</p>
+            )}
           </div>
 
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
