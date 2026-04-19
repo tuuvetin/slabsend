@@ -188,14 +188,6 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               </a>
             ))}
 
-            {/* CRASHPADS */}
-            <a href="/listings?tab=sell&category=Gear&subcategory=Crash+pads" className="home-cat-card" style={{ scrollSnapAlign: 'start' }}>
-              <div className="home-cat-img-wrap">
-                <div className="home-cat-img-fallback" style={{ background: '#5a3e2b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px' }}>🧗</div>
-              </div>
-              <div className="home-cat-name" style={{ textTransform: 'uppercase' }}>Crash pads</div>
-              <div className="home-cat-shop-btn">Shop</div>
-            </a>
           </div>
           <button
             onClick={() => {

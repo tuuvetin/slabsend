@@ -5,9 +5,9 @@ import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-im
 import 'react-image-crop/dist/ReactCrop.css'
 
 const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']
-const categoryKeys = ['gear', 'shoes', 'clothing', 'wall']
+const categoryKeys = ['gear', 'shoes', 'clothing', 'wall', 'crashpads']
 const categoryLabels: Record<string, string> = {
-  gear: 'Gear', shoes: 'Shoes', clothing: 'Clothing', wall: 'Wall equipment',
+  gear: 'Gear', shoes: 'Shoes', clothing: 'Clothing', wall: 'Wall equipment', crashpads: 'Crash pads',
 }
 
 function centerAspectCrop(width: number, height: number, aspect: number) {
@@ -121,7 +121,7 @@ export default function AdminPage() {
     setHeroUploading(true)
     setHeroMessage('')
     const file = new File([blob], 'hero.jpg', { type: 'image/jpeg' })
-    const { error } = await supabase.storage.from('hero-image').upload('hero.jpg', file, { upsert: true })
+    const { error } = await supabase.storage.from('hero-image').upload('hero.jpg', file, { upsert: true, cacheControl: '1' })
     setHeroUploading(false)
     if (error) { setHeroMessage('Error: ' + error.message); return }
     setHeroMessage('Hero image updated! Refresh the front page to see it.')
@@ -134,7 +134,7 @@ export default function AdminPage() {
     setCatUploading(prev => ({ ...prev, [key]: true }))
     setCatMessages(prev => ({ ...prev, [key]: '' }))
     const file = new File([blob], `${key}.jpg`, { type: 'image/jpeg' })
-    const { error } = await supabase.storage.from('category-images').upload(`${key}.jpg`, file, { upsert: true })
+    const { error } = await supabase.storage.from('category-images').upload(`${key}.jpg`, file, { upsert: true, cacheControl: '1' })
     setCatUploading(prev => ({ ...prev, [key]: false }))
     setCatMessages(prev => ({ ...prev, [key]: error ? 'Error: ' + error.message : 'Updated! Refresh the front page to see it.' }))
   }
