@@ -8,6 +8,8 @@ interface Props {
   rentalPeriod: string
   isOwner: boolean
   currentUserId?: string
+  weeklyDiscountPct?: number
+  monthlyDiscountPct?: number
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -26,7 +28,7 @@ function dateStr(year: number, month: number, day: number) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, isOwner, currentUserId }: Props) {
+export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, isOwner, currentUserId, weeklyDiscountPct = 0, monthlyDiscountPct = 0 }: Props) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
@@ -107,17 +109,22 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
   }
 
   const calculatePrice = () => {
-    if (!selectedStart || !selectedEnd) return 0
+    if (!selectedStart || !selectedEnd) return { base: 0, discountPct: 0, total: 0, days: 0 }
     const start = new Date(selectedStart)
     const end = new Date(selectedEnd)
     const days = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
-    return days * pricePerDay
+    const base = days * pricePerDay
+    let discountPct = 0
+    if (days >= 30 && monthlyDiscountPct > 0) discountPct = monthlyDiscountPct
+    else if (days >= 7 && weeklyDiscountPct > 0) discountPct = weeklyDiscountPct
+    const discounted = base * (1 - discountPct / 100)
+    return { base, discountPct, total: discounted, days }
   }
 
   const handleBooking = async () => {
     if (!selectedStart || !selectedEnd || !currentUserId) return
     setLoading(true)
-    const total = calculatePrice()
+    const { total } = calculatePrice()
 
     const { error } = await supabase.from('rental_bookings').insert({
       listing_id: listingId,
@@ -241,29 +248,44 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
             <span>From</span><span style={{ fontWeight: 600, color: '#1a1408' }}>{selectedStart}</span>
           </div>
-          {selectedEnd && (
-            <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
-                <span>To</span><span style={{ fontWeight: 600, color: '#1a1408' }}>{selectedEnd}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', position: 'relative' }} className="info-tooltip-wrap">
-                  🛡️ Rental protection (8%)
-                  <button className="info-btn">i</button>
-                  <div className="info-tooltip">
-                    Rental is protected if item is not as described, not delivered, or significantly damaged on arrival. Does not cover wear and tear or accidents during use. Contact info@slabsend.com within 48h.
+          {selectedEnd && (() => {
+            const { base, discountPct, total, days } = calculatePrice()
+            return (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
+                  <span>To</span><span style={{ fontWeight: 600, color: '#1a1408' }}>{selectedEnd}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
+                  <span>Duration</span><span style={{ fontWeight: 600, color: '#1a1408' }}>{days} days</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
+                  <span>Rental price</span><span>{base.toFixed(2)} €</span>
+                </div>
+                {discountPct > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#2a6a2a', marginBottom: '6px', fontWeight: 600 }}>
+                    <span>🎉 {discountPct}% discount ({days >= 30 ? 'monthly' : 'weekly'})</span>
+                    <span>−{(base - total).toFixed(2)} €</span>
                   </div>
-                </span>
-                <span>{(calculatePrice() * 0.08).toFixed(2)} €</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 700, color: '#1a1408', borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '8px', marginTop: '4px' }}>
-                <span>Total</span><span>{(calculatePrice() * 1.08).toFixed(2)} €</span>
-              </div>
-              <button className="form-submit" onClick={handleBooking} disabled={loading} style={{ marginTop: '12px', width: '100%' }}>
-                {loading ? 'Booking...' : 'Book now'}
-              </button>
-            </>
-          )}
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', position: 'relative' }} className="info-tooltip-wrap">
+                    🛡️ Rental protection (8%)
+                    <button className="info-btn">i</button>
+                    <div className="info-tooltip">
+                      Rental is protected if item is not as described, not delivered, or significantly damaged on arrival. Does not cover wear and tear or accidents during use. Contact info@slabsend.com within 48h.
+                    </div>
+                  </span>
+                  <span>{(total * 0.08).toFixed(2)} €</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 700, color: '#1a1408', borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '8px', marginTop: '4px' }}>
+                  <span>Total</span><span>{(total * 1.08).toFixed(2)} €</span>
+                </div>
+                <button className="form-submit" onClick={handleBooking} disabled={loading} style={{ marginTop: '12px', width: '100%' }}>
+                  {loading ? 'Booking...' : 'Book now'}
+                </button>
+              </>
+            )
+          })()}
           {!selectedEnd && (
             <p style={{ fontSize: '12px', color: '#9a9080', marginTop: '4px' }}>Select end date</p>
           )}

@@ -35,6 +35,8 @@ const rentalPeriods = [
   { value: 'month', label: 'Per month' },
 ]
 
+const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']
+
 const europeanCountries = SUPPORTED_COUNTRIES
 
 const citiesByCountry: Record<string, string[]> = {
@@ -119,6 +121,10 @@ export default function NewListingPage() {
   const [stripeStatus, setStripeStatus] = useState<StripeStatus>('idle')
   const [stripeLoading, setStripeLoading] = useState(false)
   const [stripeSuccess, setStripeSuccess] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [pickupLocation, setPickupLocation] = useState('')
+  const [weeklyDiscountPct, setWeeklyDiscountPct] = useState(0)
+  const [monthlyDiscountPct, setMonthlyDiscountPct] = useState(0)
 
   // Crop state
   const [cropQueue, setCropQueue] = useState<{ file: File; src: string }[]>([])
@@ -146,6 +152,7 @@ export default function NewListingPage() {
     // Check Stripe verification for logged-in users
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
+      if (user) setIsAdmin(ADMIN_EMAILS.includes(user.email || ''))
       setStripeStatus('checking')
       fetch('/api/stripe/status')
         .then(r => r.json())
@@ -248,12 +255,14 @@ export default function NewListingPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { window.location.href = '/login'; return }
 
-    // Tarkista että profiilissa on osoitetiedot
-    const { data: profile } = await supabase.from('profiles').select('address_street, address_postcode, address_city, phone').eq('user_id', user.id).single()
-    if (!profile?.address_street || !profile?.address_postcode || !profile?.address_city || !profile?.phone) {
-      setMessage('Täytä ensin kotiosoitteesi profiilisivulla ennen ilmoituksen julkaisua.')
-      setLoading(false)
-      return
+    if (listingType !== 'rent') {
+      // Tarkista että profiilissa on osoitetiedot
+      const { data: profile } = await supabase.from('profiles').select('address_street, address_postcode, address_city, phone').eq('user_id', user.id).single()
+      if (!profile?.address_street || !profile?.address_postcode || !profile?.address_city || !profile?.phone) {
+        setMessage('Täytä ensin kotiosoitteesi profiilisivulla ennen ilmoituksen julkaisua.')
+        setLoading(false)
+        return
+      }
     }
 
     const imageUrls: string[] = []
@@ -277,12 +286,15 @@ export default function NewListingPage() {
       images: imageUrls,
       listing_type: listingType,
       rental_period: listingType === 'rent' ? rentalPeriod : null,
-      shipping_enabled: listingType !== 'service' ? shippingEnabled : false,
-      pickup_enabled: listingType !== 'service' ? pickupEnabled : false,
+      shipping_enabled: listingType === 'sell' ? shippingEnabled : false,
+      pickup_enabled: listingType === 'rent' ? true : (listingType !== 'service' ? pickupEnabled : false),
       package_size: listingType !== 'service' && shippingEnabled ? packageSize : null,
       package_weight: listingType !== 'service' && shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
       weight_kg: listingType !== 'service' && shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
-      shipping_from_country: 'FI',
+      shipping_from_country: listingType === 'sell' ? 'FI' : null,
+      pickup_location: listingType === 'rent' ? pickupLocation : null,
+      weekly_discount_pct: listingType === 'rent' ? weeklyDiscountPct : null,
+      monthly_discount_pct: listingType === 'rent' ? monthlyDiscountPct : null,
     }).select('id').single()
 
     setLoading(false)
@@ -295,6 +307,9 @@ export default function NewListingPage() {
       setServicePrices({})
       setCroppedFiles([]); setCropQueue([])
       setShippingEnabled(false); setPickupEnabled(false); setPackageSize(''); setPackageWeight('')
+      setPickupLocation('')
+      setWeeklyDiscountPct(0)
+      setMonthlyDiscountPct(0)
     }
   }
 
@@ -307,7 +322,7 @@ export default function NewListingPage() {
   const activeCategoryMap = categories
 
   // Show Stripe gate for unverified logged-in users
-  if (stripeStatus === 'unverified') {
+  if (stripeStatus === 'unverified' && listingType !== 'rent') {
     return (
       <div className="new-listing-page">
         <h1 className="new-listing-title">New listing</h1>
@@ -410,7 +425,7 @@ export default function NewListingPage() {
       <div className="listing-type-toggle">
         <button className={`listing-type-btn ${listingType === 'sell' ? 'active' : ''}`} onClick={() => handleTypeChange('sell')}>For sale</button>
         <button className={`listing-type-btn ${listingType === 'rent' ? 'active rent' : ''}`} onClick={() => handleTypeChange('rent')}>For rent</button>
-        <button className={`listing-type-btn ${listingType === 'service' ? 'active service' : ''}`} onClick={() => handleTypeChange('service')}>Service</button>
+        {isAdmin && <button className={`listing-type-btn ${listingType === 'service' ? 'active service' : ''}`} onClick={() => handleTypeChange('service')}>Service</button>}
       </div>
 
       {listingType === 'rent' && (
@@ -423,6 +438,53 @@ export default function NewListingPage() {
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {listingType === 'rent' && (
+        <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '12px' }}>
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+            Long-term discounts (optional)
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', flex: 1 }}>Weekly discount (7+ days)</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <input
+                  type="number"
+                  min={0}
+                  max={50}
+                  value={weeklyDiscountPct || ''}
+                  onChange={e => setWeeklyDiscountPct(Math.min(50, Math.max(0, parseInt(e.target.value) || 0)))}
+                  placeholder="0"
+                  style={{ fontFamily: 'Barlow', fontSize: '14px', width: '70px', padding: '7px 10px', background: '#fff', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', color: '#1a1408', textAlign: 'right' }}
+                />
+                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', color: '#7a7060', minWidth: '20px' }}>%</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', flex: 1 }}>Monthly discount (30+ days)</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <input
+                  type="number"
+                  min={0}
+                  max={50}
+                  value={monthlyDiscountPct || ''}
+                  onChange={e => setMonthlyDiscountPct(Math.min(50, Math.max(0, parseInt(e.target.value) || 0)))}
+                  placeholder="0"
+                  style={{ fontFamily: 'Barlow', fontSize: '14px', width: '70px', padding: '7px 10px', background: '#fff', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', color: '#1a1408', textAlign: 'right' }}
+                />
+                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', color: '#7a7060', minWidth: '20px' }}>%</span>
+              </div>
+            </div>
+          </div>
+          {(weeklyDiscountPct > 0 || monthlyDiscountPct > 0) && (
+            <p style={{ fontSize: '12px', color: '#7a7060', marginTop: '10px', marginBottom: 0 }}>
+              {weeklyDiscountPct > 0 && `7+ days: ${weeklyDiscountPct}% off`}
+              {weeklyDiscountPct > 0 && monthlyDiscountPct > 0 && ' · '}
+              {monthlyDiscountPct > 0 && `30+ days: ${monthlyDiscountPct}% off`}
+            </p>
+          )}
         </div>
       )}
 
@@ -452,9 +514,21 @@ export default function NewListingPage() {
         If your city isn't in the list, just type it in.
       </p>
       <div className="location-row">
-        <div className="form-input" style={{ marginBottom: 0, background: '#f0ede3', color: '#7a7060', display: 'flex', alignItems: 'center', cursor: 'not-allowed' }}>
-          🇫🇮 Finland
-        </div>
+        {listingType === 'rent' ? (
+          <select
+            className="form-input"
+            value={country}
+            onChange={e => { setCountry(e.target.value); setCity('') }}
+            style={{ marginBottom: 0 }}
+          >
+            <option value="">Select country</option>
+            {europeanCountries.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        ) : (
+          <div className="form-input" style={{ marginBottom: 0, background: '#f0ede3', color: '#7a7060', display: 'flex', alignItems: 'center', cursor: 'not-allowed' }}>
+            🇫🇮 Finland
+          </div>
+        )}
         <div style={{ position: 'relative', flex: 1, marginBottom: 0 }}>
           <input
             className="form-input"
@@ -531,8 +605,8 @@ export default function NewListingPage() {
         </select>
       )}
 
-      {/* SHIPPING + PICKUP — not shown for service listings */}
-      {listingType !== 'service' && (
+      {/* DELIVERY OPTIONS */}
+      {listingType === 'sell' && (
         <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
           <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
             Delivery options
@@ -602,6 +676,24 @@ export default function NewListingPage() {
               />
             </div>
           )}
+        </div>
+      )}
+
+      {listingType === 'rent' && (
+        <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+            📍 Pickup only
+          </p>
+          <input
+            className="form-input"
+            placeholder="Pickup location (e.g. Helsinki, Kallio)"
+            value={pickupLocation}
+            onChange={e => setPickupLocation(e.target.value)}
+            style={{ marginBottom: 0 }}
+          />
+          <p style={{ fontSize: '12px', color: '#7a7060', marginTop: '6px' }}>
+            Where can the item be picked up and returned?
+          </p>
         </div>
       )}
 

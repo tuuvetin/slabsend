@@ -397,6 +397,12 @@ export default function ListingPage() {
             <p style={{ fontSize: '13px', color: '#9a9080', marginBottom: '20px' }}>📍 {listing.location}</p>
           )}
 
+          {isRental && listing.pickup_location && (
+            <p style={{ fontSize: '13px', color: '#3a3020', marginBottom: '20px' }}>
+              📍 Pickup: <strong>{listing.pickup_location}</strong>
+            </p>
+          )}
+
           {/* Category */}
           {!isService && listing.category && (
             <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '20px' }}>
@@ -468,6 +474,13 @@ export default function ListingPage() {
                     <span>Unit price</span>
                     <span>€{listing.price}{isRental ? `/${listing.rental_period || 'day'}` : ''}</span>
                   </div>
+                  {isRental && (listing.weekly_discount_pct > 0 || listing.monthly_discount_pct > 0) && (
+                    <div style={{ fontSize: '12px', color: '#2a6a2a', marginBottom: '8px', background: '#f0f7f0', borderRadius: '6px', padding: '6px 10px' }}>
+                      {listing.weekly_discount_pct > 0 && <span>7+ days: <strong>{listing.weekly_discount_pct}%</strong> off</span>}
+                      {listing.weekly_discount_pct > 0 && listing.monthly_discount_pct > 0 && <span> · </span>}
+                      {listing.monthly_discount_pct > 0 && <span>30+ days: <strong>{listing.monthly_discount_pct}%</strong> off</span>}
+                    </div>
+                  )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>🛡️ Buyer protection</span>
                     <span>€{serviceFee.toFixed(2)}</span>
@@ -625,6 +638,8 @@ export default function ListingPage() {
                   rentalPeriod={listing.rental_period || 'day'}
                   isOwner={currentUser?.id === listing.user_id}
                   currentUserId={currentUser?.id}
+                  weeklyDiscountPct={listing.weekly_discount_pct || 0}
+                  monthlyDiscountPct={listing.monthly_discount_pct || 0}
                 />
               )}
 
