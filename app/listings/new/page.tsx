@@ -30,6 +30,13 @@ const conditions = ['New', 'Excellent', 'Good', 'Fair', 'Poor']
 
 const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']
 
+// Generate 30-min time slots for the full day
+const ALL_TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
+  const h = Math.floor(i / 2).toString().padStart(2, '0')
+  const m = i % 2 === 0 ? '00' : '30'
+  return `${h}:${m}`
+})
+
 const europeanCountries = SUPPORTED_COUNTRIES
 
 const citiesByCountry: Record<string, string[]> = {
@@ -115,6 +122,8 @@ export default function NewListingPage() {
   const [stripeSuccess, setStripeSuccess] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [pickupLocation, setPickupLocation] = useState('')
+  const [pickupHoursFrom, setPickupHoursFrom] = useState('09:00')
+  const [pickupHoursTo, setPickupHoursTo] = useState('20:00')
   const [weeklyDiscountPct, setWeeklyDiscountPct] = useState(0)
   const [monthlyDiscountPct, setMonthlyDiscountPct] = useState(0)
 
@@ -285,6 +294,8 @@ export default function NewListingPage() {
       weight_kg: listingType !== 'service' && shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
       shipping_from_country: listingType === 'sell' ? 'FI' : null,
       pickup_location: listingType === 'rent' ? pickupLocation : null,
+      pickup_hours_from: listingType === 'rent' ? pickupHoursFrom : null,
+      pickup_hours_to: listingType === 'rent' ? pickupHoursTo : null,
       weekly_discount_pct: listingType === 'rent' ? weeklyDiscountPct : null,
       monthly_discount_pct: listingType === 'rent' ? monthlyDiscountPct : null,
     }).select('id').single()
@@ -668,10 +679,29 @@ export default function NewListingPage() {
             placeholder="Pickup location (e.g. Helsinki, Kallio)"
             value={pickupLocation}
             onChange={e => setPickupLocation(e.target.value)}
-            style={{ marginBottom: 0 }}
           />
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', margin: '14px 0 8px' }}>
+            Pickup hours
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <select
+              value={pickupHoursFrom}
+              onChange={e => setPickupHoursFrom(e.target.value)}
+              style={{ flex: 1, padding: '9px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontFamily: 'Barlow', fontSize: '14px', background: '#fff', color: '#1a1408' }}
+            >
+              {ALL_TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', color: '#7a7060' }}>–</span>
+            <select
+              value={pickupHoursTo}
+              onChange={e => setPickupHoursTo(e.target.value)}
+              style={{ flex: 1, padding: '9px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontFamily: 'Barlow', fontSize: '14px', background: '#fff', color: '#1a1408' }}
+            >
+              {ALL_TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
           <p style={{ fontSize: '12px', color: '#7a7060', marginTop: '6px' }}>
-            Where can the item be picked up and returned?
+            The renter picks a specific time within this window when booking.
           </p>
         </div>
       )}

@@ -10,6 +10,23 @@ interface Props {
   currentUserId?: string
   weeklyDiscountPct?: number
   monthlyDiscountPct?: number
+  pickupHoursFrom?: string
+  pickupHoursTo?: string
+}
+
+function getTimeSlots(from: string, to: string): string[] {
+  const slots: string[] = []
+  const [fh, fm] = from.split(':').map(Number)
+  const [th, tm] = to.split(':').map(Number)
+  let mins = fh * 60 + fm
+  const end = th * 60 + tm
+  while (mins <= end) {
+    const h = Math.floor(mins / 60).toString().padStart(2, '0')
+    const m = (mins % 60).toString().padStart(2, '0')
+    slots.push(`${h}:${m}`)
+    mins += 30
+  }
+  return slots
 }
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -28,17 +45,21 @@ function dateStr(year: number, month: number, day: number) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, isOwner, currentUserId, weeklyDiscountPct = 0, monthlyDiscountPct = 0 }: Props) {
+export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, isOwner, currentUserId, weeklyDiscountPct = 0, monthlyDiscountPct = 0, pickupHoursFrom = '09:00', pickupHoursTo = '20:00' }: Props) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
   const [availability, setAvailability] = useState<Record<string, string>>({})
   const [selectedStart, setSelectedStart] = useState<string | null>(null)
   const [selectedEnd, setSelectedEnd] = useState<string | null>(null)
+  const [pickupTime, setPickupTime] = useState('')
+  const [returnTime, setReturnTime] = useState('')
   const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [showRentalInfo, setShowRentalInfo] = useState(false)
   const supabase = createClient()
+
+  const timeSlots = getTimeSlots(pickupHoursFrom, pickupHoursTo)
 
   useEffect(() => {
     loadData()
@@ -123,6 +144,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
 
   const handleBooking = async () => {
     if (!selectedStart || !selectedEnd || !currentUserId) return
+    if (!pickupTime || !returnTime) return
     setLoading(true)
     const { total } = calculatePrice()
 
@@ -131,6 +153,8 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
       renter_id: currentUserId,
       start_date: selectedStart,
       end_date: selectedEnd,
+      pickup_time: pickupTime,
+      return_time: returnTime,
       total_price: total,
       status: 'pending'
     })
@@ -248,47 +272,87 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
             <span>From</span><span style={{ fontWeight: 600, color: '#1a1408' }}>{selectedStart}</span>
           </div>
+          {!selectedEnd && (
+            <p style={{ fontSize: '12px', color: '#9a9080', marginTop: '4px' }}>Select end date</p>
+          )}
           {selectedEnd && (() => {
             const { base, discountPct, total, days } = calculatePrice()
             return (
               <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '10px' }}>
                   <span>To</span><span style={{ fontWeight: 600, color: '#1a1408' }}>{selectedEnd}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
-                  <span>Duration</span><span style={{ fontWeight: 600, color: '#1a1408' }}>{days} days</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
-                  <span>Rental price</span><span>{base.toFixed(2)} €</span>
-                </div>
-                {discountPct > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#2a6a2a', marginBottom: '6px', fontWeight: 600 }}>
-                    <span>🎉 {discountPct}% discount ({days >= 30 ? 'monthly' : 'weekly'})</span>
-                    <span>−{(base - total).toFixed(2)} €</span>
-                  </div>
-                )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', position: 'relative' }} className="info-tooltip-wrap">
-                    🛡️ Rental protection (8%)
-                    <button className="info-btn">i</button>
-                    <div className="info-tooltip">
-                      Rental is protected if item is not as described, not delivered, or significantly damaged on arrival. Does not cover wear and tear or accidents during use. Contact info@slabsend.com within 48h.
+
+                {/* TIME PICKERS */}
+                <div style={{ borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '10px', marginBottom: '10px' }}>
+                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '8px' }}>
+                    Choose times (available {pickupHoursFrom}–{pickupHoursTo})
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <div>
+                      <p style={{ fontSize: '11px', color: '#9a9080', marginBottom: '4px' }}>Pickup</p>
+                      <select
+                        value={pickupTime}
+                        onChange={e => setPickupTime(e.target.value)}
+                        style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: pickupTime ? '1px solid rgba(26,20,8,0.15)' : '1px solid #FC7038', fontFamily: 'Barlow', fontSize: '13px', background: '#fff', color: pickupTime ? '#1a1408' : '#9a9080' }}
+                      >
+                        <option value="">Select time</option>
+                        {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
                     </div>
-                  </span>
-                  <span>{(total * 0.08).toFixed(2)} €</span>
+                    <div>
+                      <p style={{ fontSize: '11px', color: '#9a9080', marginBottom: '4px' }}>Return</p>
+                      <select
+                        value={returnTime}
+                        onChange={e => setReturnTime(e.target.value)}
+                        style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: returnTime ? '1px solid rgba(26,20,8,0.15)' : '1px solid #FC7038', fontFamily: 'Barlow', fontSize: '13px', background: '#fff', color: returnTime ? '#1a1408' : '#9a9080' }}
+                      >
+                        <option value="">Select time</option>
+                        {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 700, color: '#1a1408', borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '8px', marginTop: '4px' }}>
-                  <span>Total</span><span>{(total * 1.08).toFixed(2)} €</span>
+
+                {/* PRICE BREAKDOWN */}
+                <div style={{ borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
+                    <span>Duration</span><span style={{ fontWeight: 600, color: '#1a1408' }}>{days} days</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
+                    <span>Rental price</span><span>{base.toFixed(2)} €</span>
+                  </div>
+                  {discountPct > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#2a6a2a', marginBottom: '6px', fontWeight: 600 }}>
+                      <span>🎉 {discountPct}% discount ({days >= 30 ? 'monthly' : 'weekly'})</span>
+                      <span>−{(base - total).toFixed(2)} €</span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', position: 'relative' }} className="info-tooltip-wrap">
+                      🛡️ Rental protection (8%)
+                      <button className="info-btn">i</button>
+                      <div className="info-tooltip">
+                        Rental is protected if item is not as described, not delivered, or significantly damaged on arrival. Does not cover wear and tear or accidents during use. Contact info@slabsend.com within 48h.
+                      </div>
+                    </span>
+                    <span>{(total * 0.08).toFixed(2)} €</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 700, color: '#1a1408', borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '8px', marginTop: '4px' }}>
+                    <span>Total</span><span>{(total * 1.08).toFixed(2)} €</span>
+                  </div>
+                  <button
+                    className="form-submit"
+                    onClick={handleBooking}
+                    disabled={loading || !pickupTime || !returnTime}
+                    style={{ marginTop: '12px', width: '100%', opacity: (!pickupTime || !returnTime) ? 0.45 : 1 }}
+                  >
+                    {loading ? 'Booking...' : (!pickupTime || !returnTime) ? 'Select pickup & return times' : 'Book now'}
+                  </button>
                 </div>
-                <button className="form-submit" onClick={handleBooking} disabled={loading} style={{ marginTop: '12px', width: '100%' }}>
-                  {loading ? 'Booking...' : 'Book now'}
-                </button>
               </>
             )
           })()}
-          {!selectedEnd && (
-            <p style={{ fontSize: '12px', color: '#9a9080', marginTop: '4px' }}>Select end date</p>
-          )}
         </div>
       )}
     </div>

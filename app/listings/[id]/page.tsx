@@ -397,10 +397,15 @@ export default function ListingPage() {
             <p style={{ fontSize: '13px', color: '#9a9080', marginBottom: '20px' }}>📍 {listing.location}</p>
           )}
 
-          {isRental && listing.pickup_location && (
-            <p style={{ fontSize: '13px', color: '#3a3020', marginBottom: '20px' }}>
-              📍 Pickup: <strong>{listing.pickup_location}</strong>
-            </p>
+          {isRental && (listing.pickup_location || listing.pickup_hours_from) && (
+            <div style={{ fontSize: '13px', color: '#3a3020', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {listing.pickup_location && (
+                <span>📍 Pickup: <strong>{listing.pickup_location}</strong></span>
+              )}
+              {listing.pickup_hours_from && listing.pickup_hours_to && (
+                <span>🕐 Hours: <strong>{listing.pickup_hours_from} – {listing.pickup_hours_to}</strong></span>
+              )}
+            </div>
           )}
 
           {/* Category */}
@@ -640,6 +645,8 @@ export default function ListingPage() {
                   currentUserId={currentUser?.id}
                   weeklyDiscountPct={listing.weekly_discount_pct || 0}
                   monthlyDiscountPct={listing.monthly_discount_pct || 0}
+                  pickupHoursFrom={listing.pickup_hours_from || '09:00'}
+                  pickupHoursTo={listing.pickup_hours_to || '20:00'}
                 />
               )}
 
