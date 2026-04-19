@@ -5,6 +5,7 @@ import ReviewForm from '@/app/components/ReviewForm'
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import { calculateShippingCost, getShippingZone, BUYER_COUNTRIES, BUYER_COUNTRY_NAMES } from '@/app/lib/shipping'
 
 const conditionLabels: Record<string, string> = {
   'Uusi': 'New', 'Erinomainen': 'Excellent', 'Hyvä': 'Good', 'Tyydyttävä': 'Fair', 'Huono': 'Poor',
@@ -35,13 +36,7 @@ export default function ListingPage() {
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [justPublished, setJustPublished] = useState(false)
   // Shipping
-  const [shippingFrom, setShippingFrom] = useState<number | null>(null)
-  const [showShippingModal, setShowShippingModal] = useState(false)
-  const [shippingRates, setShippingRates] = useState<any[]>([])
-  const [shippingRatesLoading, setShippingRatesLoading] = useState(false)
-  const [selectedRate, setSelectedRate] = useState<any>(null)
-  const [destCountry, setDestCountry] = useState('')
-  const [destCity, setDestCity] = useState('')
+  const [buyerCountry, setBuyerCountry] = useState('FI')
   const supabase = createClient()
 
   useEffect(() => {
@@ -90,29 +85,10 @@ export default function ListingPage() {
         supabase.from('profiles').select('username, full_name, avatar_url, location').eq('user_id', data.user_id).single().then(({ data: p }) => setSellerProfile(p))
       }
 
-      // Fetch cheapest shipping rate for logged-in user's country
-      if (user && data?.shipping_enabled && data?.country && data?.package_size) {
-        supabase.from('profiles').select('country, city').eq('user_id', user.id).single().then(async ({ data: profile }) => {
-          if (!profile?.country || profile.country === data.country) return
-          setDestCountry(profile.country)
-          setDestCity(profile.city || '')
-          const res = await fetch('/api/easyship/rates', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              originCountry: data.country,
-              originCity: data.city || '',
-              destinationCountry: profile.country,
-              destinationCity: profile.city || '',
-              packageSize: data.package_size,
-              packageWeight: data.package_weight,
-              itemValue: data.price || 50,
-            }),
-          })
-          const json = await res.json()
-          if (json.rates && json.rates.length > 0) {
-            setShippingFrom(json.rates[0].price)
-          }
+      // Pre-select buyer's country from profile (address_country)
+      if (user) {
+        supabase.from('profiles').select('address_country').eq('user_id', user.id).single().then(({ data: profile }) => {
+          if (profile?.address_country) setBuyerCountry(profile.address_country)
         })
       }
 
@@ -193,59 +169,22 @@ export default function ListingPage() {
 
   const handleBuyNow = async () => {
     if (!currentUser) { window.location.href = '/login'; return }
-    if (listing.shipping_enabled && !listing.pickup_enabled) {
-      // Must go through shipping modal
-      openShippingModal()
-      return
-    }
-    if (listing.shipping_enabled && listing.pickup_enabled) {
-      // Has both options — open modal to choose
-      openShippingModal()
-      return
-    }
-    proceedToCheckout(null)
+    proceedToCheckout()
   }
 
-  const openShippingModal = async () => {
-    setShowShippingModal(true)
-    setShippingRates([])
-    setSelectedRate(null)
-    if (destCountry) fetchRates(destCountry, destCity)
-  }
-
-  const fetchRates = async (country: string, city: string) => {
-    if (!country || !listing?.country || !listing?.package_size) return
-    setShippingRatesLoading(true)
-    const res = await fetch('/api/easyship/rates', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        originCountry: listing.country,
-        originCity: listing.city || '',
-        destinationCountry: country,
-        destinationCity: city || '',
-        packageSize: listing.package_size,
-        packageWeight: listing.package_weight,
-        itemValue: listing.price || 50,
-      }),
-    })
-    const json = await res.json()
-    setShippingRates(json.rates || [])
-    if (json.rates?.length > 0) setSelectedRate(json.rates[0])
-    setShippingRatesLoading(false)
-  }
-
-  const proceedToCheckout = async (rate: any) => {
+  const proceedToCheckout = async () => {
     setBuyLoading(true)
-    setShowShippingModal(false)
+    const zone = getShippingZone(buyerCountry)
+    const shippingCents = listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
     const res = await fetch('/api/stripe/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         listingId: listing.id,
         amount: listing.price,
-        shippingCost: rate?.price || null,
-        shippingService: rate ? `${rate.courier} ${rate.service}` : null,
+        shippingCostCents: shippingCents,
+        shippingZone: zone || null,
+        buyerCountry,
       }),
     })
     const data = await res.json()
@@ -327,96 +266,8 @@ export default function ListingPage() {
   const serviceTotal = serviceItems.filter(i => selectedServices.includes(i.name)).reduce((s, i) => s + i.price, 0)
   const hasServiceSelection = selectedServices.length > 0
 
-  const europeanCountries = [
-    'Austria','Belgium','Bulgaria','Croatia','Cyprus','Czech Republic','Denmark',
-    'Estonia','Finland','France','Germany','Greece','Hungary','Iceland','Ireland',
-    'Italy','Latvia','Liechtenstein','Lithuania','Luxembourg','Malta','Netherlands',
-    'Norway','Poland','Portugal','Romania','Slovakia','Slovenia','Spain','Sweden',
-    'Switzerland','United Kingdom',
-  ]
-
   return (
     <div className="listing-detail-page">
-
-      {/* SHIPPING MODAL */}
-      {showShippingModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: '#F5F3E6', borderRadius: '14px', padding: '28px', width: '100%', maxWidth: '440px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontFamily: 'Barlow Condensed', fontSize: '18px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#1a1408', margin: 0 }}>Choose delivery</h2>
-              <button onClick={() => setShowShippingModal(false)} style={{ background: 'transparent', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#9a9080', lineHeight: 1 }}>×</button>
-            </div>
-
-            {/* Pickup option */}
-            {listing.pickup_enabled && (
-              <button
-                onClick={() => proceedToCheckout(null)}
-                style={{ width: '100%', textAlign: 'left', background: '#fff', border: '1px solid rgba(26,20,8,0.15)', borderRadius: '10px', padding: '14px 16px', marginBottom: '10px', cursor: 'pointer', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408' }}
-              >
-                <div style={{ fontWeight: 700, marginBottom: '2px' }}>📍 Local pickup — Free</div>
-                <div style={{ fontSize: '12px', color: '#7a7060' }}>Arrange pickup directly with the seller</div>
-              </button>
-            )}
-
-            {/* Shipping section */}
-            {listing.shipping_enabled && (
-              <>
-                <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
-                  📦 Ship to my address
-                </p>
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                  <select
-                    value={destCountry}
-                    onChange={e => { setDestCountry(e.target.value); setShippingRates([]); setSelectedRate(null) }}
-                    style={{ flex: 2, padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(26,20,8,0.15)', fontFamily: 'Barlow', fontSize: '13px', background: '#fff', color: '#1a1408' }}
-                  >
-                    <option value="">Select country</option>
-                    {europeanCountries.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <input
-                    placeholder="City"
-                    value={destCity}
-                    onChange={e => { setDestCity(e.target.value); setShippingRates([]); setSelectedRate(null) }}
-                    style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(26,20,8,0.15)', fontFamily: 'Barlow', fontSize: '13px', background: '#fff', color: '#1a1408' }}
-                  />
-                </div>
-                <button
-                  onClick={() => fetchRates(destCountry, destCity)}
-                  disabled={!destCountry || shippingRatesLoading}
-                  style={{ width: '100%', fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#1a1408', color: '#F5F3E6', border: 'none', borderRadius: '8px', padding: '11px', cursor: !destCountry ? 'not-allowed' : 'pointer', opacity: !destCountry ? 0.45 : 1, marginBottom: '14px' }}
-                >
-                  {shippingRatesLoading ? 'Getting rates...' : 'Get shipping rates'}
-                </button>
-
-                {shippingRates.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-                    {shippingRates.map(rate => (
-                      <label key={rate.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: selectedRate?.id === rate.id ? '#fff' : 'transparent', border: selectedRate?.id === rate.id ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.12)', borderRadius: '10px', padding: '12px 14px', cursor: 'pointer' }}>
-                        <input type="radio" name="rate" checked={selectedRate?.id === rate.id} onChange={() => setSelectedRate(rate)} style={{ accentColor: '#FC7038', flexShrink: 0 }} />
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontFamily: 'Barlow', fontSize: '14px', fontWeight: 600, color: '#1a1408' }}>{rate.courier} — {rate.service}</div>
-                          {rate.minDays && <div style={{ fontSize: '12px', color: '#7a7060' }}>{rate.minDays}–{rate.maxDays} business days</div>}
-                        </div>
-                        <div style={{ fontFamily: 'Barlow Condensed', fontSize: '16px', fontWeight: 700, color: '#1a1408' }}>€{rate.price.toFixed(2)}</div>
-                      </label>
-                    ))}
-                  </div>
-                )}
-
-                {shippingRates.length > 0 && selectedRate && (
-                  <button
-                    onClick={() => proceedToCheckout(selectedRate)}
-                    disabled={buyLoading}
-                    style={{ width: '100%', fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#FC7038', color: '#F5F3E6', border: 'none', borderRadius: '8px', padding: '14px', cursor: 'pointer' }}
-                  >
-                    {buyLoading ? 'Loading...' : `Pay — €${((listing.price * 1.08) + selectedRate.price).toFixed(2)}`}
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* LIGHTBOX */}
       {lightboxIndex !== null && images.length > 0 && (
@@ -604,38 +455,48 @@ export default function ListingPage() {
             )}
 
             {/* PRICE BREAKDOWN */}
-            {!isService && (
-              <>
-                <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>Order breakdown</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
-                  <span>Unit price</span>
-                  <span>€{listing.price}{isRental ? `/${listing.rental_period || 'day'}` : ''}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>🛡️ Buyer protection</span>
-                  <span>€{(listing.price * 0.08).toFixed(2)}</span>
-                </div>
-                {listing.shipping_enabled && (
+            {!isService && (() => {
+              const zone = getShippingZone(buyerCountry)
+              const shippingCents = listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
+              const shippingEur = shippingCents / 100
+              const serviceFee = listing.price * 0.08
+              const total = listing.price + serviceFee + shippingEur
+              return (
+                <>
+                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>Order breakdown</p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
-                    <span>📦 Shipping</span>
-                    <span style={{ fontSize: '12px', color: shippingFrom ? '#1a1408' : '#9a9080', fontWeight: shippingFrom ? 600 : 400 }}>
-                      {shippingFrom ? `from €${shippingFrom.toFixed(2)}` : 'calculated at checkout'}
-                    </span>
+                    <span>Unit price</span>
+                    <span>€{listing.price}{isRental ? `/${listing.rental_period || 'day'}` : ''}</span>
                   </div>
-                )}
-                {listing.pickup_enabled && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
-                    <span>📍 Pickup</span>
-                    <span style={{ fontSize: '12px', color: '#9a9080' }}>agree with seller</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>🛡️ Buyer protection</span>
+                    <span>€{serviceFee.toFixed(2)}</span>
                   </div>
-                )}
-                <div style={{ height: '1px', background: 'rgba(26,20,8,0.1)', margin: '12px 0' }} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a7060' }}>Total price</span>
-                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '26px', fontWeight: 700, color: '#1a1408' }}>€{(listing.price * 1.08).toFixed(2)}</span>
-                </div>
-              </>
-            )}
+                  {listing.weight_kg && (
+                    <div style={{ marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '6px' }}>
+                        <span>📦 Shipping</span>
+                        <span style={{ fontWeight: 600, color: '#1a1408' }}>€{shippingEur.toFixed(2)}</span>
+                      </div>
+                      <select
+                        value={buyerCountry}
+                        onChange={e => setBuyerCountry(e.target.value)}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontFamily: 'Barlow', fontSize: '13px', background: '#fff', color: '#1a1408', cursor: 'pointer' }}
+                      >
+                        {BUYER_COUNTRIES.map(c => (
+                          <option key={c} value={c}>{BUYER_COUNTRY_NAMES[c]}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  <div style={{ height: '1px', background: 'rgba(26,20,8,0.1)', margin: '12px 0' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a7060' }}>Total price</span>
+                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '26px', fontWeight: 700, color: '#1a1408' }}>€{total.toFixed(2)}</span>
+                  </div>
+                </>
+              )
+            })()}
 
             {/* SERVICE total */}
             {isService && (
@@ -661,10 +522,14 @@ export default function ListingPage() {
           {!listing.sold && !order && currentUser && currentUser.id !== listing.user_id && (
             <>
               {/* Buy now — sell */}
-              {!isRental && !isService && (
+              {!isRental && !isService && (() => {
+                const zone = getShippingZone(buyerCountry)
+                const shippingCents = listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
+                const total = listing.price * 1.08 + shippingCents / 100
+                return (
                 <>
                   <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ width: '100%', marginBottom: '8px' }}>
-                    {buyLoading ? 'Loading...' : `Buy now — €${(listing.price * 1.08).toFixed(2)}`}
+                    {buyLoading ? 'Loading...' : `Buy now — €${total.toFixed(2)}`}
                   </button>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)', marginBottom: '10px', position: 'relative' }} className="info-tooltip-wrap">
                     <span style={{ fontSize: '14px' }}>🛡️</span>
@@ -677,7 +542,8 @@ export default function ListingPage() {
                     </div>
                   </div>
                 </>
-              )}
+                )
+              })()}
 
               {/* Buy now — service */}
               {isService && serviceItems.length > 0 && (

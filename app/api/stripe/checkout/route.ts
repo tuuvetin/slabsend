@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { listingId, amount, shippingCost, shippingService } = await req.json()
+  const { listingId, amount, shippingCostCents, shippingZone, buyerCountry } = await req.json()
 
   const { data: listing } = await supabase
     .from('listings')
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const commissionRate = parseFloat(process.env.NEXT_PUBLIC_COMMISSION_RATE || '0.08')
   const baseAmount = Math.round(amount * 100)
   const serviceFee = Math.round(baseAmount * commissionRate)
-  const shippingCents = shippingCost ? Math.round(shippingCost * 100) : 0
+  const shippingCents = shippingCostCents ? Math.round(shippingCostCents) : 0
 
   const lineItems: any[] = [
     {
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     lineItems.push({
       price_data: {
         currency: 'eur',
-        product_data: { name: shippingService ? `Shipping — ${shippingService}` : 'Shipping' },
+        product_data: { name: 'Shipping (Matkahuolto)' },
         unit_amount: shippingCents,
       },
       quantity: 1,
@@ -67,6 +67,8 @@ export async function POST(req: Request) {
       base_amount: baseAmount.toString(),
       service_fee: serviceFee.toString(),
       shipping_cost: shippingCents.toString(),
+      shipping_zone: shippingZone || '',
+      buyer_country: buyerCountry || '',
     },
   })
 
