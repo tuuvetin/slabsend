@@ -318,8 +318,8 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .home-listings-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 
 .home-cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-.home-cat-card { text-decoration: none; color: inherit; cursor: pointer; }
-.home-cat-img-wrap { overflow: hidden; border-radius: 12px; margin-bottom: 14px; aspect-ratio: 1/1; position: relative; min-height: 280px; }
+.home-cat-card { text-decoration: none; color: inherit; cursor: pointer; min-width: 155px; }
+.home-cat-img-wrap { overflow: hidden; border-radius: 12px; margin-bottom: 14px; aspect-ratio: 1/1; position: relative; }
 .home-cat-img { width: 100%; height: 100%; -o-object-fit: cover; object-fit: cover; display: block; -webkit-transition: -webkit-transform 0.3s ease; transition: transform 0.3s ease; }
 .home-cat-card:hover .home-cat-img { -webkit-transform: scale(1.03); transform: scale(1.03); }
 .home-cat-img-fallback { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; border-radius: 12px; }
