@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
@@ -19,8 +19,28 @@ export default function ConversationPage() {
   const [order, setOrder] = useState<any>(null)
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [confirmDone, setConfirmDone] = useState(false)
+  const [imageUploading, setImageUploading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
+
+  const adjustTextareaHeight = () => {
+    const ta = textareaRef.current
+    if (!ta) return
+    ta.style.height = 'auto'
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'
+  }
+
+  const markIncomingAsRead = useCallback(async (userId: string) => {
+    await supabase
+      .from('messages')
+      .update({ is_read: true })
+      .eq('listing_id', listingId)
+      .eq('sender_id', otherUserId)
+      .eq('receiver_id', userId)
+      .eq('is_read', false)
+  }, [listingId, otherUserId])
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -35,6 +55,9 @@ export default function ConversationPage() {
         .order('created_at', { ascending: true })
 
       setMessages(msgs || [])
+
+      // Mark all incoming messages as read
+      await markIncomingAsRead(user.id)
 
       const { data: l } = await supabase.from('listings').select('*').eq('id', listingId).single()
       setListing(l)
@@ -66,13 +89,14 @@ export default function ConversationPage() {
         .on('postgres_changes', {
           event: 'INSERT', schema: 'public', table: 'messages',
           filter: `listing_id=eq.${listingId}`
-        }, (payload) => {
+        }, async (payload) => {
           const msg = payload.new as any
-          if (
-            (msg.sender_id === user.id && msg.receiver_id === otherUserId) ||
-            (msg.sender_id === otherUserId && msg.receiver_id === user.id)
-          ) {
+          if (msg.sender_id === user.id && msg.receiver_id === otherUserId) {
             setMessages(prev => [...prev, msg])
+          } else if (msg.sender_id === otherUserId && msg.receiver_id === user.id) {
+            // Mark incoming realtime message as read immediately (we're looking at the convo)
+            await supabase.from('messages').update({ is_read: true }).eq('id', msg.id)
+            setMessages(prev => [...prev, { ...msg, is_read: true }])
           }
         })
         .on('postgres_changes', {
@@ -91,18 +115,49 @@ export default function ConversationPage() {
 
   const handleSend = async () => {
     if (!newMessage.trim() || !currentUser) return
+    const content = newMessage.trim()
+    setNewMessage('')
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+    }
     await supabase.from('messages').insert({
       sender_id: currentUser.id,
       receiver_id: otherUserId,
       listing_id: listingId,
-      content: newMessage,
+      content,
     })
     fetch('/api/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'message', recipientId: otherUserId, listingId, preview: newMessage }),
+      body: JSON.stringify({ type: 'message', recipientId: otherUserId, listingId, preview: content }),
     })
-    setNewMessage('')
+  }
+
+  const handleImageUpload = async (file: File) => {
+    if (!currentUser || imageUploading) return
+    setImageUploading(true)
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+      const path = `chat/${listingId}/${currentUser.id}-${Date.now()}.${ext}`
+      const { error } = await supabase.storage.from('listing-images').upload(path, file, { cacheControl: '3600' })
+      if (error) { setImageUploading(false); return }
+      const { data: { publicUrl } } = supabase.storage.from('listing-images').getPublicUrl(path)
+      await supabase.from('messages').insert({
+        sender_id: currentUser.id,
+        receiver_id: otherUserId,
+        listing_id: listingId,
+        content: '📷 Photo',
+        image_url: publicUrl,
+      })
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'message', recipientId: otherUserId, listingId, preview: '📷 Photo' }),
+      })
+    } finally {
+      setImageUploading(false)
+      if (imageInputRef.current) imageInputRef.current.value = ''
+    }
   }
 
   const handleAcceptAndPay = async (msg: any) => {
@@ -183,6 +238,12 @@ export default function ConversationPage() {
   const isSellerOrder = order && currentUser && order.seller_id === currentUser.id
   const otherProfile = profiles[otherUserId]
   const otherName = otherProfile?.username || otherProfile?.full_name || 'User'
+
+  // Find index of last message sent by me — for "Seen" receipt
+  let lastMyMsgIdx = -1
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].sender_id === currentUser?.id) { lastMyMsgIdx = i; break }
+  }
 
   return (
     <div className="conversation-page">
@@ -268,6 +329,9 @@ export default function ConversationPage() {
             const time = msgDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
             const dateLabel = msgDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 
+            const isLastMine = isMine && idx === lastMyMsgIdx
+            const showSeen = isLastMine && msg.is_read
+
             return (
               <div key={msg.id}>
                 {showDateSep && (
@@ -284,7 +348,15 @@ export default function ConversationPage() {
                       <p className="message-sender-label">{senderName} · {time}</p>
                     )}
 
-                    {isOffer ? (
+                    {msg.image_url ? (
+                      <div className={`message-bubble ${isMine ? 'mine' : 'theirs'}`} style={{ padding: '4px', overflow: 'hidden' }}>
+                        <img
+                          src={msg.image_url}
+                          alt="shared image"
+                          style={{ maxWidth: '220px', maxHeight: '280px', width: '100%', objectFit: 'cover', borderRadius: '14px', display: 'block' }}
+                        />
+                      </div>
+                    ) : isOffer ? (
                       <div className={`message-bubble ${isMine ? 'mine' : 'theirs'}`} style={{ minWidth: 200 }}>
                         <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: isMine ? 'rgba(245,243,230,0.7)' : '#9a9080', margin: '0 0 4px' }}>
                           {msg.offer_status === 'accepted' ? '✓ Offer accepted' : msg.offer_status === 'declined' ? '✗ Offer declined' : msg.offer_status === 'countered' ? '↩ Counter offered' : 'Offer'}
@@ -318,6 +390,10 @@ export default function ConversationPage() {
 
                     {isMine && <p className="message-time-mine">{time}</p>}
                     {!isMine && !senderName && <p className="message-time-theirs">{time}</p>}
+
+                    {showSeen && (
+                      <p className="message-seen-label">Seen</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -329,12 +405,46 @@ export default function ConversationPage() {
 
       {/* INPUT */}
       <div className="conversation-input-row">
+        {/* Image upload button */}
+        <button
+          className="conversation-img-btn"
+          onClick={() => imageInputRef.current?.click()}
+          disabled={imageUploading}
+          title="Send photo"
+        >
+          {imageUploading ? (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 1s linear infinite' }}>
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          )}
+        </button>
         <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(f) }}
+        />
+
+        <textarea
+          ref={textareaRef}
           className="conversation-input"
           placeholder="Write a message..."
           value={newMessage}
-          onChange={e => setNewMessage(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSend()}
+          rows={1}
+          onChange={e => { setNewMessage(e.target.value); adjustTextareaHeight() }}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              handleSend()
+            }
+          }}
         />
         <button className="conversation-send-btn" onClick={handleSend}>Send</button>
       </div>
