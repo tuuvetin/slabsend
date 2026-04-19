@@ -58,15 +58,15 @@ export async function POST(req: Request) {
     const orderNumber = generateOrderNumber()
 
     // Ostajan osoite Stripe-sessiosta
-    const shippingDetails = session.shipping_details || session.customer_details
-    const buyerAddress = shippingDetails?.address || {}
+    const sessionAny = session as any
+    const buyerAddress = sessionAny.shipping_details?.address || session.customer_details?.address || {}
     const buyerPhone = session.customer_details?.phone || ''
-    const buyerCountry = (buyerAddress as any).country || session.metadata?.buyer_country || ''
+    const buyerCountry = buyerAddress.country || session.metadata?.buyer_country || ''
 
     // Haetaan ostajan profiiliosoite jos ei tule Stripestä
-    let buyerAddressStreet = (buyerAddress as any).line1 || ''
-    let buyerAddressPostcode = (buyerAddress as any).postal_code || ''
-    let buyerAddressCity = (buyerAddress as any).city || ''
+    let buyerAddressStreet = buyerAddress.line1 || ''
+    let buyerAddressPostcode = buyerAddress.postal_code || ''
+    let buyerAddressCity = buyerAddress.city || ''
     let buyerPhoneFinal = buyerPhone
 
     if (buyerId && (!buyerAddressStreet || !buyerPhoneFinal)) {
