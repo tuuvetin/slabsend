@@ -67,7 +67,7 @@ export default function NavBar() {
         {/* DESKTOP LINKS */}
         <div className="sb-nav-links">
           <a href="/listings" className="sb-nav-link">Listings</a>
-          <a href="/service" className="sb-nav-link">Service</a>
+          <a href="/listings?tab=rent" className="sb-nav-link">Rent</a>
           <a href="/messages" className="sb-nav-link" style={{ position: 'relative' }}>
             Messages
             {hasUnread && user && (
@@ -117,7 +117,7 @@ export default function NavBar() {
       <div className={`sb-mobile-menu ${menuOpen ? 'open' : ''}`}>
         <button className="sb-mobile-close" onClick={() => setMenuOpen(false)}>×</button>
         <a href="/listings" onClick={() => setMenuOpen(false)}>Listings</a>
-        <a href="/service" onClick={() => setMenuOpen(false)}>Service</a>
+        <a href="/listings?tab=rent" onClick={() => setMenuOpen(false)}>Rent</a>
         <a href="/messages" onClick={() => setMenuOpen(false)} style={{ position: 'relative' }}>
           Messages
           {hasUnread && user && (

@@ -245,7 +245,16 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .login-forgot-btn { font-family: 'Barlow', sans-serif; width: 100%; padding: 8px; margin-top: 4px; background: transparent; color: #9a9080; border: none; font-size: 12px; cursor: pointer; text-align: right; }
 .login-forgot-btn:hover { color: #FC7038; }
-@media (max-width: 600px) { .conversation-scroll { padding: 12px 14px 6px; } .conversation-header { padding: 10px 14px; } .conversation-input-row { padding: 10px 14px; padding-bottom: max(14px, env(safe-area-inset-bottom)); } .message-body { max-width: 82%; } }
+@media (max-width: 600px) {
+  .conversation-scroll { padding: 12px 14px 6px; }
+  .conversation-header { padding: 10px 14px; }
+  .conversation-input-row { padding: 10px 14px; padding-bottom: max(14px, env(safe-area-inset-bottom)); }
+  .message-body { max-width: 82%; }
+  /* 16px prevents iOS auto-zoom on textarea focus */
+  .conversation-input { font-size: 16px; }
+  /* Make photo button more visible on mobile */
+  .conversation-img-btn { background: rgba(26,20,8,0.06); border-radius: 10px; padding: 10px; }
+}
 
 /* ── HOME PAGE ── */
 .home-hero-full {
