@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 import FavoriteButton from '@/app/components/FavoriteButton'
@@ -25,6 +25,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
   const [searchVal, setSearchVal] = useState('')
   const [placeholder, setPlaceholder] = useState('Search for gear, brand or category...')
   const router = useRouter()
+  const eyebrowRef = useRef<HTMLParagraphElement>(null)
 
   useEffect(() => {
     const words = ['Scarpa..', 'Crash pads..', 'T-shirts..', 'Climbing shoes..', 'Harness..', 'La Sportiva..', 'Rent a crashpad..']
@@ -59,6 +60,33 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
   }, [])
 
 
+  useEffect(() => {
+    const el = eyebrowRef.current
+    if (!el) return
+    // Pre-promote to own GPU layer
+    el.style.willChange = 'transform, opacity'
+
+    let rafId: number
+    const onScroll = () => {
+      rafId = requestAnimationFrame(() => {
+        const scrollY = window.scrollY
+        // Hero is 640px desktop / 520px mobile — fade+drift completes at 55% of hero
+        const heroH = window.innerWidth <= 600 ? 520 : 640
+        const progress = Math.min(scrollY / (heroH * 0.55), 1)
+        const y = scrollY * 0.28
+        const opacity = 1 - progress
+        el.style.transform = `translate3d(0, ${y}px, 0)`
+        el.style.opacity = String(opacity)
+      })
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(rafId)
+    }
+  }, [])
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchVal.trim()) router.push(`/listings?search=${encodeURIComponent(searchVal.trim())}`)
@@ -91,7 +119,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
         <div className="home-hero-content-full">
           <div className="home-hero-text">
             <h1 className="home-hero-title">Buy. Sell.<br/>Rent. Climb.</h1>
-            <p className="home-hero-eyebrow">Slabsend — Pre-owned climbing gear</p>
+            <p ref={eyebrowRef} className="home-hero-eyebrow">Slabsend — Pre-owned climbing gear</p>
           </div>
           <div className="home-action-boxes">
             <a href="/listings/new" className="home-action-box-sm accent">
