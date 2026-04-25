@@ -92,6 +92,7 @@ function buildShipmentXml(
   params: MatkahuoltoShipmentParams,
   userId: string,
   password: string,
+  testMode: boolean,
 ): string {
   const weight = Math.max(1, Math.ceil(params.weightKg))
   const ref = escapeXml(params.senderReference || '')
@@ -122,7 +123,7 @@ function buildShipmentXml(
     <ReceiverEmail>${params.receiverEmail}</ReceiverEmail>
     <PayerCode>L</PayerCode>
     <PayerId>${userId}</PayerId>
-    <ProductCode>80</ProductCode>
+    <ProductCode>${testMode ? '84' : '80'}</ProductCode>
     <VAKDescription/>
     <DocumentType>NO</DocumentType>
     <ShipmentRow>
@@ -160,7 +161,7 @@ export async function createMatkahuoltoShipment(
     ? (process.env.MATKAHUOLTO_TEST_PASSWORD || '456')
     : (process.env.MATKAHUOLTO_PASSWORD || '')
 
-  const xml = buildShipmentXml(params, userId, password)
+  const xml = buildShipmentXml(params, userId, password, testMode)
 
   let responseText = ''
   try {

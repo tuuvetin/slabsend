@@ -484,8 +484,8 @@ export default function ListingPage() {
                 <>
                   <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>Order breakdown</p>
 
-                  {/* DELIVERY METHOD TOGGLE — vain kun molemmat saatavilla */}
-                  {!isRental && hasShipping && hasPickup && (
+                  {/* DELIVERY METHOD TOGGLE — vain kun molemmat saatavilla, ei myyjälle, ei ostoksen jälkeen */}
+                  {!isRental && hasShipping && hasPickup && !order && !(currentUser && currentUser.id === listing.user_id) && (
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
                       <button
                         onClick={() => setDeliveryMethod('shipping')}
@@ -513,14 +513,14 @@ export default function ListingPage() {
                   )}
 
                   {/* Vain nouto saatavilla */}
-                  {!isRental && !hasShipping && hasPickup && (
+                  {!isRental && !hasShipping && hasPickup && !order && !(currentUser && currentUser.id === listing.user_id) && (
                     <div style={{ fontSize: '13px', color: '#5a5040', marginBottom: '12px', padding: '8px 12px', background: '#f5f3e6', borderRadius: '6px' }}>
                       Pickup only — agree location with seller
                     </div>
                   )}
 
                   {/* Vain toimitus saatavilla */}
-                  {!isRental && hasShipping && !hasPickup && (
+                  {!isRental && hasShipping && !hasPickup && !order && !(currentUser && currentUser.id === listing.user_id) && (
                     <div style={{ fontSize: '13px', color: '#5a5040', marginBottom: '12px', padding: '8px 12px', background: '#f5f3e6', borderRadius: '6px' }}>
                       Shipping only — Matkahuolto
                     </div>
@@ -709,6 +709,23 @@ export default function ListingPage() {
                 </button>
               </div>
             </>
+          )}
+
+          {/* Message to seller after purchase */}
+          {order && currentUser && currentUser.id !== listing.user_id && (
+            <div style={{ marginTop: '4px' }}>
+              {messageSent && <p className={`form-message ${messageSent.startsWith('Error') ? 'error' : 'success'}`} style={{ marginBottom: '8px' }}>{messageSent}</p>}
+              <textarea
+                className="form-input form-textarea"
+                placeholder="Write a message to the seller..."
+                value={message}
+                onChange={e => setMessage(e.target.value)}
+                style={{ marginBottom: '8px' }}
+              />
+              <button className="form-submit" onClick={handleSendMessage} style={{ background: 'transparent', color: '#1a1408', border: '1px solid rgba(26,20,8,0.2)' }}>
+                Send message
+              </button>
+            </div>
           )}
 
           {!currentUser && !listing.sold && (
