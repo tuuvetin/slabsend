@@ -310,13 +310,14 @@ function sellerEmailWithCode(p: {
       <div style="background: #1a1408; border-radius: 12px; padding: 28px 24px; margin: 28px 0; text-align: center;">
         <p style="color: rgba(245,243,230,0.55); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 10px;">Your Matkahuolto activation code</p>
         <p style="color: #FC7038; font-size: 42px; font-weight: 700; letter-spacing: 0.15em; margin: 0 0 10px; font-family: monospace;">${p.activationCode}</p>
-        <p style="color: rgba(245,243,230,0.45); font-size: 12px; margin: 0;">Write this code on your package and drop it off at any Matkahuolto point</p>
+        <p style="color: rgba(245,243,230,0.45); font-size: 12px; margin: 0 0 20px;">Write this code on your package and drop it off at any Matkahuolto point</p>
+        <a href="https://www.matkahuolto.fi/palvelupistehaku" style="display: inline-block; background: #FC7038; color: #fff; text-decoration: none; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; padding: 12px 24px; border-radius: 8px;">Find nearest drop-off point →</a>
       </div>
 
       <h3 style="font-size: 15px; margin-bottom: 8px;">What to do:</h3>
       <ol style="padding-left: 20px; line-height: 1.8; color: #3a3020;">
         <li>Write the 7-digit code clearly on the package</li>
-        <li>Drop the package at your nearest <a href="https://www.matkahuolto.fi/en/find-service-point" style="color: #FC7038;">Matkahuolto service point</a></li>
+        <li>Drop the package at your nearest Matkahuolto service point</li>
         <li>The buyer will be notified automatically when the parcel is scanned</li>
       </ol>
 
