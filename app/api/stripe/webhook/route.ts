@@ -147,6 +147,7 @@ export async function POST(req: Request) {
     let activationCode: string | undefined
     let trackingNumber: string | undefined
     let matkahuoltoError: string | undefined
+    let matkahuoltoRaw: string | undefined
     let labelCreated = false
 
     if (shippingZone === 'FI' && orderId) {
@@ -199,7 +200,8 @@ export async function POST(req: Request) {
               .eq('id', orderId)
           } else {
             matkahuoltoError = mhResult.error || 'Unknown error'
-            console.error('Matkahuolto API error:', matkahuoltoError, mhResult.rawResponse?.slice(0, 500))
+            matkahuoltoRaw = mhResult.rawResponse?.slice(0, 1000) || ''
+            console.error('Matkahuolto API error:', matkahuoltoError, matkahuoltoRaw)
           }
         } catch (e) {
           matkahuoltoError = String(e)
@@ -274,6 +276,7 @@ export async function POST(req: Request) {
         activationCode,
         trackingNumber,
         matkahuoltoError,
+        matkahuoltoRaw,
         orderId,
       }),
     })
@@ -394,6 +397,7 @@ function adminOrderEmail(p: {
   activationCode?: string
   trackingNumber?: string
   matkahuoltoError?: string
+  matkahuoltoRaw?: string
   orderId: number | null
 }): string {
   const mhBlock = p.shippingZone === 'FI'
@@ -407,6 +411,7 @@ function adminOrderEmail(p: {
         <tr style="background: #fff8f0;"><td style="padding: 8px; border-bottom: 1px solid #eee;" colspan="2"><strong>⚠️ Matkahuolto label FAILED — manual action needed</strong></td></tr>
         <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Error</td><td style="padding: 8px; border-bottom: 1px solid #eee; color: #c0392b;">${p.matkahuoltoError || 'Unknown error'}</td></tr>
         ${p.orderId ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Manual entry</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://slabsend.com'}/admin/orders/${p.orderId}">Enter code manually →</a></td></tr>` : ''}
+        ${p.matkahuoltoRaw ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee; vertical-align: top;">API raw response</td><td style="padding: 8px; border-bottom: 1px solid #eee; font-family: monospace; font-size: 11px; color: #555; word-break: break-all;">${p.matkahuoltoRaw.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td></tr>` : ''}
       `
     : ''
 
