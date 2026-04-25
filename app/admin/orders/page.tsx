@@ -34,27 +34,13 @@ export default function AdminOrdersPage() {
   useEffect(() => {
     if (!authorized) return
     setLoading(true)
-    const since = new Date()
-    if (range === '1m') since.setMonth(since.getMonth() - 1)
-    else if (range === '3m') since.setMonth(since.getMonth() - 3)
-    else if (range === '6m') since.setMonth(since.getMonth() - 6)
-    else if (range === '1y') since.setFullYear(since.getFullYear() - 1)
-    else since.setFullYear(2000) // all
-
-    supabase
-      .from('orders')
-      .select(`
-        id, order_number, status, amount, service_fee, created_at, confirmed_at, auto_confirm_at,
-        listing:listing_id ( title, price ),
-        buyer:buyer_id ( id ),
-        seller:seller_id ( id )
-      `)
-      .gte('created_at', since.toISOString())
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setOrders(data || [])
+    fetch(`/api/admin/orders/list?range=${range}`)
+      .then(r => r.json())
+      .then(data => {
+        setOrders(Array.isArray(data) ? data : [])
         setLoading(false)
       })
+      .catch(() => setLoading(false))
   }, [authorized, range])
 
   if (authorized === null) return null
