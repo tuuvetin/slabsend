@@ -251,7 +251,7 @@ export default function NewListingPage() {
     const serviceItems = Object.entries(servicePrices).map(([name, p]) => ({ name, price: parseFloat(p) || 0 }))
     if (listingType === 'service' && serviceItems.length === 0) { setMessage('Please select at least one service type.'); return }
     if (listingType !== 'service' && shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
-    if (listingType !== 'service' && shippingEnabled && !packageWeight) { setMessage('Syötä paketin paino (kg).'); return }
+    if (listingType === 'sell' && !packageWeight) { setMessage('Please enter the package weight (kg).'); return }
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { window.location.href = '/login'; return }
@@ -636,7 +636,7 @@ export default function NewListingPage() {
               <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
                 Package size
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                 {packageSizes.map(size => (
                   <button
                     key={size.value}
@@ -656,16 +656,33 @@ export default function NewListingPage() {
                   </button>
                 ))}
               </div>
-              <input
-                className="form-input"
-                type="number"
-                placeholder="Weight in kg (e.g. 0.5)"
-                value={packageWeight}
-                onChange={e => setPackageWeight(e.target.value)}
-                style={{ marginBottom: 0 }}
-              />
             </div>
           )}
+        </div>
+      )}
+
+      {/* PACKAGE WEIGHT — pakollinen kaikille sell-ilmoituksille */}
+      {listingType === 'sell' && (
+        <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '4px' }}>
+            Package weight <span style={{ color: '#FC7038' }}>*</span>
+          </p>
+          <p style={{ fontSize: '12px', color: '#9a9080', marginBottom: '10px' }}>
+            Used to calculate the shipping cost shown to buyers.
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input
+              className="form-input"
+              type="number"
+              min="0.1"
+              step="0.1"
+              placeholder="e.g. 0.5"
+              value={packageWeight}
+              onChange={e => setPackageWeight(e.target.value)}
+              style={{ marginBottom: 0, width: '120px' }}
+            />
+            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', color: '#7a7060' }}>kg</span>
+          </div>
         </div>
       )}
 
