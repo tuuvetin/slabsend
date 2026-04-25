@@ -75,7 +75,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             alt="Hero"
             fill
             priority
-            style={{ objectFit: 'cover' }}
+            style={{ objectFit: 'cover', zIndex: 1 }}
             onError={() => setHeroError(true)}
           />
         )}
