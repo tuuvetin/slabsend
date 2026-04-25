@@ -9,7 +9,10 @@
  */
 
 const TEST_ENDPOINT =
-  'https://mhhkiweb1.matkahuolto.fi/scripts101c/mhshipmentxmltesti.wsc/ovtinxml'
+  'https://extservicestest.matkahuolto.fi/mpaketti/mhshipmentxml'
+
+const PROD_ENDPOINT =
+  'https://extservices.matkahuolto.fi/mpaketti/mhshipmentxml'
 
 export interface MatkahuoltoShipmentParams {
   // Myyjä (lähettäjä)
@@ -147,7 +150,7 @@ export async function createMatkahuoltoShipment(
 
   const endpoint = testMode
     ? TEST_ENDPOINT
-    : (process.env.MATKAHUOLTO_API_URL as string)
+    : (process.env.MATKAHUOLTO_API_URL || PROD_ENDPOINT)
 
   const userId = testMode
     ? (process.env.MATKAHUOLTO_TEST_USER_ID || '9430023')
