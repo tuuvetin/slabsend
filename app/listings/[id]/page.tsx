@@ -399,13 +399,13 @@ export default function ListingPage() {
 
           {/* Location */}
           {listing.location && (
-            <p style={{ fontSize: '13px', color: '#9a9080', marginBottom: '20px' }}>{listing.location}</p>
+            <p style={{ fontSize: '13px', color: '#9a9080', marginBottom: '20px' }}>📍 {listing.location}</p>
           )}
 
           {isRental && (listing.pickup_location || listing.pickup_hours_from) && (
             <div style={{ fontSize: '13px', color: '#3a3020', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {listing.pickup_location && (
-                <span>Pickup: <strong>{listing.pickup_location}</strong></span>
+                <span>📍 Pickup: <strong>{listing.pickup_location}</strong></span>
               )}
               {listing.pickup_hours_from && listing.pickup_hours_to && (
                 <span>🕐 Hours: <strong>{listing.pickup_hours_from} – {listing.pickup_hours_to}</strong></span>
@@ -615,7 +615,7 @@ export default function ListingPage() {
                   <div style={{ position: 'relative', marginBottom: '10px' }} className="info-tooltip-wrap">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)' }}>
                       <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em', flex: 1 }}>
-                        Buyer protection included — €{(listing.price * 0.08).toFixed(2)}
+                        🛡️ Buyer protection included — €{(listing.price * 0.08).toFixed(2)}
                       </span>
                       <button className="info-btn">i</button>
                     </div>
@@ -653,7 +653,7 @@ export default function ListingPage() {
                     <div style={{ position: 'relative', marginBottom: '10px' }} className="info-tooltip-wrap">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)' }}>
                         <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em', flex: 1 }}>
-                          Buyer protection included — €{(serviceTotal * 0.08).toFixed(2)}
+                          🛡️ Buyer protection included — €{(serviceTotal * 0.08).toFixed(2)}
                         </span>
                         <button className="info-btn">i</button>
                       </div>
