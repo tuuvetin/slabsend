@@ -399,13 +399,13 @@ export default function ListingPage() {
 
           {/* Location */}
           {listing.location && (
-            <p style={{ fontSize: '13px', color: '#9a9080', marginBottom: '20px' }}>📍 {listing.location}</p>
+            <p style={{ fontSize: '13px', color: '#9a9080', marginBottom: '20px' }}>{listing.location}</p>
           )}
 
           {isRental && (listing.pickup_location || listing.pickup_hours_from) && (
             <div style={{ fontSize: '13px', color: '#3a3020', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {listing.pickup_location && (
-                <span>📍 Pickup: <strong>{listing.pickup_location}</strong></span>
+                <span>Pickup: <strong>{listing.pickup_location}</strong></span>
               )}
               {listing.pickup_hours_from && listing.pickup_hours_to && (
                 <span>🕐 Hours: <strong>{listing.pickup_hours_from} – {listing.pickup_hours_to}</strong></span>
@@ -497,7 +497,7 @@ export default function ListingPage() {
                           background: deliveryMethod === 'shipping' ? '#FC7038' : '#fff',
                           color: deliveryMethod === 'shipping' ? '#fff' : '#7a7060',
                         }}
-                      >📦 Shipping</button>
+                      >Shipping</button>
                       <button
                         onClick={() => setDeliveryMethod('pickup')}
                         style={{
@@ -508,21 +508,21 @@ export default function ListingPage() {
                           background: deliveryMethod === 'pickup' ? '#1a1408' : '#fff',
                           color: deliveryMethod === 'pickup' ? '#fff' : '#7a7060',
                         }}
-                      >🤝 Pickup</button>
+                      >Pickup</button>
                     </div>
                   )}
 
                   {/* Vain nouto saatavilla */}
                   {!isRental && !hasShipping && hasPickup && (
                     <div style={{ fontSize: '13px', color: '#5a5040', marginBottom: '12px', padding: '8px 12px', background: '#f5f3e6', borderRadius: '6px' }}>
-                      🤝 Pickup only — agree location with seller
+                      Pickup only — agree location with seller
                     </div>
                   )}
 
                   {/* Vain toimitus saatavilla */}
                   {!isRental && hasShipping && !hasPickup && (
                     <div style={{ fontSize: '13px', color: '#5a5040', marginBottom: '12px', padding: '8px 12px', background: '#f5f3e6', borderRadius: '6px' }}>
-                      📦 Shipping only — Matkahuolto
+                      Shipping only — Matkahuolto
                     </div>
                   )}
 
@@ -538,7 +538,7 @@ export default function ListingPage() {
                     </div>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>🛡️ Buyer protection</span>
+                    <span>Buyer protection</span>
                     <span>€{serviceFee.toFixed(2)}</span>
                   </div>
 
@@ -546,7 +546,7 @@ export default function ListingPage() {
                   {!isPickup && listing.weight_kg && hasShipping && (
                     <div style={{ marginBottom: '10px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '6px' }}>
-                        <span>📦 Shipping</span>
+                        <span>Shipping</span>
                         <span style={{ fontWeight: 600, color: '#1a1408' }}>€{shippingEur.toFixed(2)}</span>
                       </div>
                       <select
@@ -564,7 +564,7 @@ export default function ListingPage() {
                   {/* Nouto */}
                   {isPickup && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
-                      <span>🤝 Pickup</span>
+                      <span>Pickup</span>
                       <span style={{ fontWeight: 600, color: '#2a6a2a' }}>Free</span>
                     </div>
                   )}
@@ -583,7 +583,7 @@ export default function ListingPage() {
               <>
                 {hasServiceSelection && serviceTotal > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>🛡️ Buyer protection</span>
+                    <span>Buyer protection</span>
                     <span>€{(serviceTotal * 0.08).toFixed(2)}</span>
                   </div>
                 )}
@@ -612,12 +612,13 @@ export default function ListingPage() {
                   <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ width: '100%', marginBottom: '8px' }}>
                     {buyLoading ? 'Loading...' : `Buy now — €${total.toFixed(2)}`}
                   </button>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)', marginBottom: '10px', position: 'relative' }} className="info-tooltip-wrap">
-                    <span style={{ fontSize: '14px' }}>🛡️</span>
-                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em', flex: 1 }}>
-                      Buyer protection included — €{(listing.price * 0.08).toFixed(2)}
-                    </span>
-                    <button className="info-btn">i</button>
+                  <div style={{ position: 'relative', marginBottom: '10px' }} className="info-tooltip-wrap">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)' }}>
+                      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em', flex: 1 }}>
+                        Buyer protection included — €{(listing.price * 0.08).toFixed(2)}
+                      </span>
+                      <button className="info-btn">i</button>
+                    </div>
                     <div className="info-tooltip">
                       Your purchase is protected. The seller receives payment only after you confirm the item is as described. If something goes wrong, contact info@slabsend.com within 48h.
                     </div>
@@ -649,12 +650,13 @@ export default function ListingPage() {
                     {buyLoading ? 'Loading...' : hasServiceSelection && serviceTotal > 0 ? `Buy now — €${(serviceTotal * 1.08).toFixed(2)}` : 'Select services above'}
                   </button>
                   {hasServiceSelection && serviceTotal > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)', marginBottom: '10px', position: 'relative' }} className="info-tooltip-wrap">
-                      <span style={{ fontSize: '14px' }}>🛡️</span>
-                      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em', flex: 1 }}>
-                        Buyer protection included — €{(serviceTotal * 0.08).toFixed(2)}
-                      </span>
-                      <button className="info-btn">i</button>
+                    <div style={{ position: 'relative', marginBottom: '10px' }} className="info-tooltip-wrap">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: '#F0F7F0', borderRadius: '6px', border: '1px solid rgba(42,106,42,0.15)' }}>
+                        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#2a6a2a', letterSpacing: '0.05em', flex: 1 }}>
+                          Buyer protection included — €{(serviceTotal * 0.08).toFixed(2)}
+                        </span>
+                        <button className="info-btn">i</button>
+                      </div>
                       <div className="info-tooltip">
                         Your purchase is protected. The seller receives payment only after you confirm the service was completed as described.
                       </div>
@@ -687,7 +689,7 @@ export default function ListingPage() {
                         <span>Your offer</span><span>€{Number(offerAmount).toFixed(2)}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}>
-                        <span>🛡️ Buyer protection</span><span>€{(Number(offerAmount) * 0.08).toFixed(2)}</span>
+                        <span>Buyer protection</span><span>€{(Number(offerAmount) * 0.08).toFixed(2)}</span>
                       </div>
                       <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)', margin: '6px 0' }} />
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 700, color: '#1a1408' }}>
