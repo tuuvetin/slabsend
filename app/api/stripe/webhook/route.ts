@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { createMatkahuoltoShipment } from '@/app/lib/matkahuolto'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 const resend = new Resend(process.env.RESEND_API_KEY!)
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
     const totalAmount = totalCents / 100
     const baseAmount = parseFloat((itemPriceCents / 100).toFixed(2))
     const serviceFee = parseFloat((serviceFeeCents / 100).toFixed(2))
+    const shippingZone: string = session.metadata?.shipping_zone || ''
 
     // 48h auto-confirm
     const autoConfirmAt = new Date()
@@ -68,11 +70,12 @@ export async function POST(req: Request) {
     let buyerAddressPostcode = buyerAddress.postal_code || ''
     let buyerAddressCity = buyerAddress.city || ''
     let buyerPhoneFinal = buyerPhone
+    let buyerName = session.customer_details?.name || ''
 
     if (buyerId && (!buyerAddressStreet || !buyerPhoneFinal)) {
       const { data: buyerProfile } = await supabaseAdmin
         .from('profiles')
-        .select('address_street, address_postcode, address_city, phone')
+        .select('address_street, address_postcode, address_city, phone, full_name, username')
         .eq('user_id', buyerId)
         .maybeSingle()
       if (buyerProfile) {
@@ -80,46 +83,52 @@ export async function POST(req: Request) {
         buyerAddressPostcode = buyerAddressPostcode || buyerProfile.address_postcode || ''
         buyerAddressCity = buyerAddressCity || buyerProfile.address_city || ''
         buyerPhoneFinal = buyerPhoneFinal || buyerProfile.phone || ''
+        buyerName = buyerName || buyerProfile.full_name || buyerProfile.username || ''
       }
     }
 
     // Luodaan order
-    const orderNumber2 = orderNumber
-    await supabaseAdmin.from('orders').insert({
-      listing_id: parseInt(listingId),
-      buyer_id: buyerId || null,
-      seller_id: sellerUserId || null,
-      amount: baseAmount,
-      service_fee: serviceFee,
-      status: 'paid',
-      stripe_session_id: session.id,
-      auto_confirm_at: autoConfirmAt.toISOString(),
-      order_number: orderNumber2,
-      // Uudet kentät
-      item_price_cents: itemPriceCents,
-      shipping_cost_cents: shippingCostCents,
-      service_fee_cents: serviceFeeCents,
-      total_cents: totalCents,
-      shipping_zone: session.metadata?.shipping_zone || null,
-      buyer_address_street: buyerAddressStreet,
-      buyer_address_postcode: buyerAddressPostcode,
-      buyer_address_city: buyerAddressCity,
-      buyer_country: buyerCountry,
-      buyer_phone: buyerPhoneFinal,
-      buyer_email: buyerEmail,
-    })
+    const { data: insertedOrder } = await supabaseAdmin
+      .from('orders')
+      .insert({
+        listing_id: parseInt(listingId),
+        buyer_id: buyerId || null,
+        seller_id: sellerUserId || null,
+        amount: baseAmount,
+        service_fee: serviceFee,
+        status: 'paid',
+        stripe_session_id: session.id,
+        auto_confirm_at: autoConfirmAt.toISOString(),
+        order_number: orderNumber,
+        // Uudet kentät
+        item_price_cents: itemPriceCents,
+        shipping_cost_cents: shippingCostCents,
+        service_fee_cents: serviceFeeCents,
+        total_cents: totalCents,
+        shipping_zone: shippingZone || null,
+        buyer_address_street: buyerAddressStreet,
+        buyer_address_postcode: buyerAddressPostcode,
+        buyer_address_city: buyerAddressCity,
+        buyer_country: buyerCountry,
+        buyer_phone: buyerPhoneFinal,
+        buyer_email: buyerEmail,
+      })
+      .select('id')
+      .single()
+
+    const orderId: number | null = insertedOrder?.id ?? null
 
     // Haetaan ilmoituksen tiedot
     const { data: listing } = await supabaseAdmin
       .from('listings')
-      .select('title, user_id')
+      .select('title, user_id, weight_kg')
       .eq('id', listingId)
       .single()
 
-    // Haetaan myyjän profiili
+    // Haetaan myyjän profiili (myös osoitetiedot Matkahuoltoa varten)
     const { data: sellerProfile } = await supabaseAdmin
       .from('profiles')
-      .select('username, full_name')
+      .select('username, full_name, address_street, address_postcode, address_city, phone')
       .eq('user_id', sellerUserId || '')
       .single()
 
@@ -134,6 +143,74 @@ export async function POST(req: Request) {
       console.error('Error fetching seller email:', e)
     }
 
+    // ── Matkahuolto auto-generation ─────────────────────────────────────────────
+    let activationCode: string | undefined
+    let trackingNumber: string | undefined
+    let matkahuoltoError: string | undefined
+    let labelCreated = false
+
+    if (shippingZone === 'FI' && orderId) {
+      const sellerReady =
+        sellerProfile?.address_street &&
+        sellerProfile?.address_postcode &&
+        sellerProfile?.address_city &&
+        sellerProfile?.phone &&
+        sellerEmail
+
+      const buyerReady =
+        buyerAddressStreet &&
+        buyerAddressPostcode &&
+        buyerAddressCity &&
+        buyerPhoneFinal
+
+      if (sellerReady && buyerReady) {
+        try {
+          const weightKg = (listing as any)?.weight_kg || 1
+          const mhResult = await createMatkahuoltoShipment({
+            senderName: sellerProfile!.full_name || sellerProfile!.username || sellerName,
+            senderAddress: sellerProfile!.address_street,
+            senderPostal: sellerProfile!.address_postcode,
+            senderCity: sellerProfile!.address_city,
+            senderPhone: sellerProfile!.phone,
+            senderEmail: sellerEmail,
+            receiverName: buyerName || buyerEmail,
+            receiverAddress: buyerAddressStreet,
+            receiverPostal: buyerAddressPostcode,
+            receiverCity: buyerAddressCity,
+            receiverPhone: buyerPhoneFinal,
+            receiverEmail: buyerEmail,
+            weightKg,
+            senderReference: orderNumber,
+          })
+
+          if (mhResult.success && mhResult.activationCode) {
+            activationCode = mhResult.activationCode
+            trackingNumber = mhResult.trackingNumber
+            labelCreated = true
+
+            // Päivitetään tilaus aktivointikoodilla
+            await supabaseAdmin
+              .from('orders')
+              .update({
+                status: 'label_created',
+                activation_code: activationCode,
+                tracking_number: trackingNumber || null,
+              })
+              .eq('id', orderId)
+          } else {
+            matkahuoltoError = mhResult.error || 'Unknown error'
+            console.error('Matkahuolto API error:', matkahuoltoError, mhResult.rawResponse?.slice(0, 500))
+          }
+        } catch (e) {
+          matkahuoltoError = String(e)
+          console.error('Matkahuolto exception:', e)
+        }
+      } else {
+        matkahuoltoError = `Missing address data — seller ready: ${!!sellerReady}, buyer ready: ${!!buyerReady}`
+        console.warn('Matkahuolto skipped:', matkahuoltoError)
+      }
+    }
+
     // Merkitään kaikki avoimet tarjoukset perutuiksi
     await supabaseAdmin
       .from('messages')
@@ -143,7 +220,7 @@ export async function POST(req: Request) {
 
     // Lisätään viesti chattiin ostajan ja myyjän välille
     if (buyerId && sellerUserId) {
-  await supabaseAdmin.from('messages').insert({
+      await supabaseAdmin.from('messages').insert({
         sender_id: buyerId,
         receiver_id: sellerUserId,
         listing_id: parseInt(listingId),
@@ -151,73 +228,54 @@ export async function POST(req: Request) {
       })
     }
 
-    // Sähköposti myyjälle
+    // ── Sähköpostit ──────────────────────────────────────────────────────────────
+
+    // Myyjälle
     if (sellerEmail) {
       await resend.emails.send({
         from: 'Slabsend <info@slabsend.com>',
         to: sellerEmail,
-        subject: `Your item "${listing?.title}" has been sold!`,
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #FC7038;">Your item has been sold! 🎉</h2>
-            <p>Hi ${sellerName},</p>
-            <p><strong>${listing?.title}</strong> has been purchased.</p>
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${orderNumber}</strong></td></tr>
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${listing?.title}</td></tr>
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Amount you'll receive</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${baseAmount} €</strong></td></tr>
-            </table>
-            <p>Please ship the item as soon as possible. The buyer has 48 hours to confirm receipt, after which you'll receive your payment.</p>
-            <p>Questions? Contact <a href="mailto:info@slabsend.com">info@slabsend.com</a></p>
-            <p style="color: #9a9080; font-size: 12px;">Slabsend — Pre-owned climbing gear</p>
-          </div>
-        `,
+        subject: labelCreated
+          ? `Ship now — activation code for "${listing?.title}"`
+          : `Your item "${listing?.title}" has been sold!`,
+        html: labelCreated
+          ? sellerEmailWithCode({ sellerName, listingTitle: listing?.title || '', orderNumber, baseAmount, activationCode: activationCode! })
+          : sellerEmailWithoutCode({ sellerName, listingTitle: listing?.title || '', orderNumber, baseAmount }),
       })
     }
 
-    // Sähköposti ostajalle
+    // Ostajalle
     if (buyerEmail) {
       await resend.emails.send({
         from: 'Slabsend <info@slabsend.com>',
         to: buyerEmail,
         subject: `Order confirmed: ${listing?.title}`,
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #FC7038;">Order confirmed! ✓</h2>
-            <p>Thank you for your purchase.</p>
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${orderNumber}</strong></td></tr>
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${listing?.title}</td></tr>
-              <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Total paid</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${totalAmount} €</strong></td></tr>
-            </table>
-            <p>Once you receive the item, please confirm receipt on the listing page. If anything is wrong, contact us within 48 hours at <a href="mailto:info@slabsend.com">info@slabsend.com</a></p>
-            <p style="color: #9a9080; font-size: 12px;">Slabsend — Pre-owned climbing gear</p>
-          </div>
-        `,
+        html: buyerConfirmationEmail({ listingTitle: listing?.title || '', orderNumber, totalAmount, trackingNumber }),
       })
     }
 
-    // Sähköposti Slabsendille
+    // Adminille
     await resend.emails.send({
       from: 'Slabsend <info@slabsend.com>',
       to: 'info@slabsend.com',
-      subject: `New order: ${listing?.title} — ${orderNumber}`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>New order received</h2>
-          <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${orderNumber}</strong></td></tr>
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${listing?.title}</td></tr>
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Buyer email</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${buyerEmail}</td></tr>
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Seller</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${sellerName} (${sellerEmail})</td></tr>
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Total paid</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${totalAmount} €</strong></td></tr>
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">To transfer to seller</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${baseAmount} €</strong></td></tr>
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Slabsend fee</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${serviceFee} €</td></tr>
-            <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Stripe session</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${session.id}</td></tr>
-          </table>
-          <p><strong>Action needed:</strong> Transfer ${baseAmount} € to seller after buyer confirms receipt or after 48 hours.</p>
-        </div>
-      `,
+      subject: `${labelCreated ? '✅' : shippingZone === 'FI' ? '⚠️' : '📦'} New order: ${listing?.title} — ${orderNumber}`,
+      html: adminOrderEmail({
+        orderNumber,
+        listingTitle: listing?.title || '',
+        buyerEmail,
+        sellerName,
+        sellerEmail,
+        totalAmount,
+        baseAmount,
+        serviceFee,
+        sessionId: session.id,
+        shippingZone,
+        labelCreated,
+        activationCode,
+        trackingNumber,
+        matkahuoltoError,
+        orderId,
+      }),
     })
   }
 
@@ -229,4 +287,145 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ received: true })
+}
+
+// ── Email templates ───────────────────────────────────────────────────────────
+
+function sellerEmailWithCode(p: {
+  sellerName: string
+  listingTitle: string
+  orderNumber: string
+  baseAmount: number
+  activationCode: string
+}): string {
+  return `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+      <h2 style="color: #FC7038;">Your item has been sold! 🎉</h2>
+      <p>Hi ${p.sellerName},</p>
+      <p><strong>${p.listingTitle}</strong> has been purchased and your shipping label is ready.</p>
+
+      <div style="background: #1a1408; border-radius: 12px; padding: 28px 24px; margin: 28px 0; text-align: center;">
+        <p style="color: rgba(245,243,230,0.55); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 10px;">Your Matkahuolto activation code</p>
+        <p style="color: #FC7038; font-size: 42px; font-weight: 700; letter-spacing: 0.15em; margin: 0 0 10px; font-family: monospace;">${p.activationCode}</p>
+        <p style="color: rgba(245,243,230,0.45); font-size: 12px; margin: 0;">Write this code on your package and drop it off at any Matkahuolto point</p>
+      </div>
+
+      <h3 style="font-size: 15px; margin-bottom: 8px;">What to do:</h3>
+      <ol style="padding-left: 20px; line-height: 1.8; color: #3a3020;">
+        <li>Write the 7-digit code clearly on the package</li>
+        <li>Drop the package at your nearest <a href="https://www.matkahuolto.fi/en/find-service-point" style="color: #FC7038;">Matkahuolto service point</a></li>
+        <li>The buyer will be notified automatically when the parcel is scanned</li>
+      </ol>
+
+      <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.orderNumber}</strong></td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.listingTitle}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">You'll receive</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.baseAmount} €</strong> after buyer confirms receipt</td></tr>
+      </table>
+
+      <p>Questions? Contact <a href="mailto:info@slabsend.com" style="color: #FC7038;">info@slabsend.com</a></p>
+      <p style="color: #9a9080; font-size: 12px;">Slabsend — Pre-owned climbing gear</p>
+    </div>
+  `
+}
+
+function sellerEmailWithoutCode(p: {
+  sellerName: string
+  listingTitle: string
+  orderNumber: string
+  baseAmount: number
+}): string {
+  return `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+      <h2 style="color: #FC7038;">Your item has been sold! 🎉</h2>
+      <p>Hi ${p.sellerName},</p>
+      <p><strong>${p.listingTitle}</strong> has been purchased.</p>
+
+      <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.orderNumber}</strong></td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.listingTitle}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">You'll receive</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.baseAmount} €</strong> after buyer confirms receipt</td></tr>
+      </table>
+
+      <p>We're preparing your shipping details. You'll receive a separate email shortly with your Matkahuolto activation code and drop-off instructions.</p>
+      <p>If you don't hear from us within a few hours, please contact <a href="mailto:info@slabsend.com" style="color: #FC7038;">info@slabsend.com</a> with your order number.</p>
+      <p style="color: #9a9080; font-size: 12px;">Slabsend — Pre-owned climbing gear</p>
+    </div>
+  `
+}
+
+function buyerConfirmationEmail(p: {
+  listingTitle: string
+  orderNumber: string
+  totalAmount: number
+  trackingNumber?: string
+}): string {
+  const trackingBlock = p.trackingNumber
+    ? `<p style="margin-top: 16px;">Your parcel tracking number: <strong>${p.trackingNumber}</strong> — track at <a href="https://www.matkahuolto.fi/en/tracking?trackingCode=${p.trackingNumber}" style="color: #FC7038;">Matkahuolto tracking</a></p>`
+    : ''
+  return `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+      <h2 style="color: #FC7038;">Order confirmed! ✓</h2>
+      <p>Thank you for your purchase.</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.orderNumber}</strong></td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.listingTitle}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Total paid</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.totalAmount} €</strong></td></tr>
+      </table>
+      ${trackingBlock}
+      <p>Once you receive the item, please confirm receipt on the listing page. If anything is wrong, contact us within 48 hours at <a href="mailto:info@slabsend.com" style="color: #FC7038;">info@slabsend.com</a></p>
+      <p style="color: #9a9080; font-size: 12px;">Slabsend — Pre-owned climbing gear</p>
+    </div>
+  `
+}
+
+function adminOrderEmail(p: {
+  orderNumber: string
+  listingTitle: string
+  buyerEmail: string
+  sellerName: string
+  sellerEmail: string
+  totalAmount: number
+  baseAmount: number
+  serviceFee: number
+  sessionId: string
+  shippingZone: string
+  labelCreated: boolean
+  activationCode?: string
+  trackingNumber?: string
+  matkahuoltoError?: string
+  orderId: number | null
+}): string {
+  const mhBlock = p.shippingZone === 'FI'
+    ? p.labelCreated
+      ? `
+        <tr style="background: #f0faf0;"><td style="padding: 8px; border-bottom: 1px solid #eee;" colspan="2"><strong>✅ Matkahuolto label auto-generated</strong></td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Activation code</td><td style="padding: 8px; border-bottom: 1px solid #eee; font-size: 20px; font-weight: 700; font-family: monospace; color: #FC7038;">${p.activationCode}</td></tr>
+        ${p.trackingNumber ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Tracking number</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.trackingNumber}</td></tr>` : ''}
+      `
+      : `
+        <tr style="background: #fff8f0;"><td style="padding: 8px; border-bottom: 1px solid #eee;" colspan="2"><strong>⚠️ Matkahuolto label FAILED — manual action needed</strong></td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Error</td><td style="padding: 8px; border-bottom: 1px solid #eee; color: #c0392b;">${p.matkahuoltoError || 'Unknown error'}</td></tr>
+        ${p.orderId ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Manual entry</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://slabsend.com'}/admin/orders/${p.orderId}">Enter code manually →</a></td></tr>` : ''}
+      `
+    : ''
+
+  return `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2>New order received</h2>
+      <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.orderNumber}</strong></td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.listingTitle}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Buyer email</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.buyerEmail}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Seller</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.sellerName} (${p.sellerEmail})</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Total paid</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.totalAmount} €</strong></td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">To transfer to seller</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.baseAmount} €</strong></td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Slabsend fee</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.serviceFee} €</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Shipping zone</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.shippingZone || 'N/A'}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Stripe session</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.sessionId}</td></tr>
+        ${mhBlock}
+      </table>
+      <p><strong>Action needed:</strong> Transfer ${p.baseAmount} € to seller after buyer confirms receipt or after 48 hours.</p>
+    </div>
+  `
 }
