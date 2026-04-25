@@ -1,11 +1,35 @@
+'use client'
+import { useEffect, useState } from 'react'
+
 export default function ServicePage() {
+  const [typed, setTyped] = useState('')
+  const [showCursor, setShowCursor] = useState(true)
+  const fullText = 'Coming Soon'
+
+  useEffect(() => {
+    let i = 0
+    const type = () => {
+      if (i <= fullText.length) {
+        setTyped(fullText.slice(0, i))
+        i++
+        setTimeout(type, i === 1 ? 400 : 80)
+      }
+    }
+    setTimeout(type, 500)
+  }, [])
+
+  useEffect(() => {
+    const blink = setInterval(() => setShowCursor(c => !c), 530)
+    return () => clearInterval(blink)
+  }, [])
+
   return (
     <div style={{ background: '#F5F3E6', minHeight: 'calc(100vh - 64px)' }}>
 
       {/* HERO */}
       <div style={{
         background: '#1a1408',
-        padding: '80px 32px 72px',
+        padding: '88px 32px 80px',
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden',
@@ -21,38 +45,50 @@ export default function ServicePage() {
           </g>
         </svg>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: '640px', margin: '0 auto' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '680px', margin: '0 auto' }}>
           <span style={{
-            display: 'inline-block',
+            display: 'inline-flex',
+            alignItems: 'center',
             fontFamily: 'Barlow Condensed, sans-serif',
-            fontSize: '11px',
+            fontSize: '13px',
             fontWeight: 700,
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
             color: '#FC7038',
             border: '1px solid rgba(252,112,56,0.4)',
-            padding: '5px 16px',
+            padding: '6px 20px',
             borderRadius: '20px',
-            marginBottom: '24px',
+            marginBottom: '28px',
+            minWidth: '160px',
+            justifyContent: 'center',
           }}>
-            Coming Soon
+            {typed}
+            <span style={{
+              display: 'inline-block',
+              width: '2px',
+              height: '13px',
+              background: '#FC7038',
+              marginLeft: '2px',
+              opacity: showCursor ? 1 : 0,
+              verticalAlign: 'middle',
+            }} />
           </span>
 
           <h1 style={{
             fontFamily: 'Barlow Condensed, sans-serif',
-            fontSize: 'clamp(36px, 6vw, 58px)',
+            fontSize: 'clamp(42px, 7vw, 66px)',
             fontWeight: 700,
             letterSpacing: '0.04em',
             textTransform: 'uppercase',
             color: '#F5F3E6',
             lineHeight: 1.05,
-            margin: '0 0 20px',
+            margin: '0 0 22px',
           }}>
             Find the best<br />climbing cobblers
           </h1>
 
           <p style={{
-            fontSize: '16px',
+            fontSize: '17px',
             color: 'rgba(245,243,230,0.6)',
             lineHeight: 1.7,
             margin: '0 auto',
