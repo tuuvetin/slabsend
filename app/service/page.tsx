@@ -1,158 +1,180 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
-import FavoriteButton from '@/app/components/FavoriteButton'
-
-const serviceTypes = [
-  'Shoe resoling',
-  'Gear repair',
-  'Harness inspection',
-  'Rope inspection',
-  'Gear cleaning',
-  'Custom alterations',
-  'General service',
-  'Other',
-]
-
-const europeanCountries = [
-  'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic',
-  'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hungary',
-  'Iceland', 'Ireland', 'Italy', 'Latvia', 'Liechtenstein', 'Lithuania',
-  'Luxembourg', 'Malta', 'Netherlands', 'Norway', 'Poland', 'Portugal',
-  'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland',
-  'United Kingdom',
-]
-
-function parseCategories(raw: string | null | undefined): string[] {
-  if (!raw) return []
-  try {
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
-    if (parsed.length === 0) return []
-    if (typeof parsed[0] === 'string') return parsed
-    return parsed.map((i: any) => i.name).filter(Boolean)
-  } catch { return [raw] }
-}
-
 export default function ServicePage() {
-  const [services, setServices] = useState<any[]>([])
-  const [filtered, setFiltered] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [currentUser, setCurrentUser] = useState<any>(null)
-  const [filterType, setFilterType] = useState('')
-  const [filterCountry, setFilterCountry] = useState('')
-  const supabase = createClient()
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setCurrentUser(user))
-    supabase
-      .from('listings')
-      .select('*')
-      .eq('listing_type', 'service')
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setServices(data || [])
-        setFiltered(data || [])
-        setLoading(false)
-      })
-  }, [])
-
-  useEffect(() => {
-    let result = services
-    if (filterType) result = result.filter(s => parseCategories(s.category).includes(filterType))
-    if (filterCountry) result = result.filter(s => s.country === filterCountry)
-    setFiltered(result)
-  }, [filterType, filterCountry, services])
-
   return (
-    <div className="service-page">
-      <div className="service-header">
-        <div>
-          <h1 className="service-title">Service & Repair</h1>
-          <p className="service-subtitle">Find a resoler, repair shop, or gear inspector near you</p>
+    <div style={{ background: '#F5F3E6', minHeight: 'calc(100vh - 64px)' }}>
+
+      {/* HERO */}
+      <div style={{
+        background: '#1a1408',
+        padding: '80px 32px 72px',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* subtle topo lines */}
+        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.07 }} viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice">
+          <g fill="none" stroke="#c8a84a" strokeWidth="1">
+            <path d="M-10,340 Q200,310 400,325 Q600,340 800,310 Q1000,280 1210,295"/>
+            <path d="M-10,290 Q200,260 400,275 Q600,290 800,260 Q1000,230 1210,245"/>
+            <path d="M-10,240 Q200,212 400,226 Q600,240 800,212 Q1000,184 1210,197"/>
+            <path d="M-10,192 Q200,165 400,178 Q600,192 800,165 Q1000,138 1210,150"/>
+            <path d="M-10,145 Q200,119 400,132 Q600,145 800,119 Q1000,93 1210,105"/>
+          </g>
+        </svg>
+
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '640px', margin: '0 auto' }}>
+          <span style={{
+            display: 'inline-block',
+            fontFamily: 'Barlow Condensed, sans-serif',
+            fontSize: '11px',
+            fontWeight: 700,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: '#FC7038',
+            border: '1px solid rgba(252,112,56,0.4)',
+            padding: '5px 16px',
+            borderRadius: '20px',
+            marginBottom: '24px',
+          }}>
+            Coming Soon
+          </span>
+
+          <h1 style={{
+            fontFamily: 'Barlow Condensed, sans-serif',
+            fontSize: 'clamp(36px, 6vw, 58px)',
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
+            color: '#F5F3E6',
+            lineHeight: 1.05,
+            margin: '0 0 20px',
+          }}>
+            Find the best<br />climbing cobblers
+          </h1>
+
+          <p style={{
+            fontSize: '16px',
+            color: 'rgba(245,243,230,0.6)',
+            lineHeight: 1.7,
+            margin: '0 auto',
+            maxWidth: '480px',
+          }}>
+            We're building a directory of Europe's finest climbing shoe resolers and repair specialists — so your shoes get a second life and you get more sends.
+          </p>
         </div>
-        {currentUser ? (
-          <a
-            href="/listings/new?type=service"
-            className="form-submit"
-            style={{ width: 'auto', padding: '10px 24px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
-          >
-            + List your service
-          </a>
-        ) : (
-          <a href="/login" className="sb-btn-sell">Sign in to list a service</a>
-        )}
       </div>
 
-      <div className="service-filters">
-        <select className="listings-select" value={filterType} onChange={e => setFilterType(e.target.value)}>
-          <option value="">All service types</option>
-          {serviceTypes.map(t => <option key={t} value={t}>{t}</option>)}
-        </select>
-        <select className="listings-select" value={filterCountry} onChange={e => setFilterCountry(e.target.value)}>
-          <option value="">All countries</option>
-          {europeanCountries.map(c => (
-            <option key={c} value={c}>{c}</option>
+      {/* WHAT'S COMING */}
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '64px 32px 80px' }}>
+
+        <p style={{
+          fontFamily: 'Barlow Condensed, sans-serif',
+          fontSize: '11px',
+          fontWeight: 700,
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          color: '#9a9080',
+          marginBottom: '40px',
+          textAlign: 'center',
+        }}>
+          What you'll find here
+        </p>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '20px',
+          marginBottom: '64px',
+        }}>
+          {[
+            {
+              icon: '👟',
+              title: 'Shoe resoling',
+              desc: 'Professional rubber replacement for worn climbing shoes. Full resole, half resole, rand repair.',
+            },
+            {
+              icon: '🪡',
+              title: 'Stitching & repairs',
+              desc: 'Rand repair, toe patches, stitching fixes — extend the life of your favourite shoes.',
+            },
+            {
+              icon: '📍',
+              title: 'Find near you',
+              desc: 'Filter by country and city. Ship your shoes or drop them off locally.',
+            },
+          ].map(item => (
+            <div key={item.title} style={{
+              background: '#fff',
+              border: '1px solid rgba(26,20,8,0.08)',
+              borderRadius: '12px',
+              padding: '28px 24px',
+            }}>
+              <div style={{ fontSize: '28px', marginBottom: '14px' }}>{item.icon}</div>
+              <h3 style={{
+                fontFamily: 'Barlow Condensed, sans-serif',
+                fontSize: '16px',
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: '#1a1408',
+                marginBottom: '8px',
+              }}>
+                {item.title}
+              </h3>
+              <p style={{ fontSize: '14px', color: '#7a7060', lineHeight: 1.6 }}>{item.desc}</p>
+            </div>
           ))}
-        </select>
-      </div>
-
-      {loading && <p className="listing-loading">Loading...</p>}
-
-      {!loading && filtered.length === 0 && (
-        <div className="service-empty">
-          <p>No service providers listed yet.</p>
-          <p>Be the first to list your service.</p>
         </div>
-      )}
 
-      <div className="listings-grid">
-        {filtered.map(listing => {
-          const cats = parseCategories(listing.category)
-          const visibleCats = cats.slice(0, 2)
-          const extraCount = cats.length - 2
-          const location = [listing.city, listing.country].filter(Boolean).join(', ')
-
-          return (
-            <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
-              <div className="listing-card">
-                <div style={{ position: 'relative' }}>
-                  {listing.images && listing.images.length > 0 ? (
-                    <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
-                  ) : (
-                    <div className="listing-card-no-img">No image</div>
-                  )}
-                  <FavoriteButton listingId={listing.id} />
-                </div>
-                <div className="listing-card-body">
-                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#F5F3E6', background: '#1a1408', display: 'inline-block', padding: '2px 8px', borderRadius: 4, marginBottom: 6 }}>
-                    Service
-                  </p>
-                  <h3 className="listing-card-title">{listing.title}</h3>
-
-                  {cats.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
-                      {visibleCats.map(cat => (
-                        <span key={cat} className="listing-card-cat" style={{ margin: 0, background: 'rgba(26,20,8,0.06)', padding: '1px 7px', borderRadius: 20 }}>{cat}</span>
-                      ))}
-                      {extraCount > 0 && (
-                        <span className="listing-card-cat" style={{ margin: 0, background: 'rgba(26,20,8,0.06)', padding: '1px 7px', borderRadius: 20 }}>+{extraCount}</span>
-                      )}
-                    </div>
-                  )}
-
-                  {listing.price
-                    ? <p className="listing-card-price">from {listing.price} €</p>
-                    : <p className="listing-card-price" style={{ color: '#c0b8a8' }}>Price on request</p>
-                  }
-                  <p className="listing-card-meta">
-                    {location && <span className="listing-card-loc">📍 {location}</span>}
-                  </p>
-                </div>
-              </div>
-            </a>
-          )
-        })}
+        {/* CTA */}
+        <div style={{
+          background: '#1a1408',
+          borderRadius: '16px',
+          padding: '40px 32px',
+          textAlign: 'center',
+        }}>
+          <p style={{
+            fontFamily: 'Barlow Condensed, sans-serif',
+            fontSize: '11px',
+            fontWeight: 700,
+            letterSpacing: '0.16em',
+            textTransform: 'uppercase',
+            color: 'rgba(245,243,230,0.4)',
+            marginBottom: '12px',
+          }}>
+            Are you a cobbler or resoler?
+          </p>
+          <h2 style={{
+            fontFamily: 'Barlow Condensed, sans-serif',
+            fontSize: '28px',
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+            color: '#F5F3E6',
+            marginBottom: '10px',
+          }}>
+            Get listed when we launch
+          </h2>
+          <p style={{ fontSize: '14px', color: 'rgba(245,243,230,0.55)', marginBottom: '24px', lineHeight: 1.6 }}>
+            We're onboarding the first service providers now.<br />Reach climbers across Europe who need your skills.
+          </p>
+          <a
+            href="mailto:info@slabsend.com?subject=Service listing - I want to get listed"
+            style={{
+              display: 'inline-block',
+              fontFamily: 'Barlow Condensed, sans-serif',
+              fontWeight: 700,
+              fontSize: '12px',
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              background: '#FC7038',
+              color: '#F5F3E6',
+              padding: '12px 28px',
+              borderRadius: '8px',
+              textDecoration: 'none',
+            }}
+          >
+            Contact us to get listed →
+          </a>
+        </div>
       </div>
     </div>
   )
