@@ -11,8 +11,10 @@ const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
+
   // Auth check
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -27,7 +29,7 @@ export async function GET(
       listing:listing_id ( title, price, weight_kg, images ),
       seller_profile:profiles!orders_seller_id_fkey ( username, full_name, address_street, address_postcode, address_city, phone )
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error || !order) {
@@ -35,7 +37,7 @@ export async function GET(
     const { data: orderPlain } = await supabaseAdmin
       .from('orders')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (!orderPlain) return NextResponse.json({ error: 'Order not found' }, { status: 404 })

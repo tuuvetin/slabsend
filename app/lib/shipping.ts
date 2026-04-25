@@ -1,5 +1,14 @@
-// Matkahuolto-hinnat — Casavend Oy hintaliite 19.04.2026
-// Kaikki hinnat ALV 0% → kerrotaan × 1.255 (ALV 25,5%)
+// Matkahuolto-hinnat — Hinnasto 1.1.2026 (ALV 0%) + Slabsend-marginaali
+//
+// Kustannus meille (ALV 0% → ×1.255):
+//   FI  Lähellä-paketti  ≤10 kg : 6,10 € → 7,66 € incl. ALV
+//   BALTIC Ulkomaan Lähellä ≤10 kg : 7,96 € → 9,99 € incl. ALV
+//   SE  Ulkomaan Lähellä  : 9,20 € + 0,31 €/kg → ~11,94 € (1 kg) incl. ALV
+//
+// Ostajalta veloitetaan (kiinteät, marginaali ~15–20 %):
+//   FI     8,90 € (≤10 kg)  +0,50 €/lisäkg
+//   BALTIC 11,90 € (≤10 kg) +0,50 €/lisäkg
+//   SE     14,90 € (≤5 kg)  +0,60 €/lisäkg
 
 export const SELLER_COUNTRIES = ['FI'] as const
 export const BUYER_COUNTRIES = ['FI', 'EE', 'LV', 'LT', 'SE'] as const
@@ -15,8 +24,6 @@ export const BUYER_COUNTRY_NAMES: Record<string, string> = {
 export type BuyerCountry = typeof BUYER_COUNTRIES[number]
 export type ShippingZone = 'FI' | 'BALTIC' | 'SE'
 
-const VAT = 1.255
-
 export function getShippingZone(buyerCountry: string): ShippingZone | null {
   if (buyerCountry === 'FI') return 'FI'
   if (['EE', 'LV', 'LT'].includes(buyerCountry)) return 'BALTIC'
@@ -25,59 +32,40 @@ export function getShippingZone(buyerCountry: string): ShippingZone | null {
 }
 
 export function getZoneLabel(zone: ShippingZone): string {
-  if (zone === 'FI') return 'Suomi'
-  if (zone === 'BALTIC') return 'Baltia'
-  return 'Ruotsi'
+  if (zone === 'FI') return 'Finland'
+  if (zone === 'BALTIC') return 'Estonia / Latvia / Lithuania'
+  return 'Sweden'
 }
 
 export function getServiceName(zone: ShippingZone): string {
-  if (zone === 'FI') return 'Matkahuolto XXS'
+  if (zone === 'FI') return 'Matkahuolto Lähellä-paketti'
   if (zone === 'BALTIC') return 'Matkahuolto Ulkomaan Lähellä'
   return 'Matkahuolto Ulkomaan Lähellä (SE)'
 }
 
 /**
- * Laskee toimitushinnan senteissä, ALV 25,5% sisältyen.
+ * Palauttaa toimitushinnan senteissä (ALV sisältyy, B2C-hinta).
  *
- * FI   → XXS: kiinteä 4,86 € (alv 0) = 6,10 € (alv 25,5%)
- *         Yli 3x25x40cm tai paino yli XXS → Lähellä-paketti:
- *         0–10 kg = 6,10 € (alv 0), lisä 0,31 €/kg yli 10 kg
- *
- * BALTIC (EE/LV/LT) → Ulkomaan Lähellä FIEE/FILT/FILV:
- *         0–10 kg = 7,96 € (alv 0), lisä 0,31 €/kg yli 10 kg
- *
- * SE   → Ulkomaan Lähellä FISE:
- *         perushinta 9,20 € (alv 0) + 0,31 €/kg (kaikki kilot)
+ * FI     : 8,90 € (0–10 kg), +0,50 €/kg yli 10 kg
+ * BALTIC : 11,90 € (0–10 kg), +0,50 €/kg yli 10 kg
+ * SE     : 14,90 € (0–5 kg), +0,60 €/kg yli 5 kg
  */
 export function calculateShippingCost(zone: ShippingZone, weightKg: number): number {
-  const w = Math.max(0.1, weightKg)
+  const w = Math.max(1, Math.ceil(weightKg))   // min 1 kg, pyöristys ylös
 
   if (zone === 'FI') {
-    // Käytetään XXS kun mahtuu (3x25x40cm) → ilmoituksen tekijä valitsee
-    // XXS: 4,86 € alv0, kiinteä
-    // Lähellä: 6,10 € / 10 kg + 0,31 € / lisäkg
-    // MVP: kaikki FI-lähetykset XXS-hinnalla, jos paino > 10 kg → Lähellä
-    if (w <= 10) {
-      // Pienet: XXS 4,86 alv0
-      return Math.round(4.86 * VAT * 100)  // 610 snt = 6,10 €
-    } else {
-      const extra = Math.ceil(w) - 10
-      return Math.round((6.10 + extra * 0.31) * VAT * 100)
-    }
+    if (w <= 10) return 890
+    return 890 + (w - 10) * 50
   }
 
   if (zone === 'BALTIC') {
-    // FIEE/FILT/FILV: 7,96 € / 10 kg, +0,31 €/kg yli 10 kg
-    if (w <= 10) {
-      return Math.round(7.96 * VAT * 100)  // 999 snt ≈ 9,99 €
-    } else {
-      const extra = Math.ceil(w) - 10
-      return Math.round((7.96 + extra * 0.31) * VAT * 100)
-    }
+    if (w <= 10) return 1190
+    return 1190 + (w - 10) * 50
   }
 
-  // SE: FISE: 9,20 € per lähetys + 0,31 €/kg kaikki kilot
-  return Math.round((9.20 + Math.ceil(w) * 0.31) * VAT * 100)
+  // SE
+  if (w <= 5) return 1490
+  return 1490 + (w - 5) * 60
 }
 
 export function isValidBuyerCountry(country: string): country is BuyerCountry {
