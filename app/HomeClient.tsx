@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 import FavoriteButton from '@/app/components/FavoriteButton'
+import { parseSearchIntent } from '@/app/lib/searchIntent'
 
 interface Category {
   key: string
@@ -89,7 +90,13 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    if (searchVal.trim()) router.push(`/listings?search=${encodeURIComponent(searchVal.trim())}`)
+    if (!searchVal.trim()) return
+    const { tab, category, subcategory, cleanQuery } = parseSearchIntent(searchVal)
+    const params = new URLSearchParams({ tab })
+    if (cleanQuery) params.set('search', cleanQuery)
+    if (category) params.set('category', category)
+    if (subcategory) params.set('subcategory', subcategory)
+    router.push(`/listings?${params.toString()}`)
   }
 
   return (

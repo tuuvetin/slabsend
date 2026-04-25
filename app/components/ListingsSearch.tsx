@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { parseSearchIntent } from '@/app/lib/searchIntent'
 
 const categories: Record<string, string[]> = {
   'Clothing': ['T-Shirts', 'Hoodies', 'Pants', 'Shorts', 'Jackets', 'Other clothing'],
@@ -39,7 +40,16 @@ export default function ListingsSearch({ tab, search, category, subcategory, cou
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    router.push(buildHref(tab))
+    if (searchVal.trim()) {
+      const { tab: intentTab, category: intentCat, subcategory: intentSub, cleanQuery } = parseSearchIntent(searchVal)
+      // Use intent-detected values when the dropdowns haven't been manually set
+      const resolvedTab = intentTab
+      const resolvedCat = intentCat || categoryVal
+      const resolvedSub = intentSub || subcategoryVal
+      router.push(`/listings?tab=${resolvedTab}&search=${encodeURIComponent(cleanQuery)}&category=${encodeURIComponent(resolvedCat)}&subcategory=${encodeURIComponent(resolvedSub)}&country=${encodeURIComponent(countryVal)}`)
+    } else {
+      router.push(buildHref(tab))
+    }
   }
 
   return (
