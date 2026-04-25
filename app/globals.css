@@ -235,26 +235,17 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .message-time-theirs { font-size: 11px; color: #9a9080; margin: 3px 0 0 4px; }
 .message-seen-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.06em; color: #9a9080; margin: 2px 4px 0 0; }
 .conversation-input-row { display: -webkit-flex; display: flex; -webkit-align-items: flex-end; align-items: flex-end; gap: 10px; padding: 12px 20px; padding-bottom: max(16px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(26,20,8,0.08); background: #F5F3E6; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.conversation-input { font-family: 'Barlow', sans-serif; -webkit-flex: 1; flex: 1; padding: 10px 18px; background: #fff; border: 1px solid rgba(26,20,8,0.18); border-radius: 20px; font-size: 16px; color: #1a1408; outline: none; resize: none; overflow: hidden; line-height: 1.5; min-height: 42px; max-height: 120px; }
+.conversation-input { font-family: 'Barlow', sans-serif; -webkit-flex: 1; flex: 1; padding: 10px 18px; background: #fff; border: 1px solid rgba(26,20,8,0.18); border-radius: 20px; font-size: 14px; color: #1a1408; outline: none; resize: none; overflow: hidden; line-height: 1.5; min-height: 42px; max-height: 120px; }
 .conversation-input::placeholder { color: #9a9080; }
-.conversation-img-btn { background: #fff; border: 1px solid rgba(26,20,8,0.14); color: #7a7060; cursor: pointer; padding: 9px; -webkit-flex-shrink: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; width: 42px; height: 42px; transition: color 0.15s, border-color 0.15s; }
-.conversation-img-btn:hover { color: #FC7038; border-color: #FC7038; }
+.conversation-img-btn { background: transparent; border: none; color: #9a9080; cursor: pointer; padding: 8px; -webkit-flex-shrink: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: color 0.15s; margin-bottom: 1px; }
+.conversation-img-btn:hover { color: #FC7038; }
 .conversation-img-btn:disabled { opacity: 0.4; cursor: default; }
 .conversation-send-btn { font-family: 'Barlow Condensed', sans-serif; background: #FC7038; color: #F5F3E6; border: none; padding: 10px 20px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: background 0.15s; transition: background 0.15s; white-space: nowrap; -webkit-flex-shrink: 0; flex-shrink: 0; margin-bottom: 1px; }
 .conversation-send-btn:hover { background: #e05e28; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .login-forgot-btn { font-family: 'Barlow', sans-serif; width: 100%; padding: 8px; margin-top: 4px; background: transparent; color: #9a9080; border: none; font-size: 12px; cursor: pointer; text-align: right; }
 .login-forgot-btn:hover { color: #FC7038; }
-@media (max-width: 600px) {
-  .conversation-scroll { padding: 12px 14px 6px; }
-  .conversation-header { padding: 10px 14px; }
-  .conversation-input-row { padding: 10px 14px; padding-bottom: max(14px, env(safe-area-inset-bottom)); }
-  .message-body { max-width: 82%; }
-  /* 16px prevents iOS auto-zoom on textarea focus */
-  .conversation-input { font-size: 16px; }
-  /* Make photo button more visible on mobile */
-  .conversation-img-btn { background: rgba(26,20,8,0.06); border-radius: 10px; padding: 10px; }
-}
+@media (max-width: 600px) { .conversation-scroll { padding: 12px 14px 6px; } .conversation-header { padding: 10px 14px; } .conversation-input-row { padding: 10px 14px; padding-bottom: max(14px, env(safe-area-inset-bottom)); } .message-body { max-width: 82%; } }
 
 /* ── HOME PAGE ── */
 .home-hero-full {

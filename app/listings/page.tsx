@@ -3,7 +3,6 @@ import ListingsSearch from '@/app/components/ListingsSearch'
 import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 import FavoriteButton from '@/app/components/FavoriteButton'
 
-
 export const revalidate = 0
 
 const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']

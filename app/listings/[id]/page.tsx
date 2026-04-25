@@ -1,5 +1,4 @@
 'use client'
-
 import RentalCalendar from '@/app/components/RentalCalendar'
 import FavoriteButton from '@/app/components/FavoriteButton'
 import ReviewForm from '@/app/components/ReviewForm'

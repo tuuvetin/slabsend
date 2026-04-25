@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-
 import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 import FavoriteButton from '@/app/components/FavoriteButton'
 
@@ -69,7 +68,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
     <main>
       {/* HERO */}
       <div className="home-hero-full" style={{height: '640px', minHeight: '640px'}}>
-        {!heroError && heroImageUrl && (
+        {!heroError && (
           <img src={heroImageUrl} alt="Hero" className="home-hero-bg-img" onError={() => setHeroError(true)} fetchPriority="high" loading="eager" />
         )}
         <svg className="home-topo" viewBox="0 0 1400 640" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -173,7 +172,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             {categories.map(cat => (
               <a key={cat.key} href={cat.href} className="home-cat-card" style={{ scrollSnapAlign: 'start' }}>
                 <div className="home-cat-img-wrap">
-                  {!catErrors[cat.key] && catImageUrls[cat.key] ? (
+                  {!catErrors[cat.key] ? (
                     <img
                       src={catImageUrls[cat.key]}
                       alt={cat.label}

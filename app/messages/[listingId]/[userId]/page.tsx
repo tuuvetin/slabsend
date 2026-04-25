@@ -439,7 +439,6 @@ export default function ConversationPage() {
           value={newMessage}
           rows={1}
           onChange={e => { setNewMessage(e.target.value); adjustTextareaHeight() }}
-          onFocus={() => { setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 350) }}
           onKeyDown={e => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault()
