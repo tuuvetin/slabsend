@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import ListingsSearch from '@/app/components/ListingsSearch'
 import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 import FavoriteButton from '@/app/components/FavoriteButton'
-import Image from 'next/image'
+
 
 export const revalidate = 0
 
@@ -70,15 +70,9 @@ export default async function ListingsPage({
           return (
             <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
               <div className="listing-card" style={listing.sold ? { opacity: 0.6 } : undefined}>
-                <div style={{ position: 'relative', height: '300px' }}>
+                <div style={{ position: 'relative' }}>
                   {listing.images && listing.images.length > 0 ? (
-                    <Image
-                      src={listing.images[0]}
-                      alt={listing.title}
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'top', borderRadius: '10px 10px 0 0' }}
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
-                    />
+                    <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
                   ) : (
                     <div className="listing-card-no-img">No image</div>
                   )}

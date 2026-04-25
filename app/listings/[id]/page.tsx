@@ -1,5 +1,5 @@
 'use client'
-import Image from 'next/image'
+
 import RentalCalendar from '@/app/components/RentalCalendar'
 import FavoriteButton from '@/app/components/FavoriteButton'
 import ReviewForm from '@/app/components/ReviewForm'
@@ -311,14 +311,11 @@ export default function ListingPage() {
           {images.length > 0 ? (
             <>
               {/* Main image */}
-              <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: '#e8e4d8', cursor: 'pointer', aspectRatio: '4/3' }} onClick={() => setLightboxIndex(0)}>
-                <Image
+              <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: '#e8e4d8', cursor: 'pointer' }} onClick={() => setLightboxIndex(0)}>
+                <img
                   src={images[lightboxIndex ?? 0] ?? images[0]}
                   alt={listing.title}
-                  fill
-                  priority
-                  style={{ objectFit: 'cover' }}
-                  sizes="(max-width: 900px) 100vw, 600px"
+                  style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }}
                 />
                 <FavoriteButton listingId={listing.id} />
                 {images.length > 1 && (
@@ -334,14 +331,12 @@ export default function ListingPage() {
               {images.length > 1 && (
                 <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
                   {images.map((url, i) => (
-                    <Image
+                    <img
                       key={i}
                       src={url}
                       alt=""
-                      width={72}
-                      height={72}
                       onClick={() => setLightboxIndex(i)}
-                      style={{ objectFit: 'cover', borderRadius: '6px', cursor: 'pointer', border: (lightboxIndex ?? 0) === i ? '2px solid #FC7038' : '2px solid transparent', opacity: (lightboxIndex ?? 0) === i ? 1 : 0.7, transition: 'all 0.15s' }}
+                      style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '6px', cursor: 'pointer', border: (lightboxIndex ?? 0) === i ? '2px solid #FC7038' : '2px solid transparent', opacity: (lightboxIndex ?? 0) === i ? 1 : 0.7, transition: 'all 0.15s' }}
                     />
                   ))}
                 </div>

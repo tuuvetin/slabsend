@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import NextImage from 'next/image'
+
 import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 import FavoriteButton from '@/app/components/FavoriteButton'
 
@@ -70,14 +70,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
       {/* HERO */}
       <div className="home-hero-full" style={{height: '640px', minHeight: '640px'}}>
         {!heroError && heroImageUrl && (
-          <NextImage
-            src={heroImageUrl}
-            alt="Hero"
-            fill
-            priority
-            style={{ objectFit: 'cover', zIndex: 1 }}
-            onError={() => setHeroError(true)}
-          />
+          <img src={heroImageUrl} alt="Hero" className="home-hero-bg-img" onError={() => setHeroError(true)} fetchPriority="high" loading="eager" />
         )}
         <svg className="home-topo" viewBox="0 0 1400 640" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
           <rect width="1400" height="640" fill="#3a5460"/>
@@ -181,14 +174,11 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               <a key={cat.key} href={cat.href} className="home-cat-card" style={{ scrollSnapAlign: 'start' }}>
                 <div className="home-cat-img-wrap">
                   {!catErrors[cat.key] && catImageUrls[cat.key] ? (
-                    <NextImage
+                    <img
                       src={catImageUrls[cat.key]}
                       alt={cat.label}
-                      fill
-                      style={{ objectFit: 'cover', transition: 'transform 0.3s ease' }}
                       className="home-cat-img"
                       onError={() => setCatErrors(prev => ({ ...prev, [cat.key]: true }))}
-                      sizes="(max-width: 640px) 50vw, 200px"
                     />
                   ) : (
                     <div className="home-cat-img-fallback" style={{ background: cat.defaultBg }} />
@@ -226,15 +216,9 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
           {listings.map((listing: any) => (
             <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
               <div className="listing-card">
-                <div style={{ position: 'relative', height: '300px' }}>
+                <div style={{ position: 'relative' }}>
                   {listing.images && listing.images.length > 0 ? (
-                    <NextImage
-                      src={listing.images[0]}
-                      alt={listing.title}
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'top', borderRadius: '10px 10px 0 0' }}
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
-                    />
+                    <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
                   ) : (
                     <div className="listing-card-no-img">No image</div>
                   )}
