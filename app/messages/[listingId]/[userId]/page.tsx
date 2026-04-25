@@ -446,12 +446,6 @@ export default function ConversationPage() {
               handleSend()
             }
           }}
-          onFocus={() => {
-            // Scroll to bottom after keyboard appears (iOS needs the delay)
-            setTimeout(() => {
-              bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-            }, 350)
-          }}
         />
         <button className="conversation-send-btn" onClick={handleSend}>Send</button>
       </div>
