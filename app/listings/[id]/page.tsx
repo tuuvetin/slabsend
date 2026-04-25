@@ -35,8 +35,9 @@ export default function ListingPage() {
   const [togglingSOLD, setTogglingSOLD] = useState(false)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [justPublished, setJustPublished] = useState(false)
-  // Shipping
+  // Shipping / delivery
   const [buyerCountry, setBuyerCountry] = useState('FI')
+  const [deliveryMethod, setDeliveryMethod] = useState<'shipping' | 'pickup'>('shipping')
   const supabase = createClient()
 
   useEffect(() => {
@@ -80,6 +81,9 @@ export default function ListingPage() {
 
       setListing(data)
       setLoading(false)
+      // Oletusvalinta: jos ei toimitusta → nouto; jos molemmat → toimitus
+      if (!data.shipping_enabled && data.pickup_enabled) setDeliveryMethod('pickup')
+      else setDeliveryMethod('shipping')
 
       if (data?.user_id) {
         supabase.from('profiles').select('username, full_name, avatar_url, location').eq('user_id', data.user_id).single().then(({ data: p }) => setSellerProfile(p))
@@ -174,8 +178,9 @@ export default function ListingPage() {
 
   const proceedToCheckout = async () => {
     setBuyLoading(true)
-    const zone = getShippingZone(buyerCountry)
-    const shippingCents = listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
+    const isPickup = deliveryMethod === 'pickup'
+    const zone = !isPickup ? getShippingZone(buyerCountry) : null
+    const shippingCents = !isPickup && listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
     const res = await fetch('/api/stripe/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -184,7 +189,7 @@ export default function ListingPage() {
         amount: listing.price,
         shippingCostCents: shippingCents,
         shippingZone: zone || null,
-        buyerCountry,
+        buyerCountry: isPickup ? '' : buyerCountry,
       }),
     })
     const data = await res.json()
@@ -467,14 +472,60 @@ export default function ListingPage() {
 
             {/* PRICE BREAKDOWN */}
             {!isService && (() => {
-              const zone = getShippingZone(buyerCountry)
-              const shippingCents = listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
+              const isPickup = deliveryMethod === 'pickup'
+              const zone = !isPickup ? getShippingZone(buyerCountry) : null
+              const shippingCents = !isPickup && listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
               const shippingEur = shippingCents / 100
               const serviceFee = listing.price * 0.08
               const total = listing.price + serviceFee + shippingEur
+              const hasShipping = !!listing.shipping_enabled
+              const hasPickup = !!listing.pickup_enabled
               return (
                 <>
                   <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>Order breakdown</p>
+
+                  {/* DELIVERY METHOD TOGGLE — vain kun molemmat saatavilla */}
+                  {!isRental && hasShipping && hasPickup && (
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+                      <button
+                        onClick={() => setDeliveryMethod('shipping')}
+                        style={{
+                          flex: 1, padding: '9px 8px', borderRadius: '8px', cursor: 'pointer',
+                          fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700,
+                          letterSpacing: '0.08em', textTransform: 'uppercase',
+                          border: deliveryMethod === 'shipping' ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)',
+                          background: deliveryMethod === 'shipping' ? '#FC7038' : '#fff',
+                          color: deliveryMethod === 'shipping' ? '#fff' : '#7a7060',
+                        }}
+                      >📦 Shipping</button>
+                      <button
+                        onClick={() => setDeliveryMethod('pickup')}
+                        style={{
+                          flex: 1, padding: '9px 8px', borderRadius: '8px', cursor: 'pointer',
+                          fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700,
+                          letterSpacing: '0.08em', textTransform: 'uppercase',
+                          border: deliveryMethod === 'pickup' ? '2px solid #1a1408' : '1px solid rgba(26,20,8,0.15)',
+                          background: deliveryMethod === 'pickup' ? '#1a1408' : '#fff',
+                          color: deliveryMethod === 'pickup' ? '#fff' : '#7a7060',
+                        }}
+                      >🤝 Pickup</button>
+                    </div>
+                  )}
+
+                  {/* Vain nouto saatavilla */}
+                  {!isRental && !hasShipping && hasPickup && (
+                    <div style={{ fontSize: '13px', color: '#5a5040', marginBottom: '12px', padding: '8px 12px', background: '#f5f3e6', borderRadius: '6px' }}>
+                      🤝 Pickup only — agree location with seller
+                    </div>
+                  )}
+
+                  {/* Vain toimitus saatavilla */}
+                  {!isRental && hasShipping && !hasPickup && (
+                    <div style={{ fontSize: '13px', color: '#5a5040', marginBottom: '12px', padding: '8px 12px', background: '#f5f3e6', borderRadius: '6px' }}>
+                      📦 Shipping only — Matkahuolto
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
                     <span>Unit price</span>
                     <span>€{listing.price}{isRental ? '/day' : ''}</span>
@@ -490,7 +541,9 @@ export default function ListingPage() {
                     <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>🛡️ Buyer protection</span>
                     <span>€{serviceFee.toFixed(2)}</span>
                   </div>
-                  {listing.weight_kg && (
+
+                  {/* Toimitus */}
+                  {!isPickup && listing.weight_kg && hasShipping && (
                     <div style={{ marginBottom: '10px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '6px' }}>
                         <span>📦 Shipping</span>
@@ -507,6 +560,15 @@ export default function ListingPage() {
                       </select>
                     </div>
                   )}
+
+                  {/* Nouto */}
+                  {isPickup && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
+                      <span>🤝 Pickup</span>
+                      <span style={{ fontWeight: 600, color: '#2a6a2a' }}>Free</span>
+                    </div>
+                  )}
+
                   <div style={{ height: '1px', background: 'rgba(26,20,8,0.1)', margin: '12px 0' }} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                     <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a7060' }}>Total price</span>
@@ -541,8 +603,9 @@ export default function ListingPage() {
             <>
               {/* Buy now — sell */}
               {!isRental && !isService && (() => {
-                const zone = getShippingZone(buyerCountry)
-                const shippingCents = listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
+                const isPickup = deliveryMethod === 'pickup'
+                const zone = !isPickup ? getShippingZone(buyerCountry) : null
+                const shippingCents = !isPickup && listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
                 const total = listing.price * 1.08 + shippingCents / 100
                 return (
                 <>
