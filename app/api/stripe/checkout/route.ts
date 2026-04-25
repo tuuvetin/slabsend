@@ -54,10 +54,15 @@ export async function POST(req: Request) {
     })
   }
 
+  // Allowed shipping countries must match BUYER_COUNTRIES in app/lib/shipping.ts
+  const allowedCountries = ['FI', 'EE', 'LV', 'LT', 'SE'] as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[]
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: lineItems,
     mode: 'payment',
+    shipping_address_collection: { allowed_countries: allowedCountries },
+    phone_number_collection: { enabled: true },
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listingId}?payment=success`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listingId}?payment=cancelled`,
     metadata: {

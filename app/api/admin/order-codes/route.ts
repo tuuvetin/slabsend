@@ -37,8 +37,8 @@ export async function POST(req: Request) {
   // Update order
   await supabaseAdmin.from('orders').update({
     status: 'label_created',
-    matkahuolto_activation_code: activationCode,
-    matkahuolto_tracking_code: trackingCode,
+    activation_code: activationCode,
+    tracking_number: trackingCode,
     label_created_at: new Date().toISOString(),
   }).eq('id', orderId)
 
@@ -116,6 +116,26 @@ export async function POST(req: Request) {
       `,
     })
   }
+
+  return NextResponse.json({ ok: true })
+}
+
+// PATCH — päivitä vain status
+export async function PATCH(req: Request) {
+  const { createClient: createServerClient } = await import('@/utils/supabase/server')
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || !ADMIN_EMAILS.includes(user.email || '')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { orderId, status } = await req.json()
+  if (!orderId || !status) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+
+  await supabaseAdmin.from('orders').update({
+    status,
+    [`${status}_at`]: new Date().toISOString(),
+  }).eq('id', orderId)
 
   return NextResponse.json({ ok: true })
 }

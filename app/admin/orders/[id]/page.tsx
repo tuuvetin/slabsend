@@ -7,8 +7,7 @@ const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 
 export default function AdminOrderDetailPage({ params }: { params: { id: string } }) {
   const [authorized, setAuthorized] = useState<boolean | null>(null)
   const [order, setOrder] = useState<any>(null)
-  const [sellerProfile, setSellerProfile] = useState<any>(null)
-  const [sellerEmail, setSellerEmail] = useState('')
+  const [loadError, setLoadError] = useState('')
   const [activationCode, setActivationCode] = useState('')
   const [trackingCode, setTrackingCode] = useState('')
   const [saving, setSaving] = useState(false)
@@ -24,22 +23,17 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
   }, [])
 
   const loadOrder = async () => {
-    const { data } = await supabase
-      .from('orders')
-      .select(`
-        *,
-        listing:listing_id ( title, price, weight_kg, images ),
-        seller_profile:seller_id ( username, address_street, address_postcode, address_city, phone )
-      `)
-      .eq('id', params.id)
-      .single()
-
-    if (data) {
-      setOrder(data)
-      setSellerProfile(data.seller_profile)
-      setActivationCode(data.matkahuolto_activation_code || '')
-      setTrackingCode(data.matkahuolto_tracking_code || '')
+    setLoadError('')
+    const res = await fetch(`/api/admin/orders/${params.id}`)
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      setLoadError(err.error || `HTTP ${res.status}`)
+      return
     }
+    const data = await res.json()
+    setOrder(data)
+    setActivationCode(data.activation_code || '')
+    setTrackingCode(data.tracking_number || '')
   }
 
   const handleSaveAndSend = async () => {
@@ -63,7 +57,11 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
   }
 
   const handleStatusUpdate = async (newStatus: string) => {
-    await supabase.from('orders').update({ status: newStatus, [`${newStatus}_at`]: new Date().toISOString() }).eq('id', params.id)
+    await fetch('/api/admin/order-codes', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: params.id, status: newStatus }),
+    })
     setMessage(`Status päivitetty: ${newStatus}`)
     await loadOrder()
   }
@@ -72,6 +70,12 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
 
   if (authorized === null) return null
   if (!authorized) return <div style={{ padding: '40px', fontFamily: 'Barlow' }}>Access denied.</div>
+  if (loadError) return (
+    <div style={{ padding: '40px', fontFamily: 'Barlow' }}>
+      <p style={{ color: '#c0392b' }}>Virhe ladattaessa tilausta: {loadError}</p>
+      <button onClick={loadOrder} style={{ marginTop: '12px', padding: '8px 16px', cursor: 'pointer' }}>Yritä uudelleen</button>
+    </div>
+  )
   if (!order) return <div style={{ padding: '40px', fontFamily: 'Barlow' }}>Ladataan...</div>
 
   const statusColors: Record<string, string> = {
@@ -79,6 +83,7 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
     delivered: '#207040', completed: '#2a6a2a',
   }
   const statusColor = statusColors[order.status] || '#888'
+  const sellerProfile = order.seller_profile
 
   return (
     <div style={{ fontFamily: 'Barlow', maxWidth: '800px', margin: '0 auto', padding: '40px 24px' }}>
@@ -105,20 +110,21 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
         </div>
       </div>
 
-      {/* LÄHETTÄJÄ — kopioi Matkahuoltoon */}
+      {/* LÄHETTÄJÄ */}
       <div style={cardStyle}>
-        <SectionTitle>🟢 Lähettäjä (myyjä) — kopioi Matkahuoltoon</SectionTitle>
+        <SectionTitle>🟢 Lähettäjä (myyjä)</SectionTitle>
         <CopyBlock lines={[
-          sellerProfile?.username || '—',
+          sellerProfile?.full_name || sellerProfile?.username || '—',
           sellerProfile?.address_street || '—',
           `${sellerProfile?.address_postcode || ''} ${sellerProfile?.address_city || ''}`.trim() || '—',
           sellerProfile?.phone || '—',
+          order.seller_email || '—',
         ]} />
       </div>
 
-      {/* VASTAANOTTAJA — kopioi Matkahuoltoon */}
+      {/* VASTAANOTTAJA */}
       <div style={cardStyle}>
-        <SectionTitle>🔵 Vastaanottaja (ostaja) — kopioi Matkahuoltoon</SectionTitle>
+        <SectionTitle>🔵 Vastaanottaja (ostaja)</SectionTitle>
         <CopyBlock lines={[
           order.buyer_address_street || '—',
           `${order.buyer_address_postcode || ''} ${order.buyer_address_city || ''}`.trim() || '—',
@@ -153,11 +159,11 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
           Avaa Matkahuollon Yritysportaali →
         </a>
 
-        {order.matkahuolto_activation_code ? (
+        {order.activation_code ? (
           <div style={{ background: '#e6f4ea', border: '1px solid #a8d5b0', borderRadius: '8px', padding: '12px 16px', marginBottom: '12px' }}>
-            <p style={{ fontSize: '12px', color: '#3a7a4a', margin: '0 0 6px' }}>Koodit tallennettu</p>
-            <p style={{ fontSize: '14px', margin: '0 0 4px' }}>Aktivointikoodi: <strong>{order.matkahuolto_activation_code}</strong></p>
-            <p style={{ fontSize: '14px', margin: 0 }}>Seurantakoodi: <strong>{order.matkahuolto_tracking_code}</strong></p>
+            <p style={{ fontSize: '12px', color: '#3a7a4a', margin: '0 0 6px' }}>Koodit tallennettu ✅</p>
+            <p style={{ fontSize: '14px', margin: '0 0 4px' }}>Aktivointikoodi: <strong style={{ fontFamily: 'monospace', fontSize: '18px', letterSpacing: '0.1em' }}>{order.activation_code}</strong></p>
+            {order.tracking_number && <p style={{ fontSize: '14px', margin: 0 }}>Seurantakoodi: <strong>{order.tracking_number}</strong></p>}
           </div>
         ) : null}
 
