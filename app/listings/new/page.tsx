@@ -428,7 +428,7 @@ export default function NewListingPage() {
       <div className="listing-type-toggle">
         <button className={`listing-type-btn ${listingType === 'sell' ? 'active' : ''}`} onClick={() => handleTypeChange('sell')}>For sale</button>
         <button className={`listing-type-btn ${listingType === 'rent' ? 'active rent' : ''}`} onClick={() => handleTypeChange('rent')}>For rent</button>
-        {isAdmin && <button className={`listing-type-btn ${listingType === 'service' ? 'active service' : ''}`} onClick={() => handleTypeChange('service')}>Service</button>}
+        {/* Service listings hidden until directory launches */}
       </div>
 
       {listingType === 'rent' && (
