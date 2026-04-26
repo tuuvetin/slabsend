@@ -44,13 +44,17 @@ export async function POST(req: Request) {
     // Lasketaan summat (senttiinä)
     const totalCents = session.amount_total || 0
     const itemPriceCents = session.metadata?.base_amount ? parseInt(session.metadata.base_amount) : 0
-    const shippingCostCents = session.metadata?.shipping_cost ? parseInt(session.metadata.shipping_cost) : 0
+    // Shipping cost comes from Stripe's shipping_options selection
+    const shippingCostCents = (session as any).shipping_cost?.amount_total ?? (session.metadata?.shipping_cost ? parseInt(session.metadata.shipping_cost) : 0)
     const serviceFeeCents = session.metadata?.service_fee ? parseInt(session.metadata.service_fee) : 0
     // Backwards compat
     const totalAmount = totalCents / 100
     const baseAmount = parseFloat((itemPriceCents / 100).toFixed(2))
     const serviceFee = parseFloat((serviceFeeCents / 100).toFixed(2))
-    const shippingZone: string = session.metadata?.shipping_zone || ''
+    // Detect shipping zone from buyer's country (set by Stripe address collection)
+    const sessionAny2 = session as any
+    const shippingCountry = sessionAny2.shipping_details?.address?.country || session.metadata?.buyer_country || ''
+    const shippingZone: string = shippingCostCents === 0 ? 'pickup' : (shippingCountry || session.metadata?.shipping_zone || '')
 
     // 48h auto-confirm
     const autoConfirmAt = new Date()

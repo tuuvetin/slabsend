@@ -179,18 +179,12 @@ export default function ListingPage() {
 
   const proceedToCheckout = async () => {
     setBuyLoading(true)
-    const isPickup = deliveryMethod === 'pickup'
-    const zone = !isPickup ? getShippingZone(buyerCountry) : null
-    const shippingCents = !isPickup && listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
     const res = await fetch('/api/stripe/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         listingId: listing.id,
         amount: listing.price,
-        shippingCostCents: shippingCents,
-        shippingZone: zone || null,
-        buyerCountry: isPickup ? '' : buyerCountry,
       }),
     })
     const data = await res.json()
@@ -384,14 +378,19 @@ export default function ListingPage() {
                   €{(listing.price * 1.08).toFixed(2)}{isRental ? '/day' : ''}
                 </span>
               </div>
-              <div style={{ position: 'relative' }} className="info-tooltip-wrap">
-                <span style={{ fontSize: '13px', color: '#2a6a2a', cursor: 'default', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  🛡️ Includes buyer protection
-                  <button className="info-btn" style={{ fontSize: '10px', width: '15px', height: '15px' }}>i</button>
-                </span>
-                <div className="info-tooltip">
-                  Your purchase is protected. The seller receives payment only after you confirm the item is as described. If something goes wrong, contact info@slabsend.com within 48h.
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative' }} className="info-tooltip-wrap">
+                  <span style={{ fontSize: '13px', color: '#2a6a2a', cursor: 'default', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    🛡️ Includes buyer protection
+                    <button className="info-btn" style={{ fontSize: '10px', width: '15px', height: '15px' }}>i</button>
+                  </span>
+                  <div className="info-tooltip">
+                    Your purchase is protected. The seller receives payment only after you confirm the item is as described. If something goes wrong, contact info@slabsend.com within 48h.
+                  </div>
                 </div>
+                {!isRental && listing.shipping_enabled !== false && (
+                  <span style={{ fontSize: '13px', color: '#7a7060' }}>📦 Shipping from €8.90</span>
+                )}
               </div>
             </div>
           )}
