@@ -677,33 +677,10 @@ export default function ListingPage() {
 
             {/* Payment icons — bottom of card */}
             {!listing.sold && (
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid rgba(26,20,8,0.07)' }}>
-                {/* Mastercard */}
-                <div style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: '4px', height: '28px' }}>
-                  <svg width="26" height="16" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="12" r="10" fill="#EB001B"/><circle cx="24" cy="12" r="10" fill="#F79E1B"/><path d="M19 4.5a10 10 0 0 1 0 15A10 10 0 0 1 19 4.5z" fill="#FF5F00"/></svg>
-                </div>
-                {/* Visa */}
-                <div style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', padding: '3px 8px', display: 'flex', alignItems: 'center', height: '28px' }}>
-                  <svg width="38" height="12" viewBox="0 0 80 26" xmlns="http://www.w3.org/2000/svg"><text x="0" y="22" fill="#1A1F71" fontSize="26" fontFamily="Arial" fontWeight="900" fontStyle="italic" letterSpacing="1">VISA</text></svg>
-                </div>
-                {/* Amex */}
-                <div style={{ background: '#2E77BC', border: '1px solid #2E77BC', borderRadius: '6px', padding: '3px 10px', display: 'flex', alignItems: 'center', height: '28px' }}>
-                  <svg width="32" height="12" viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg"><text x="0" y="15" fill="#fff" fontSize="15" fontFamily="Arial" fontWeight="bold" letterSpacing="1">AMEX</text></svg>
-                </div>
-                {/* Apple Pay */}
-                <div style={{ background: '#000', border: '1px solid #000', borderRadius: '6px', padding: '3px 10px', display: 'flex', alignItems: 'center', gap: '3px', height: '28px' }}>
-                  <svg width="11" height="14" viewBox="0 0 14 17" xmlns="http://www.w3.org/2000/svg" fill="#fff"><path d="M13.2 5.8c-.1 0-2.4 1-2.4 3.5 0 2.8 2.8 3.7 2.8 3.7-.1.2-.4 1.4-1.3 2.6-.8 1.1-1.6 2.2-2.9 2.2-1.2 0-1.6-.7-3-.7-1.3 0-1.8.7-2.9.7-1.2 0-2.1-1.1-3-2.3C.2 14 0 11.5 0 9.1c0-4.2 2.7-6.4 5.4-6.4 1.4 0 2.5.9 3.4.9.8 0 2.2-1 3.7-1 .6 0 2.4.1 3.6 1.8l-2.9 1.4zM9.3.4C9.8-.2 10.6-.5 11.3-.5c.1.9-.3 1.8-.8 2.4-.5.6-1.3 1.1-2.1 1-.1-.8.3-1.7.9-2.5z"/></svg>
-                  <svg width="22" height="12" viewBox="0 0 36 16" xmlns="http://www.w3.org/2000/svg"><text x="0" y="13" fill="#fff" fontSize="14" fontFamily="-apple-system,Arial" fontWeight="400" letterSpacing="0.3">Pay</text></svg>
-                </div>
-                {/* Google Pay */}
-                <div style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', padding: '3px 8px', display: 'flex', alignItems: 'center', height: '28px' }}>
-                  <svg width="36" height="14" viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg">
-                    <text x="0" y="15" fontSize="15" fontFamily="Arial" fontWeight="500" fill="#3C4043">G </text>
-                    <text x="14" y="15" fontSize="15" fontFamily="Arial" fontWeight="500" fill="#3C4043">Pay</text>
-                    <circle cx="5" cy="8" r="5" fill="none"/>
-                    <text x="0" y="15" fontSize="15" fontFamily="Arial" fontWeight="700" fill="#4285F4">G</text>
-                  </svg>
-                </div>
+              <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid rgba(26,20,8,0.07)' }}>
+                {['visa', 'mastercard', 'amex', 'apple-pay', 'google-pay'].map(icon => (
+                  <img key={icon} src={`/pay/${icon}.svg`} alt={icon} style={{ height: '26px', width: 'auto', borderRadius: '4px', display: 'block' }} />
+                ))}
               </div>
             )}
 
