@@ -71,7 +71,7 @@ body {
 .listings-input-xs { -webkit-flex: 0; flex: 0; min-width: 90px; }
 .listings-select {  padding: 10px 14px; border: 1px solid rgba(26, 20, 8, 0.15); background: #F5F3E6; color: #1a1408; font-size: 14px; border-radius: 8px; cursor: pointer; }
 .listings-select-full { width: 100%; }
-.listings-empty { color: #9a9080; font-size: 15px; padding: 20px 0; }
+.listings-empty { color: #9a9080; font-size: 14px; padding: 20px 0; }
 .listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
 .listing-card-link { text-decoration: none; color: inherit; }
 .listing-card { background: #F5F3E6; border-radius: 10px; overflow: visible; cursor: pointer; -webkit-transition: -webkit-transform 0.15s; transition: transform 0.15s; border: 1px solid rgba(26, 20, 8, 0.08); }
@@ -79,10 +79,10 @@ body {
 .listing-card-img { width: 100%; height: 300px; -o-object-fit: cover; object-fit: cover; object-position: top; display: block; border-radius: 10px 10px 0 0; }
 .listing-card-no-img { width: 100%; height: 300px; background: #e8e6d8; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; color: #9a9080; font-size: 13px; border-radius: 10px 10px 0 0; }
 .listing-card-body { padding: 14px 16px 16px; }
-.listing-card-title {  font-size: 15px; font-weight: 600; color: #1a1408; margin: 0 0 6px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.listing-card-title {  font-size: 13px; font-weight: 600; color: #1a1408; margin: 0 0 6px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .listing-card-cat {  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9080; margin: 0 0 8px 0; }
-.listing-card-price {  font-size: 17px; font-weight: 500; color: #9a9080; margin: 0 0 2px 0; }
-.listing-card-price-total {  font-size: 17px; font-weight: 500; color: #FC7038; margin: 0 0 6px 0; display: flex; align-items: center; gap: 4px; }
+.listing-card-price {  font-size: 14px; font-weight: 500; color: #9a9080; margin: 0 0 2px 0; }
+.listing-card-price-total {  font-size: 14px; font-weight: 500; color: #FC7038; margin: 0 0 6px 0; display: flex; align-items: center; gap: 4px; }
 .listing-card-meta { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 8px; margin: 0; }
 .listing-card-cond {  font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; background: #F5F3E6; color: #5a5040; padding: 2px 8px; border-radius: 20px; }
 .listing-card-loc { font-size: 12px; color: #9a9080; }
@@ -126,12 +126,12 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .listing-detail-info { position: sticky; top: 24px; }
 .listing-no-image { width: 100%; aspect-ratio: 4/3; background: #e8e6d8; border-radius: 8px; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; color: #9a9080; font-size: 14px; }
 .listing-rental-badge {  font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: #5a7a84; color: #F5F3E6; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 12px; }
-.listing-detail-title {  font-size: 28px; font-weight: 600; color: #1a1408; margin-bottom: 10px; line-height: 1.2; }
-.listing-detail-price {  font-size: 36px; font-weight: 700; color: #1a1408; margin-bottom: 16px; }
+.listing-detail-title {  font-size: 22px; font-weight: 600; color: #1a1408; margin-bottom: 10px; line-height: 1.2; }
+.listing-detail-price {  font-size: 28px; font-weight: 700; color: #1a1408; margin-bottom: 16px; }
 .listing-detail-meta { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
 .listing-meta-item {  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; background: #F5F3E6; color: #5a5040; padding: 4px 12px; border-radius: 20px; }
 .listing-meta-cond { background: #e8e6d8; }
-.listing-detail-desc { font-size: 15px; line-height: 1.7; color: #3a3020; margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid rgba(26, 20, 8, 0.1); }
+.listing-detail-desc { font-size: 14px; line-height: 1.7; color: #3a3020; margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid rgba(26, 20, 8, 0.1); }
 .listing-contact { margin-top: 8px; }
 .listing-contact-title {  font-size: 14px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1408; margin-bottom: 12px; }
 .listing-owner-actions { display: -webkit-flex; display: flex; gap: 10px; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(26, 20, 8, 0.1); }
@@ -189,7 +189,7 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .messages-page { max-width: 700px; margin: 0 auto; padding: 40px 32px 60px; }
 .messages-title {  font-size: 32px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1408; margin-bottom: 28px; }
 .messages-empty { padding: 40px 0; text-align: center; }
-.messages-empty p { color: #9a9080; font-size: 15px; margin-bottom: 12px; }
+.messages-empty p { color: #9a9080; font-size: 14px; margin-bottom: 12px; }
 .messages-empty-link {  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #FC7038; text-decoration: none; }
 .messages-list { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 10px; }
 .conversation-link { text-decoration: none; color: inherit; }
@@ -228,7 +228,7 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .message-bubble { padding: 10px 14px; border-radius: 18px; }
 .message-bubble.mine { background: #FC7038; border-bottom-right-radius: 4px; }
 .message-bubble.theirs { background: #fff; border: 1px solid rgba(26, 20, 8, 0.1); border-bottom-left-radius: 4px; }
-.message-content { font-size: 15px; line-height: 1.5; margin: 0; white-space: pre-wrap; word-break: break-word; }
+.message-content { font-size: 14px; line-height: 1.5; margin: 0; white-space: pre-wrap; word-break: break-word; }
 .message-bubble.mine .message-content { color: #F5F3E6; }
 .message-bubble.theirs .message-content { color: #1a1408; }
 .message-time-mine { font-size: 11px; color: #9a9080; margin: 3px 4px 0 0; }
@@ -328,7 +328,7 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .home-cat-img { width: 100%; height: 100%; -o-object-fit: cover; object-fit: cover; display: block; -webkit-transition: -webkit-transform 0.3s ease; transition: transform 0.3s ease; }
 .home-cat-card:hover .home-cat-img { -webkit-transform: scale(1.03); transform: scale(1.03); }
 .home-cat-img-fallback { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; border-radius: 12px; }
-.home-cat-name {  font-size: 17px; font-weight: 600; color: #1a1408; margin-bottom: 6px; }
+.home-cat-name {  font-size: 15px; font-weight: 600; color: #1a1408; margin-bottom: 6px; }
 .home-cat-shop-btn { display: inline-block; margin-top: 6px; background: #1a1408; color: #F5F3E6;  font-size: 13px; font-weight: 600; letter-spacing: 0.01em; text-transform: none; padding: 7px 18px; border-radius: 20px; -webkit-transition: background 0.15s; transition: background 0.15s; }
 .home-cat-card:hover .home-cat-shop-btn { background: #FC7038; }
 
