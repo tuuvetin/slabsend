@@ -5,8 +5,6 @@ import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-im
 import 'react-image-crop/dist/ReactCrop.css'
 import { SUPPORTED_COUNTRIES } from '@/app/lib/countries'
 
-type StripeStatus = 'idle' | 'checking' | 'verified' | 'unverified'
-
 const categories: Record<string, string[]> = {
   'Clothing': ['T-Shirts', 'Hoodies', 'Pants', 'Shorts', 'Jackets', 'Other clothing'],
   'Shoes': ['Climbing shoes', 'Approach shoes', 'Mountain boots', 'Other shoes'],
@@ -117,8 +115,6 @@ export default function NewListingPage() {
   const [pickupEnabled, setPickupEnabled] = useState(false)
   const [packageSize, setPackageSize] = useState('')
   const [packageWeight, setPackageWeight] = useState('')
-  const [stripeStatus, setStripeStatus] = useState<StripeStatus>('idle')
-  const [stripeLoading, setStripeLoading] = useState(false)
   const [stripeSuccess, setStripeSuccess] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [pickupLocation, setPickupLocation] = useState('')
@@ -150,32 +146,13 @@ export default function NewListingPage() {
       window.history.replaceState({}, '', clean.toString())
     }
 
-    // Check Stripe verification for logged-in users
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
       if (user) setIsAdmin(ADMIN_EMAILS.includes(user.email || ''))
-      setStripeStatus('checking')
-      fetch('/api/stripe/status')
-        .then(r => r.json())
-        .then(({ verified }) => setStripeStatus(verified ? 'verified' : 'unverified'))
-        .catch(() => setStripeStatus('idle'))
     })
   }, [])
 
-  const handleSetupPayments = async () => {
-    setStripeLoading(true)
-    try {
-      const res = await fetch('/api/stripe/connect', { method: 'POST' })
-      const { url, error } = await res.json()
-      if (url) window.location.href = url
-      else setMessage(error || 'Something went wrong. Please try again.')
-    } catch {
-      setMessage('Something went wrong. Please try again.')
-    }
-    setStripeLoading(false)
-  }
-
-  const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
+const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
     setListingType(type)
     setCategory('')
     setSubcategory('')
@@ -323,67 +300,6 @@ export default function NewListingPage() {
     : 'Price (€)'
 
   const activeCategoryMap = categories
-
-  // Show Stripe gate for unverified logged-in users
-  if (stripeStatus === 'unverified' && listingType !== 'rent') {
-    return (
-      <div className="new-listing-page">
-        <h1 className="new-listing-title">New listing</h1>
-        <div style={{
-          background: '#F5F3E6',
-          border: '1px solid rgba(26,20,8,0.12)',
-          borderRadius: '12px',
-          padding: '32px 28px',
-          maxWidth: '480px',
-          margin: '32px auto 0',
-        }}>
-          <div style={{ fontSize: '32px', marginBottom: '16px', textAlign: 'center' }}>🔐</div>
-          <h2 style={{
-            fontFamily: 'Barlow Condensed', fontSize: '20px', fontWeight: 700,
-            letterSpacing: '0.06em', textTransform: 'uppercase', color: '#1a1408',
-            textAlign: 'center', marginBottom: '14px',
-          }}>
-            One-time setup required
-          </h2>
-          <p style={{
-            fontFamily: 'Barlow', fontSize: '14px', lineHeight: 1.6,
-            color: '#3a3020', textAlign: 'center', marginBottom: '8px',
-          }}>
-            To post a listing on Slabsend, you need to verify your identity once through Stripe. This is required to receive payments securely.
-          </p>
-          <p style={{
-            fontFamily: 'Barlow', fontSize: '14px', lineHeight: 1.6,
-            color: '#7a7060', textAlign: 'center', marginBottom: '28px',
-          }}>
-            <strong style={{ color: '#1a1408' }}>You only need to do this once.</strong> After that, you can post listings freely.
-          </p>
-          <button
-            onClick={handleSetupPayments}
-            disabled={stripeLoading}
-            style={{
-              display: 'block', width: '100%',
-              fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700,
-              letterSpacing: '0.1em', textTransform: 'uppercase',
-              background: stripeLoading ? '#9a9080' : '#FC7038',
-              color: '#F5F3E6', border: 'none', borderRadius: '8px',
-              padding: '14px 24px', cursor: stripeLoading ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {stripeLoading ? 'Redirecting...' : 'Set up payments with Stripe →'}
-          </button>
-          <p style={{
-            fontFamily: 'Barlow', fontSize: '12px', color: '#9a9080',
-            textAlign: 'center', marginTop: '14px',
-          }}>
-            Powered by Stripe — your data is handled securely and never stored by Slabsend.
-          </p>
-          {message && (
-            <p style={{ fontFamily: 'Barlow', fontSize: '13px', color: '#cc3300', textAlign: 'center', marginTop: '10px' }}>{message}</p>
-          )}
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="new-listing-page">

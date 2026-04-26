@@ -128,7 +128,7 @@ export async function POST(req: Request) {
     // Haetaan myyjän profiili (myös osoitetiedot Matkahuoltoa varten)
     const { data: sellerProfile } = await supabaseAdmin
       .from('profiles')
-      .select('username, full_name, address_street, address_postcode, address_city, phone')
+      .select('username, full_name, address_street, address_postcode, address_city, phone, stripe_onboarded')
       .eq('user_id', sellerUserId || '')
       .single()
 
@@ -234,6 +234,8 @@ export async function POST(req: Request) {
 
     // Myyjälle
     if (sellerEmail) {
+      const sellerStripeOnboarded = sellerProfile?.stripe_onboarded === true
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://slabsend.com'
       await resend.emails.send({
         from: 'Slabsend <info@slabsend.com>',
         to: sellerEmail,
@@ -241,8 +243,8 @@ export async function POST(req: Request) {
           ? `Ship now — activation code for "${listing?.title}"`
           : `Your item "${listing?.title}" has been sold!`,
         html: labelCreated
-          ? sellerEmailWithCode({ sellerName, listingTitle: listing?.title || '', orderNumber, baseAmount, activationCode: activationCode! })
-          : sellerEmailWithoutCode({ sellerName, listingTitle: listing?.title || '', orderNumber, baseAmount }),
+          ? sellerEmailWithCode({ sellerName, listingTitle: listing?.title || '', orderNumber, baseAmount, activationCode: activationCode!, stripeOnboarded: sellerStripeOnboarded, appUrl })
+          : sellerEmailWithoutCode({ sellerName, listingTitle: listing?.title || '', orderNumber, baseAmount, stripeOnboarded: sellerStripeOnboarded, appUrl }),
       })
     }
 
@@ -294,18 +296,32 @@ export async function POST(req: Request) {
 
 // ── Email templates ───────────────────────────────────────────────────────────
 
+function stripeSetupBlock(appUrl: string): string {
+  return `
+    <div style="background: #fff8f0; border: 1px solid #FC7038; border-radius: 10px; padding: 20px 24px; margin: 24px 0;">
+      <p style="font-weight: 700; color: #1a1408; margin: 0 0 8px;">⚡ Set up payments to receive your money</p>
+      <p style="font-size: 14px; color: #3a3020; margin: 0 0 16px;">You haven't connected a bank account yet. It takes 2 minutes — your payment will be held until you complete this.</p>
+      <a href="${appUrl}/profile" style="display: inline-block; background: #FC7038; color: #fff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 10px 22px; border-radius: 8px;">Set up payments →</a>
+    </div>
+  `
+}
+
 function sellerEmailWithCode(p: {
   sellerName: string
   listingTitle: string
   orderNumber: string
   baseAmount: number
   activationCode: string
+  stripeOnboarded: boolean
+  appUrl: string
 }): string {
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
       <h2 style="color: #FC7038;">Your item has been sold! 🎉</h2>
       <p>Hi ${p.sellerName},</p>
       <p><strong>${p.listingTitle}</strong> has been purchased and your shipping label is ready.</p>
+
+      ${!p.stripeOnboarded ? stripeSetupBlock(p.appUrl) : ''}
 
       <div style="background: #1a1408; border-radius: 12px; padding: 28px 24px; margin: 28px 0; text-align: center;">
         <p style="color: rgba(245,243,230,0.55); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 10px;">Your Matkahuolto activation code</p>
@@ -338,12 +354,16 @@ function sellerEmailWithoutCode(p: {
   listingTitle: string
   orderNumber: string
   baseAmount: number
+  stripeOnboarded: boolean
+  appUrl: string
 }): string {
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
       <h2 style="color: #FC7038;">Your item has been sold! 🎉</h2>
       <p>Hi ${p.sellerName},</p>
       <p><strong>${p.listingTitle}</strong> has been purchased.</p>
+
+      ${!p.stripeOnboarded ? stripeSetupBlock(p.appUrl) : ''}
 
       <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
         <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.orderNumber}</strong></td></tr>
