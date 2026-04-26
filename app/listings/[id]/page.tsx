@@ -367,28 +367,11 @@ export default function ListingPage() {
           {/* ── CARD TOP: title, seller, price ── */}
           <div style={{ padding: '24px 24px 20px' }}>
 
-          {/* Title + status badges */}
-          {(isRental || isService || listing.sold) && (
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
-              {isRental && <span className="listing-rental-badge">For rent</span>}
-              {isService && <span className="listing-rental-badge" style={{ background: '#1a1408', color: '#FC7038' }}>Service</span>}
-              {listing.sold && <span className="listing-rental-badge" style={{ background: '#aa2200', color: '#fff' }}>Sold</span>}
-            </div>
-          )}
-          <h1 className="listing-detail-title" style={{ marginBottom: '4px' }}>{listing.title}</h1>
-
-          {/* Condition */}
-          {listing.condition && !isService && (
-            <p style={{ fontSize: '13px', color: '#9a9080', marginBottom: '12px' }}>
-              {conditionLabels[listing.condition] || listing.condition}
-            </p>
-          )}
-
-          {/* Seller widget */}
+          {/* Seller widget — top of card */}
           {sellerProfile && (
             <a
               href={`/sellers/${listing.user_id}`}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '16px', padding: '7px 14px 7px 8px', borderRadius: '40px', background: 'rgba(26,20,8,0.06)' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '14px', padding: '7px 14px 7px 8px', borderRadius: '40px', background: 'rgba(26,20,8,0.06)' }}
               onMouseEnter={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.11)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.06)')}
             >
@@ -405,6 +388,16 @@ export default function ListingPage() {
               </div>
             </a>
           )}
+
+          {/* Title + status badges */}
+          {(isRental || isService || listing.sold) && (
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
+              {isRental && <span className="listing-rental-badge">For rent</span>}
+              {isService && <span className="listing-rental-badge" style={{ background: '#1a1408', color: '#FC7038' }}>Service</span>}
+              {listing.sold && <span className="listing-rental-badge" style={{ background: '#aa2200', color: '#fff' }}>Sold</span>}
+            </div>
+          )}
+          <h1 className="listing-detail-title" style={{ marginBottom: '16px' }}>{listing.title}</h1>
 
           {/* Price block — sell/rent */}
           {!isService && (
