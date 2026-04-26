@@ -371,7 +371,8 @@ export default function ConversationPage() {
                           </div>
                         )}
 
-                        {isBuyerMsg && isAccepted && (
+                        {/* Accept & Pay: own offer was accepted, OR seller sent a counter offer (pending) */}
+                        {((isMine && isAccepted) || (!isMine && isPending && listing && listing.user_id !== currentUser?.id)) && (
                           <button onClick={() => handleAcceptAndPay(msg)} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept & Pay</button>
                         )}
 

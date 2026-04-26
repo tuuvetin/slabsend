@@ -219,9 +219,7 @@ export default function ListingPage() {
     setOfferLoading(false)
     if (error) setMessageSent('Error: ' + error.message)
     else {
-      setMessageSent('Offer sent!')
-      setShowOffer(false)
-      setOfferAmount('')
+      window.location.href = `/messages/${listing.id}/${listing.user_id}`
     }
   }
 
