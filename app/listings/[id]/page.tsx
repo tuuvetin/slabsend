@@ -25,6 +25,7 @@ export default function ListingPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [offerAmount, setOfferAmount] = useState('')
   const [showOffer, setShowOffer] = useState(false)
+  const [showMessage, setShowMessage] = useState(false)
   const [buyLoading, setBuyLoading] = useState(false)
   const [offerLoading, setOfferLoading] = useState(false)
   const [order, setOrder] = useState<any>(null)
@@ -361,7 +362,7 @@ export default function ListingPage() {
         {/* ── RIGHT: INFO PANEL ── */}
         <div className="listing-detail-info">
           {/* Single Vinted-style card */}
-          <div style={{ border: '1px solid rgba(26,20,8,0.12)', borderRadius: '16px', background: '#fff', overflow: 'hidden' }}>
+          <div style={{ border: '1px solid rgba(26,20,8,0.12)', borderRadius: '16px', background: '#F5F3E6', overflow: 'hidden' }}>
 
           {/* ── CARD TOP: title, seller, price ── */}
           <div style={{ padding: '24px 24px 20px' }}>
@@ -477,8 +478,8 @@ export default function ListingPage() {
                 {/* Delivery toggle — buyer only, pre-purchase, both options available */}
                 {!isRental && isBuyerView && hasShipping && hasPickup && (
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                    <button onClick={() => setDeliveryMethod('shipping')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'shipping' ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'shipping' ? '#FC7038' : '#fff', color: deliveryMethod === 'shipping' ? '#fff' : '#7a7060' }}>Shipping</button>
-                    <button onClick={() => setDeliveryMethod('pickup')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'pickup' ? '2px solid #1a1408' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'pickup' ? '#1a1408' : '#fff', color: deliveryMethod === 'pickup' ? '#fff' : '#7a7060' }}>Pickup</button>
+                    <button onClick={() => setDeliveryMethod('shipping')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'shipping' ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'shipping' ? '#FC7038' : 'rgba(26,20,8,0.05)', color: deliveryMethod === 'shipping' ? '#fff' : '#7a7060' }}>Shipping</button>
+                    <button onClick={() => setDeliveryMethod('pickup')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'pickup' ? '2px solid #1a1408' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'pickup' ? '#1a1408' : 'rgba(26,20,8,0.05)', color: deliveryMethod === 'pickup' ? '#fff' : '#7a7060' }}>Pickup</button>
                   </div>
                 )}
 
@@ -490,7 +491,7 @@ export default function ListingPage() {
                       <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>€{shippingEur.toFixed(2)}</span>
                     </div>
                     {isBuyerView && (
-                      <select value={buyerCountry} onChange={e => setBuyerCountry(e.target.value)} style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.12)', fontFamily: 'Barlow', fontSize: '13px', background: '#fafaf8', color: '#1a1408', cursor: 'pointer' }}>
+                      <select value={buyerCountry} onChange={e => setBuyerCountry(e.target.value)} style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontFamily: 'Barlow', fontSize: '13px', background: '#ede9d8', color: '#1a1408', cursor: 'pointer' }}>
                         {BUYER_COUNTRIES.map(c => <option key={c} value={c}>{BUYER_COUNTRY_NAMES[c]}</option>)}
                       </select>
                     )}
@@ -623,12 +624,25 @@ export default function ListingPage() {
                   </div>
                 )}
 
-                {/* Ask seller */}
-                {messageSent && <p className={`form-message ${messageSent.startsWith('Error') ? 'error' : 'success'}`} style={{ marginBottom: '8px' }}>{messageSent}</p>}
-                <textarea className="form-input form-textarea" placeholder={isRental ? 'Ask about rental...' : 'Ask the seller a question...'} value={message} onChange={e => setMessage(e.target.value)} style={{ marginBottom: '8px' }} />
-                <button className="form-submit" onClick={handleSendMessage} style={{ width: '100%', background: 'transparent', color: '#1a1408', border: '1.5px solid rgba(26,20,8,0.2)' }}>
-                  Ask seller
-                </button>
+                {/* Ask seller toggle */}
+                {!showMessage ? (
+                  <button onClick={() => setShowMessage(true)} style={{ width: '100%', fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#1a1408', border: '1.5px solid rgba(26,20,8,0.2)', borderRadius: '8px', padding: '13px', transition: 'all 0.15s' }}>
+                    Ask seller
+                  </button>
+                ) : (
+                  <div>
+                    {messageSent && <p className={`form-message ${messageSent.startsWith('Error') ? 'error' : 'success'}`} style={{ marginBottom: '8px' }}>{messageSent}</p>}
+                    <textarea className="form-input form-textarea" placeholder={isRental ? 'Ask about rental...' : 'Ask the seller a question...'} value={message} onChange={e => setMessage(e.target.value)} style={{ marginBottom: '8px' }} autoFocus />
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button className="form-submit" onClick={handleSendMessage} style={{ flex: 1, background: 'transparent', color: '#1a1408', border: '1.5px solid rgba(26,20,8,0.2)' }}>
+                        Send message
+                      </button>
+                      <button onClick={() => { setShowMessage(false); setMessage('') }} style={{ padding: '0 16px', fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, background: 'transparent', color: '#9a9080', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '8px', cursor: 'pointer' }}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </>
             )}
 
