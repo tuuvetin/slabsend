@@ -229,6 +229,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
     if (listingType === 'service' && serviceItems.length === 0) { setMessage('Please select at least one service type.'); return }
     if (listingType !== 'service' && shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
     if (listingType === 'sell' && !packageWeight) { setMessage('Please enter the package weight (kg).'); return }
+    if (listingType !== 'service' && croppedFiles.length === 0) { setMessage('Please add at least one photo of your item.'); return }
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { window.location.href = '/login'; return }

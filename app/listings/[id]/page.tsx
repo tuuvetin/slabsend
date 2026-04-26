@@ -377,14 +377,34 @@ export default function ListingPage() {
           )}
           <h1 className="listing-detail-title" style={{ marginBottom: '4px' }}>{listing.title}</h1>
 
-          {/* Subtitle: condition · seller */}
-          <p style={{ fontSize: '13px', color: '#9a9080', marginBottom: '16px' }}>
-            {listing.condition && !isService ? (conditionLabels[listing.condition] || listing.condition) : ''}
-            {listing.condition && !isService && sellerName ? ' · ' : ''}
-            {sellerName && (
-              <a href={`/sellers/${listing.user_id}`} style={{ color: '#9a9080', textDecoration: 'none' }}>{sellerName}</a>
-            )}
-          </p>
+          {/* Condition */}
+          {listing.condition && !isService && (
+            <p style={{ fontSize: '13px', color: '#9a9080', marginBottom: '12px' }}>
+              {conditionLabels[listing.condition] || listing.condition}
+            </p>
+          )}
+
+          {/* Seller widget */}
+          {sellerProfile && (
+            <a
+              href={`/sellers/${listing.user_id}`}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '16px', padding: '7px 14px 7px 8px', borderRadius: '40px', background: 'rgba(26,20,8,0.06)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.11)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.06)')}
+            >
+              {sellerProfile.avatar_url ? (
+                <img src={sellerProfile.avatar_url} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              ) : (
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#d0c8b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, color: '#7a7060', flexShrink: 0 }}>
+                  {(sellerName || '?').charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408', lineHeight: 1.2 }}>{sellerName}</div>
+                <div style={{ fontSize: '11px', color: '#9a9080' }}>View profile →</div>
+              </div>
+            </a>
+          )}
 
           {/* Price block — sell/rent */}
           {!isService && (
