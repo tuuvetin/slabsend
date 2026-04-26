@@ -316,7 +316,7 @@ function sellerEmailWithCode(p: {
   appUrl: string
 }): string {
   return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
       <h2 style="color: #FC7038;">Your item has been sold! 🎉</h2>
       <p>Hi ${p.sellerName},</p>
       <p><strong>${p.listingTitle}</strong> has been purchased and your shipping label is ready.</p>
@@ -358,7 +358,7 @@ function sellerEmailWithoutCode(p: {
   appUrl: string
 }): string {
   return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
       <h2 style="color: #FC7038;">Your item has been sold! 🎉</h2>
       <p>Hi ${p.sellerName},</p>
       <p><strong>${p.listingTitle}</strong> has been purchased.</p>
@@ -388,7 +388,7 @@ function buyerConfirmationEmail(p: {
     ? `<p style="margin-top: 16px;">Your parcel tracking number: <strong>${p.trackingNumber}</strong> — track at <a href="https://www.matkahuolto.fi/en/tracking?trackingCode=${p.trackingNumber}" style="color: #FC7038;">Matkahuolto tracking</a></p>`
     : ''
   return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
       <h2 style="color: #FC7038;">Order confirmed! ✓</h2>
       <p>Thank you for your purchase.</p>
       <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
@@ -437,7 +437,7 @@ function adminOrderEmail(p: {
     : ''
 
   return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>New order received</h2>
       <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
         <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.orderNumber}</strong></td></tr>

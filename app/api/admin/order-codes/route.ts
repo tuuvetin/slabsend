@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       to: sellerEmail,
       subject: `Lähetä pakettisi — aktivointikoodi: ${activationCode}`,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
           <h2 style="color: #FC7038;">Pakettisi on valmis lähetettäväksi! 📦</h2>
           <p>Hei ${sellerName},</p>
           <p>Tilaus <strong>${order.order_number}</strong> — tuote: <strong>${order.listing?.title}</strong></p>
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
       to: order.buyer_email,
       subject: `Tilauksesi on matkalla — seurantakoodi: ${trackingCode}`,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
           <h2 style="color: #FC7038;">Tilauksesi on matkalla! 🚚</h2>
           <p>Tilaus <strong>${order.order_number}</strong> — tuote: <strong>${order.listing?.title}</strong></p>
 

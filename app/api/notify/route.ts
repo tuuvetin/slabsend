@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       to: receiverEmail,
       subject: `New message about "${listingTitle}"`,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
           <div style="background: #FC7038; padding: 24px 32px; border-radius: 8px 8px 0 0;">
             <h2 style="color: #fff; margin: 0; font-size: 22px;">New message on Slabsend</h2>
           </div>
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
       to: sellerEmail,
       subject: `Receipt confirmed — payment of ${amount} € is on its way`,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
           <div style="background: #FC7038; padding: 24px 32px; border-radius: 8px 8px 0 0;">
             <h2 style="color: #fff; margin: 0; font-size: 22px;">Receipt confirmed ✓</h2>
           </div>
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
       to: receiverEmail,
       subject: subjectMap[offerAction] || `Update on your offer for "${listingTitle}"`,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
           <div style="background: #FC7038; padding: 24px 32px; border-radius: 8px 8px 0 0;">
             <h2 style="color: #fff; margin: 0; font-size: 22px;">${offerAction === 'accepted' ? 'Offer accepted ✓' : 'New counter offer'}</h2>
           </div>
