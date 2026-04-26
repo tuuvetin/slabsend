@@ -360,44 +360,43 @@ export default function ListingPage() {
 
         {/* ── RIGHT: INFO PANEL ── */}
         <div className="listing-detail-info">
+          {/* Single Vinted-style card */}
+          <div style={{ border: '1px solid rgba(26,20,8,0.12)', borderRadius: '16px', background: '#fff', overflow: 'hidden' }}>
 
-          {/* Status badges */}
+          {/* ── CARD TOP: title, seller, price ── */}
+          <div style={{ padding: '24px 24px 20px' }}>
+
+          {/* Title + status badges */}
           {(isRental || isService || listing.sold) && (
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
               {isRental && <span className="listing-rental-badge">For rent</span>}
               {isService && <span className="listing-rental-badge" style={{ background: '#1a1408', color: '#FC7038' }}>Service</span>}
               {listing.sold && <span className="listing-rental-badge" style={{ background: '#aa2200', color: '#fff' }}>Sold</span>}
             </div>
           )}
+          <h1 className="listing-detail-title" style={{ marginBottom: '4px' }}>{listing.title}</h1>
 
-          <h1 className="listing-detail-title">{listing.title}</h1>
+          {/* Subtitle: condition · seller */}
+          <p style={{ fontSize: '13px', color: '#9a9080', marginBottom: '16px' }}>
+            {listing.condition && !isService ? (conditionLabels[listing.condition] || listing.condition) : ''}
+            {listing.condition && !isService && sellerName ? ' · ' : ''}
+            {sellerName && (
+              <a href={`/sellers/${listing.user_id}`} style={{ color: '#9a9080', textDecoration: 'none' }}>{sellerName}</a>
+            )}
+          </p>
 
-          {/* Seller */}
-          {sellerName && (
-            <a href={`/sellers/${listing.user_id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', textDecoration: 'none' }}>
-              {sellerProfile?.avatar_url ? (
-                <img src={sellerProfile.avatar_url} alt="" style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-              ) : (
-                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#FC7038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#F5F3E6', flexShrink: 0, fontFamily: 'Barlow Condensed' }}>
-                  {sellerName[0].toUpperCase()}
-                </div>
-              )}
-              <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 600, letterSpacing: '0.06em', color: '#5a5040' }}>{sellerName}</span>
-            </a>
-          )}
-
-          {/* ── PRICE BLOCK ── */}
+          {/* Price block — sell/rent */}
           {!isService && (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '4px' }}>
+            <div style={{ marginBottom: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '6px' }}>
                 <span style={{ fontSize: '15px', color: '#9a9080' }}>€{listing.price}{isRental ? '/day' : ''}</span>
-                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '26px', fontWeight: 700, color: '#1a1408' }}>
+                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '28px', fontWeight: 700, color: '#1a1408' }}>
                   €{(listing.price * 1.08).toFixed(2)}{isRental ? '/day' : ''}
                 </span>
               </div>
               <div style={{ position: 'relative' }} className="info-tooltip-wrap">
                 <span style={{ fontSize: '13px', color: '#2a6a2a', cursor: 'default', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                  🛡️ Sisältää ostajan turvan
+                  🛡️ Includes buyer protection
                   <button className="info-btn" style={{ fontSize: '10px', width: '15px', height: '15px' }}>i</button>
                 </span>
                 <div className="info-tooltip">
@@ -406,35 +405,38 @@ export default function ListingPage() {
               </div>
             </div>
           )}
+          {isRental && (listing.weekly_discount_pct > 0 || listing.monthly_discount_pct > 0) && (
+            <div style={{ fontSize: '12px', color: '#2a6a2a', marginTop: '8px', background: '#f0f7f0', borderRadius: '6px', padding: '6px 10px', display: 'inline-block' }}>
+              {listing.weekly_discount_pct > 0 && <span>7+ days: <strong>{listing.weekly_discount_pct}%</strong> off</span>}
+              {listing.weekly_discount_pct > 0 && listing.monthly_discount_pct > 0 && <span> · </span>}
+              {listing.monthly_discount_pct > 0 && <span>30+ days: <strong>{listing.monthly_discount_pct}%</strong> off</span>}
+            </div>
+          )}
+          </div>{/* end card top padding */}
 
-          <div style={{ height: '1px', background: 'rgba(26,20,8,0.1)', marginBottom: '20px' }} />
+          {/* ── DIVIDER ── */}
+          <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)' }} />
 
-          {/* ── ATTRIBUTES TABLE ── */}
-          {!isService && (
-            <div style={{ marginBottom: '20px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          {/* ── ATTRIBUTES + DESCRIPTION ── */}
+          <div style={{ padding: '20px 24px' }}>
+            {/* Attributes: condition + location (no category, no weight for buyers) */}
+            {!isService && (listing.condition || listing.location || (isAdmin || (currentUser && currentUser.id === listing.user_id))) && (
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: listing.description ? '16px' : '0' }}>
                 <tbody>
                   {listing.condition && (
                     <tr style={{ borderBottom: '1px solid rgba(26,20,8,0.07)' }}>
-                      <td style={{ padding: '9px 0', fontSize: '13px', color: '#9a9080', width: '40%' }}>Condition</td>
+                      <td style={{ padding: '9px 0', fontSize: '13px', color: '#9a9080', width: '42%' }}>Condition</td>
                       <td style={{ padding: '9px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>{conditionLabels[listing.condition] || listing.condition}</td>
                     </tr>
                   )}
-                  {listing.category && (
-                    <tr style={{ borderBottom: '1px solid rgba(26,20,8,0.07)' }}>
-                      <td style={{ padding: '9px 0', fontSize: '13px', color: '#9a9080' }}>Category</td>
-                      <td style={{ padding: '9px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>
-                        {listing.category}{listing.subcategory ? ` › ${listing.subcategory}` : ''}
-                      </td>
-                    </tr>
-                  )}
                   {listing.location && (
-                    <tr style={{ borderBottom: '1px solid rgba(26,20,8,0.07)' }}>
+                    <tr style={{ borderBottom: listing.weight_kg && (isAdmin || (currentUser && currentUser.id === listing.user_id)) ? '1px solid rgba(26,20,8,0.07)' : 'none' }}>
                       <td style={{ padding: '9px 0', fontSize: '13px', color: '#9a9080' }}>Location</td>
                       <td style={{ padding: '9px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>📍 {listing.location}</td>
                     </tr>
                   )}
-                  {listing.weight_kg && (
+                  {/* Weight only for seller/admin */}
+                  {listing.weight_kg && currentUser && (currentUser.id === listing.user_id || isAdmin) && (
                     <tr>
                       <td style={{ padding: '9px 0', fontSize: '13px', color: '#9a9080' }}>Weight</td>
                       <td style={{ padding: '9px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>{listing.weight_kg} kg</td>
@@ -442,36 +444,104 @@ export default function ListingPage() {
                   )}
                 </tbody>
               </table>
-            </div>
-          )}
+            )}
 
-          {/* Rental pickup info */}
-          {isRental && (listing.pickup_location || listing.pickup_hours_from) && (
-            <div style={{ fontSize: '13px', color: '#3a3020', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {listing.pickup_location && (
-                <span>📍 Pickup: <strong>{listing.pickup_location}</strong></span>
-              )}
-              {listing.pickup_hours_from && listing.pickup_hours_to && (
-                <span>🕐 Hours: <strong>{listing.pickup_hours_from} – {listing.pickup_hours_to}</strong></span>
-              )}
-            </div>
-          )}
+            {/* Rental pickup info */}
+            {isRental && (listing.pickup_location || listing.pickup_hours_from) && (
+              <div style={{ fontSize: '13px', color: '#3a3020', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {listing.pickup_location && <span>📍 Pickup: <strong>{listing.pickup_location}</strong></span>}
+                {listing.pickup_hours_from && listing.pickup_hours_to && <span>🕐 Hours: <strong>{listing.pickup_hours_from} – {listing.pickup_hours_to}</strong></span>}
+              </div>
+            )}
 
-          {/* ── DESCRIPTION ── */}
-          {listing.description && (
-            <div style={{ marginBottom: '20px' }}>
+            {/* Description */}
+            {listing.description && (
               <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#3a3020', margin: 0 }}>{listing.description}</p>
+            )}
+          </div>
+
+          {/* ── DIVIDER ── */}
+          <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)' }} />
+
+          {/* ── DELIVERY SECTION ── */}
+          {!isService && (() => {
+            const isPickup = deliveryMethod === 'pickup'
+            const zone = !isPickup ? getShippingZone(buyerCountry) : null
+            const shippingCents = !isPickup && listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
+            const shippingEur = shippingCents / 100
+            const hasShipping = !!listing.shipping_enabled
+            const hasPickup = !!listing.pickup_enabled
+            const isBuyerView = !order && !(currentUser && currentUser.id === listing.user_id)
+            return (
+              <div style={{ padding: '16px 24px' }}>
+                {/* Delivery toggle — buyer only, pre-purchase, both options available */}
+                {!isRental && isBuyerView && hasShipping && hasPickup && (
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                    <button onClick={() => setDeliveryMethod('shipping')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'shipping' ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'shipping' ? '#FC7038' : '#fff', color: deliveryMethod === 'shipping' ? '#fff' : '#7a7060' }}>Shipping</button>
+                    <button onClick={() => setDeliveryMethod('pickup')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'pickup' ? '2px solid #1a1408' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'pickup' ? '#1a1408' : '#fff', color: deliveryMethod === 'pickup' ? '#fff' : '#7a7060' }}>Pickup</button>
+                  </div>
+                )}
+
+                {/* Shipping info line */}
+                {!isRental && hasShipping && !isPickup && listing.weight_kg && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '13px', color: '#5a5040' }}>Shipping · Matkahuolto</span>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>€{shippingEur.toFixed(2)}</span>
+                    </div>
+                    {isBuyerView && (
+                      <select value={buyerCountry} onChange={e => setBuyerCountry(e.target.value)} style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.12)', fontFamily: 'Barlow', fontSize: '13px', background: '#fafaf8', color: '#1a1408', cursor: 'pointer' }}>
+                        {BUYER_COUNTRIES.map(c => <option key={c} value={c}>{BUYER_COUNTRY_NAMES[c]}</option>)}
+                      </select>
+                    )}
+                  </div>
+                )}
+                {!isRental && isPickup && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '13px', color: '#5a5040' }}>Pickup</span>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: '#2a6a2a' }}>Free</span>
+                  </div>
+                )}
+                {!isRental && !hasShipping && hasPickup && isBuyerView && (
+                  <span style={{ fontSize: '13px', color: '#5a5040' }}>Pickup only — agree location with seller</span>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* SERVICE items */}
+          {isService && serviceItems.length > 0 && (
+            <div style={{ padding: '16px 24px' }}>
+              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>Select services</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {serviceItems.map(item => {
+                  const checked = selectedServices.includes(item.name)
+                  return (
+                    <label key={item.name} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                      <input type="checkbox" checked={checked}
+                        onChange={() => setSelectedServices(prev => prev.includes(item.name) ? prev.filter(s => s !== item.name) : [...prev, item.name])}
+                        style={{ width: '18px', height: '18px', accentColor: '#FC7038', flexShrink: 0 }}
+                      />
+                      <span style={{ flex: 1, fontSize: '14px', color: '#1a1408' }}>{item.name}</span>
+                      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '15px', fontWeight: 700, color: item.price > 0 ? '#1a1408' : '#9a9080' }}>
+                        {item.price > 0 ? `€${item.price}` : '—'}
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
             </div>
           )}
 
-          <div style={{ height: '1px', background: 'rgba(26,20,8,0.1)', marginBottom: '20px' }} />
+          {/* ── DIVIDER ── */}
+          <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)' }} />
 
-          {/* ── ORDER BREAKDOWN BOX ── */}
-          <div style={{ border: '1px solid rgba(26,20,8,0.12)', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
+          {/* ── ACTIONS SECTION ── */}
+          <div style={{ padding: '20px 24px' }}>
 
-            {/* Item received / confirmed banners */}
+            {/* Payment confirmed banner */}
             {order && !confirmDone && (
-              <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
+              <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
                 <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>✓ Payment confirmed</p>
                 <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: 1.5, marginBottom: '12px' }}>
                   Confirm receipt once you have the item. The seller is paid after your confirmation or automatically after 48h.
@@ -485,242 +555,101 @@ export default function ListingPage() {
               </div>
             )}
             {confirmDone && (
-              <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
+              <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
                 <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, color: '#2a6a2a', marginBottom: '4px' }}>✓ Receipt confirmed — thank you!</p>
                 <p style={{ fontSize: '13px', color: '#3a3428', margin: 0 }}>The seller will receive their payment shortly.</p>
               </div>
             )}
 
-            {/* SERVICE: selectable items */}
-            {isService && serviceItems.length > 0 && (
+            {/* Buy now + offer + ask seller — buyer only, pre-purchase */}
+            {!listing.sold && !order && currentUser && currentUser.id !== listing.user_id && (
               <>
-                <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>Select services</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
-                  {serviceItems.map(item => {
-                    const checked = selectedServices.includes(item.name)
-                    return (
-                      <label key={item.name} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={checked}
-                          onChange={() => setSelectedServices(prev => prev.includes(item.name) ? prev.filter(s => s !== item.name) : [...prev, item.name])}
-                          style={{ width: '18px', height: '18px', accentColor: '#FC7038', flexShrink: 0 }}
-                        />
-                        <span style={{ flex: 1, fontSize: '14px', color: '#1a1408' }}>{item.name}</span>
-                        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '15px', fontWeight: 700, color: item.price > 0 ? '#1a1408' : '#9a9080' }}>
-                          {item.price > 0 ? `€${item.price}` : '—'}
-                        </span>
-                      </label>
-                    )
-                  })}
-                </div>
-                <div style={{ height: '1px', background: 'rgba(26,20,8,0.1)', marginBottom: '14px' }} />
-              </>
-            )}
+                {/* Buy now — sell */}
+                {!isRental && !isService && (() => {
+                  const isPickup = deliveryMethod === 'pickup'
+                  const zone = !isPickup ? getShippingZone(buyerCountry) : null
+                  const shippingCents = !isPickup && listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
+                  const total = listing.price * 1.08 + shippingCents / 100
+                  return (
+                    <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ width: '100%', marginBottom: '10px' }}>
+                      {buyLoading ? 'Loading...' : `Buy now — €${total.toFixed(2)}`}
+                    </button>
+                  )
+                })()}
 
-            {/* SELL: delivery + price breakdown */}
-            {!isService && (() => {
-              const isPickup = deliveryMethod === 'pickup'
-              const zone = !isPickup ? getShippingZone(buyerCountry) : null
-              const shippingCents = !isPickup && listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
-              const shippingEur = shippingCents / 100
-              const serviceFee = listing.price * 0.08
-              const total = listing.price + serviceFee + shippingEur
-              const hasShipping = !!listing.shipping_enabled
-              const hasPickup = !!listing.pickup_enabled
-              const isBuyerView = !order && !(currentUser && currentUser.id === listing.user_id)
-              return (
-                <>
-                  {/* Delivery toggle — buyer only, pre-purchase */}
-                  {!isRental && isBuyerView && hasShipping && hasPickup && (
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
-                      <button onClick={() => setDeliveryMethod('shipping')} style={{ flex: 1, padding: '9px 8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'shipping' ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'shipping' ? '#FC7038' : '#fff', color: deliveryMethod === 'shipping' ? '#fff' : '#7a7060' }}>Shipping</button>
-                      <button onClick={() => setDeliveryMethod('pickup')} style={{ flex: 1, padding: '9px 8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'pickup' ? '2px solid #1a1408' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'pickup' ? '#1a1408' : '#fff', color: deliveryMethod === 'pickup' ? '#fff' : '#7a7060' }}>Pickup</button>
+                {/* Buy now — service */}
+                {isService && serviceItems.length > 0 && (
+                  <button
+                    className="form-submit"
+                    disabled={buyLoading || !hasServiceSelection || serviceTotal === 0}
+                    onClick={() => {
+                      if (!hasServiceSelection || serviceTotal === 0) return
+                      setBuyLoading(true)
+                      fetch('/api/stripe/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ listingId: listing.id, amount: serviceTotal }) })
+                        .then(r => r.json()).then(d => { if (d.url) window.location.href = d.url; else { alert(d.error || 'Payment error'); setBuyLoading(false) } })
+                    }}
+                    style={{ width: '100%', marginBottom: '10px', opacity: (!hasServiceSelection || serviceTotal === 0) ? 0.45 : 1 }}
+                  >
+                    {buyLoading ? 'Loading...' : hasServiceSelection && serviceTotal > 0 ? `Buy now — €${(serviceTotal * 1.08).toFixed(2)}` : 'Select services above'}
+                  </button>
+                )}
+
+                {/* Make an offer */}
+                {!isRental && !isService && (
+                  <button onClick={() => setShowOffer(!showOffer)} style={{ width: '100%', marginBottom: '10px', fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#FC7038', border: '1.5px solid #FC7038', borderRadius: '8px', padding: '13px', transition: 'all 0.15s' }}>
+                    Make an offer
+                  </button>
+                )}
+
+                {showOffer && (
+                  <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '8px', padding: '16px', marginBottom: '10px' }}>
+                    <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
+                      Your offer (asking price: {listing.price} €)
+                    </p>
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                      <input className="form-input" type="number" placeholder={`Max ${listing.price} €`} value={offerAmount} onChange={e => setOfferAmount(e.target.value)} style={{ marginBottom: 0 }} />
+                      <button className="form-submit" onClick={handleSendOffer} disabled={offerLoading} style={{ width: 'auto', padding: '0 20px', whiteSpace: 'nowrap' }}>
+                        {offerLoading ? 'Sending...' : 'Send offer'}
+                      </button>
                     </div>
-                  )}
-                  {!isRental && isBuyerView && !hasShipping && hasPickup && (
-                    <div style={{ fontSize: '13px', color: '#5a5040', marginBottom: '12px', padding: '8px 12px', background: '#f5f3e6', borderRadius: '6px' }}>Pickup only — agree location with seller</div>
-                  )}
-                  {!isRental && isBuyerView && hasShipping && !hasPickup && (
-                    <div style={{ fontSize: '13px', color: '#5a5040', marginBottom: '12px', padding: '8px 12px', background: '#f5f3e6', borderRadius: '6px' }}>Shipping only — Matkahuolto</div>
-                  )}
-
-                  {/* Price rows */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
-                    <span>Item price</span>
-                    <span>€{listing.price}{isRental ? '/day' : ''}</span>
-                  </div>
-                  {isRental && (listing.weekly_discount_pct > 0 || listing.monthly_discount_pct > 0) && (
-                    <div style={{ fontSize: '12px', color: '#2a6a2a', marginBottom: '8px', background: '#f0f7f0', borderRadius: '6px', padding: '6px 10px' }}>
-                      {listing.weekly_discount_pct > 0 && <span>7+ days: <strong>{listing.weekly_discount_pct}%</strong> off</span>}
-                      {listing.weekly_discount_pct > 0 && listing.monthly_discount_pct > 0 && <span> · </span>}
-                      {listing.monthly_discount_pct > 0 && <span>30+ days: <strong>{listing.monthly_discount_pct}%</strong> off</span>}
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
-                    <span>Buyer protection</span>
-                    <span>€{serviceFee.toFixed(2)}</span>
-                  </div>
-
-                  {/* Shipping row with country selector */}
-                  {!isPickup && listing.weight_kg && hasShipping && (
-                    <div style={{ marginBottom: '10px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '6px' }}>
-                        <span>Shipping</span>
-                        <span style={{ fontWeight: 600, color: '#1a1408' }}>€{shippingEur.toFixed(2)}</span>
+                    {offerAmount && !isNaN(Number(offerAmount)) && Number(offerAmount) > 0 && (
+                      <div style={{ background: '#fff', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.08)', padding: '10px 12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}><span>Your offer</span><span>€{Number(offerAmount).toFixed(2)}</span></div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}><span>Buyer protection</span><span>€{(Number(offerAmount) * 0.08).toFixed(2)}</span></div>
+                        <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)', margin: '6px 0' }} />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 700, color: '#1a1408' }}><span>Total you pay</span><span>€{(Number(offerAmount) * 1.08).toFixed(2)}</span></div>
                       </div>
-                      <select value={buyerCountry} onChange={e => setBuyerCountry(e.target.value)} style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontFamily: 'Barlow', fontSize: '13px', background: '#fff', color: '#1a1408', cursor: 'pointer' }}>
-                        {BUYER_COUNTRIES.map(c => (
-                          <option key={c} value={c}>{BUYER_COUNTRY_NAMES[c]}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                  {isPickup && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
-                      <span>Pickup</span>
-                      <span style={{ fontWeight: 600, color: '#2a6a2a' }}>Free</span>
-                    </div>
-                  )}
-
-                  <div style={{ height: '1px', background: 'rgba(26,20,8,0.1)', margin: '12px 0' }} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a7060' }}>Total</span>
-                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '26px', fontWeight: 700, color: '#1a1408' }}>€{total.toFixed(2)}</span>
-                  </div>
-                </>
-              )
-            })()}
-
-            {/* SERVICE total */}
-            {isService && (
-              <>
-                {hasServiceSelection && serviceTotal > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#5a5040', marginBottom: '8px' }}>
-                    <span>Buyer protection</span>
-                    <span>€{(serviceTotal * 0.08).toFixed(2)}</span>
+                    )}
                   </div>
                 )}
-                <div style={{ height: '1px', background: 'rgba(26,20,8,0.1)', margin: '12px 0' }} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a7060' }}>Total</span>
-                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '26px', fontWeight: 700, color: '#1a1408' }}>
-                    {hasServiceSelection && serviceTotal > 0 ? `€${(serviceTotal * 1.08).toFixed(2)}` : '—'}
-                  </span>
-                </div>
+
+                {/* Ask seller */}
+                {messageSent && <p className={`form-message ${messageSent.startsWith('Error') ? 'error' : 'success'}`} style={{ marginBottom: '8px' }}>{messageSent}</p>}
+                <textarea className="form-input form-textarea" placeholder={isRental ? 'Ask about rental...' : 'Ask the seller a question...'} value={message} onChange={e => setMessage(e.target.value)} style={{ marginBottom: '8px' }} />
+                <button className="form-submit" onClick={handleSendMessage} style={{ width: '100%', background: 'transparent', color: '#1a1408', border: '1.5px solid rgba(26,20,8,0.2)' }}>
+                  Ask seller
+                </button>
               </>
             )}
-          </div>
 
-          {/* BUY / CONTACT ACTIONS */}
-          {!listing.sold && !order && currentUser && currentUser.id !== listing.user_id && (
-            <>
-              {/* Buy now — sell */}
-              {!isRental && !isService && (() => {
-                const isPickup = deliveryMethod === 'pickup'
-                const zone = !isPickup ? getShippingZone(buyerCountry) : null
-                const shippingCents = !isPickup && listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
-                const total = listing.price * 1.08 + shippingCents / 100
-                return (
-                  <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ width: '100%', marginBottom: '8px' }}>
-                    {buyLoading ? 'Loading...' : `Osta nyt — €${total.toFixed(2)}`}
-                  </button>
-                )
-              })()}
-
-              {/* Buy now — service */}
-              {isService && serviceItems.length > 0 && (
-                <button
-                  className="form-submit"
-                  disabled={buyLoading || !hasServiceSelection || serviceTotal === 0}
-                  onClick={() => {
-                    if (!hasServiceSelection || serviceTotal === 0) return
-                    setBuyLoading(true)
-                    fetch('/api/stripe/checkout', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ listingId: listing.id, amount: serviceTotal }),
-                    }).then(r => r.json()).then(d => {
-                      if (d.url) window.location.href = d.url
-                      else { alert(d.error || 'Payment error'); setBuyLoading(false) }
-                    })
-                  }}
-                  style={{ width: '100%', marginBottom: '8px', opacity: (!hasServiceSelection || serviceTotal === 0) ? 0.45 : 1 }}
-                >
-                  {buyLoading ? 'Loading...' : hasServiceSelection && serviceTotal > 0 ? `Osta nyt — €${(serviceTotal * 1.08).toFixed(2)}` : 'Select services above'}
-                </button>
-              )}
-
-              {/* Make an offer */}
-              {!isRental && !isService && (
-                <button onClick={() => setShowOffer(!showOffer)} style={{ width: '100%', marginBottom: '8px', fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', borderRadius: '8px', padding: '14px', transition: 'all 0.15s' }}>
-                  Tee tarjous
-                </button>
-              )}
-
-              {showOffer && (
-                <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '8px', padding: '16px', marginBottom: '8px' }}>
-                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
-                    Your offer (asking price: {listing.price} €)
-                  </p>
-                  <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                    <input className="form-input" type="number" placeholder={`Max ${listing.price} €`} value={offerAmount} onChange={e => setOfferAmount(e.target.value)} style={{ marginBottom: 0 }} />
-                    <button className="form-submit" onClick={handleSendOffer} disabled={offerLoading} style={{ width: 'auto', padding: '0 20px', whiteSpace: 'nowrap' }}>
-                      {offerLoading ? 'Sending...' : 'Send offer'}
-                    </button>
-                  </div>
-                  {offerAmount && !isNaN(Number(offerAmount)) && Number(offerAmount) > 0 && (
-                    <div style={{ background: '#fff', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.08)', padding: '10px 12px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}>
-                        <span>Your offer</span><span>€{Number(offerAmount).toFixed(2)}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}>
-                        <span>Buyer protection</span><span>€{(Number(offerAmount) * 0.08).toFixed(2)}</span>
-                      </div>
-                      <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)', margin: '6px 0' }} />
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 700, color: '#1a1408' }}>
-                        <span>Total you pay</span><span>€{(Number(offerAmount) * 1.08).toFixed(2)}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Message seller */}
-              <div style={{ marginTop: '4px' }}>
+            {/* Message after purchase */}
+            {order && currentUser && currentUser.id !== listing.user_id && (
+              <div>
                 {messageSent && <p className={`form-message ${messageSent.startsWith('Error') ? 'error' : 'success'}`} style={{ marginBottom: '8px' }}>{messageSent}</p>}
-                <textarea
-                  className="form-input form-textarea"
-                  placeholder={isRental ? 'Ask about rental...' : 'Write a message to the seller...'}
-                  value={message}
-                  onChange={e => setMessage(e.target.value)}
-                  style={{ marginBottom: '8px' }}
-                />
-                <button className="form-submit" onClick={handleSendMessage} style={{ background: 'transparent', color: '#1a1408', border: '1px solid rgba(26,20,8,0.2)' }}>
-                  Kysy myyjältä
+                <textarea className="form-input form-textarea" placeholder="Write a message to the seller..." value={message} onChange={e => setMessage(e.target.value)} style={{ marginBottom: '8px' }} />
+                <button className="form-submit" onClick={handleSendMessage} style={{ width: '100%', background: 'transparent', color: '#1a1408', border: '1.5px solid rgba(26,20,8,0.2)' }}>
+                  Send message
                 </button>
               </div>
-            </>
-          )}
+            )}
 
-          {/* Message to seller after purchase */}
-          {order && currentUser && currentUser.id !== listing.user_id && (
-            <div style={{ marginTop: '4px' }}>
-              {messageSent && <p className={`form-message ${messageSent.startsWith('Error') ? 'error' : 'success'}`} style={{ marginBottom: '8px' }}>{messageSent}</p>}
-              <textarea
-                className="form-input form-textarea"
-                placeholder="Write a message to the seller..."
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                style={{ marginBottom: '8px' }}
-              />
-              <button className="form-submit" onClick={handleSendMessage} style={{ background: 'transparent', color: '#1a1408', border: '1px solid rgba(26,20,8,0.2)' }}>
-                Send message
-              </button>
-            </div>
-          )}
+            {/* Not logged in */}
+            {!currentUser && !listing.sold && (
+              <a href="/login" className="form-submit" style={{ display: 'block', textAlign: 'center' }}>Sign in to buy or contact seller</a>
+            )}
 
-          {!currentUser && !listing.sold && (
-            <a href="/login" className="form-submit" style={{ display: 'block', textAlign: 'center', marginBottom: '10px' }}>Sign in to buy or contact seller</a>
-          )}
+          </div>{/* end actions padding */}
+          </div>{/* end card */}
 
           {/* Rental calendar — visible to both owner (toggle availability) and renters */}
           {isRental && currentUser && (
