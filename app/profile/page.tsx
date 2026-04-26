@@ -277,7 +277,7 @@ export default function ProfilePage() {
       {/* CROP-TYÖKALU */}
       {cropSrc && (
         <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '12px', padding: '20px', marginBottom: '24px', maxWidth: '480px' }}>
-          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+          <p style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
             Crop profile picture
           </p>
           <ReactCrop crop={crop} onChange={c => setCrop(c)} onComplete={c => setCompletedCrop(c)} aspect={1} circularCrop>
@@ -287,7 +287,7 @@ export default function ProfilePage() {
             <button className="form-submit" onClick={handleAvatarUpload} disabled={avatarUploading} style={{ flex: 1 }}>
               {avatarUploading ? 'Uploading...' : 'Save picture'}
             </button>
-            <button onClick={() => setCropSrc(null)} style={{ flex: 1, fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#7a7060', border: '1px solid rgba(26,20,8,0.15)', borderRadius: '8px', padding: '14px' }}>
+            <button onClick={() => setCropSrc(null)} style={{ flex: 1, fontSize: '14px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#7a7060', border: '1px solid rgba(26,20,8,0.15)', borderRadius: '8px', padding: '14px' }}>
               Cancel
             </button>
           </div>
@@ -338,7 +338,7 @@ export default function ProfilePage() {
 
             {/* HERO IMAGE */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
-              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', margin: 0 }}>Cover image</p>
+              <p style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', margin: 0 }}>Cover image</p>
               <p style={{ fontSize: '11px', color: '#b0a898', margin: 0 }}>Recommended: 1920 × 400 px</p>
             </div>
             <div
@@ -349,13 +349,13 @@ export default function ProfilePage() {
                 <>
                   <img src={heroUrl} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff' }}>
                       {heroUploading ? 'Uploading...' : 'Change cover'}
                     </span>
                   </div>
                 </>
               ) : (
-                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9a9080' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9a9080' }}>
                   {heroUploading ? 'Uploading...' : '+ Add cover image'}
                 </span>
               )}
@@ -367,7 +367,7 @@ export default function ProfilePage() {
               placeholder="Bio — tell something about yourself (optional)"
               value={bio}
               onChange={e => setBio(e.target.value)}
-              style={{ resize: 'vertical', minHeight: '80px', fontFamily: 'Barlow', fontSize: '14px', marginTop: '12px' }}
+              style={{ resize: 'vertical', minHeight: '80px', fontSize: '14px', marginTop: '12px' }}
             />
             <button className="form-submit" onClick={handleSave} style={{ marginTop: '10px' }}>Save changes</button>
           </div>
@@ -400,7 +400,7 @@ export default function ProfilePage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#e6f4ea', border: '1px solid #a8d5b0', borderRadius: '8px', padding: '12px 16px', marginBottom: '12px' }}>
                 <span style={{ fontSize: '18px' }}>✅</span>
                 <div>
-                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a4a2a', margin: 0 }}>Stripe verified</p>
+                  <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a4a2a', margin: 0 }}>Stripe verified</p>
                   <p style={{ fontSize: '12px', color: '#3a7a4a', margin: '2px 0 0' }}>Your account is set up to receive payments.</p>
                 </div>
               </div>
@@ -418,7 +418,7 @@ export default function ProfilePage() {
               <button
                 onClick={handleConnectStripe}
                 disabled={stripeLoading}
-                style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#9a9080', border: '1px solid rgba(26,20,8,0.15)', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', marginTop: '8px' }}
+                style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#9a9080', border: '1px solid rgba(26,20,8,0.15)', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', marginTop: '8px' }}
               >
                 {stripeLoading ? 'Redirecting...' : 'Manage Stripe account'}
               </button>

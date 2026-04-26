@@ -64,7 +64,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
 
         {/* PROFILE INFO */}
         <div style={{ marginBottom: '28px', paddingBottom: '24px', borderBottom: '1px solid rgba(26,20,8,0.1)' }}>
-          <h1 style={{ fontFamily: 'Barlow Condensed', fontSize: '28px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408', margin: '0 0 8px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408', margin: '0 0 8px' }}>
             {displayName}
           </h1>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
@@ -79,7 +79,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
             {avgRating !== null && (
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <StarDisplay rating={avgRating} size={14} />
-                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', color: '#7a7060', fontWeight: 600 }}>
+                <span style={{ fontSize: '13px', color: '#7a7060', fontWeight: 600 }}>
                   {avgRating.toFixed(1)} ({reviews.length})
                 </span>
               </span>
@@ -93,7 +93,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* LISTINGS */}
-        <h2 style={{ fontFamily: 'Barlow Condensed', fontSize: '16px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '14px' }}>
+        <h2 style={{ fontSize: '16px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '14px' }}>
           Listings
         </h2>
 
@@ -139,13 +139,13 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
           <>
             <div style={{ borderTop: '1px solid rgba(26,20,8,0.1)', paddingTop: '32px', marginTop: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
-                <h2 style={{ fontFamily: 'Barlow Condensed', fontSize: '16px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', margin: 0 }}>
+                <h2 style={{ fontSize: '16px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', margin: 0 }}>
                   Reviews
                 </h2>
                 {avgRating !== null && (
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <StarDisplay rating={avgRating} size={16} />
-                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, color: '#1a1408' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#1a1408' }}>
                       {avgRating.toFixed(1)}
                     </span>
                     <span style={{ fontSize: '13px', color: '#9a9080' }}>({reviews.length} review{reviews.length !== 1 ? 's' : ''})</span>
@@ -163,12 +163,12 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
                         {rp?.avatar_url ? (
                           <img src={rp.avatar_url} alt={rName} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                         ) : (
-                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#c8a84a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: '#F5F3E6', fontFamily: 'Barlow Condensed', flexShrink: 0 }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#c8a84a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: '#F5F3E6', flexShrink: 0 }}>
                             {rName[0].toUpperCase()}
                           </div>
                         )}
                         <div>
-                          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#1a1408', margin: 0 }}>{rName}</p>
+                          <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#1a1408', margin: 0 }}>{rName}</p>
                           <p style={{ fontSize: '11px', color: '#9a9080', margin: '1px 0 0' }}>
                             {new Date(review.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </p>

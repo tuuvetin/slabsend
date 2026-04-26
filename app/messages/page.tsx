@@ -105,7 +105,7 @@ export default function MessagesPage() {
                   {avatarUrl ? (
                     <img src={avatarUrl} alt={displayName} style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(26,20,8,0.1)' }} />
                   ) : (
-                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#FC7038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Barlow Condensed', fontSize: '18px', fontWeight: 700, color: '#F5F3E6', flexShrink: 0 }}>
+                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#FC7038', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700, color: '#F5F3E6', flexShrink: 0 }}>
                       {displayName[0].toUpperCase()}
                     </div>
                   )}
@@ -113,7 +113,7 @@ export default function MessagesPage() {
                     <img src={listingImage} alt="" style={{ position: 'absolute', bottom: '-4px', right: '-4px', width: '20px', height: '20px', borderRadius: '4px', objectFit: 'cover', border: '1px solid #F5F3E6' }} />
                   )}
                   {unread > 0 && (
-                    <span style={{ position: 'absolute', top: '-2px', left: '-2px', minWidth: '18px', height: '18px', background: '#FC7038', borderRadius: '9px', border: '2px solid #F5F3E6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Barlow Condensed', fontSize: '10px', fontWeight: 700, color: '#F5F3E6', padding: '0 3px' }}>
+                    <span style={{ position: 'absolute', top: '-2px', left: '-2px', minWidth: '18px', height: '18px', background: '#FC7038', borderRadius: '9px', border: '2px solid #F5F3E6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, color: '#F5F3E6', padding: '0 3px' }}>
                       {unread > 9 ? '9+' : unread}
                     </span>
                   )}
@@ -123,12 +123,12 @@ export default function MessagesPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <p className="conversation-listing" style={{ fontWeight: unread > 0 ? 700 : 600, margin: 0, color: unread > 0 ? '#1a1408' : undefined }}>{displayName}</p>
                     {hasOrder && (
-                      <span style={{ background: msg.order.status === 'confirmed' ? '#2a6a2a' : '#FC7038', color: '#fff', fontFamily: 'Barlow Condensed', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
+                      <span style={{ background: msg.order.status === 'confirmed' ? '#2a6a2a' : '#FC7038', color: '#fff', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
                         {msg.order.status === 'confirmed' ? '✓ Completed' : '⏳ Awaiting confirmation'}
                       </span>
                     )}
                   </div>
-                  <p style={{ fontSize: '12px', color: '#9a9080', margin: '1px 0 3px', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>{listingTitle}</p>
+                  <p style={{ fontSize: '12px', color: '#9a9080', margin: '1px 0 3px', letterSpacing: '0.05em' }}>{listingTitle}</p>
                   <p className="conversation-preview" style={{ fontWeight: unread > 0 ? 600 : undefined, color: unread > 0 ? '#1a1408' : undefined }}>
                     {preview}
                   </p>

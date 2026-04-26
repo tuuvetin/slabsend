@@ -204,7 +204,7 @@ export default function EditListingPage() {
           zIndex: 1000, display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center', padding: '20px'
         }}>
-          <p style={{ color: '#f0ead8', fontFamily: 'Barlow Condensed', fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>
+          <p style={{ color: '#f0ead8', fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>
             Photo {cropIndex + 1} / {cropQueue.length} — Drag to crop
           </p>
           <div style={{ maxWidth: '90vw', maxHeight: '60vh', overflow: 'hidden' }}>
@@ -213,8 +213,8 @@ export default function EditListingPage() {
             </ReactCrop>
           </div>
           <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-            <button onClick={handleSkipCrop} style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', color: '#f0ead8', border: '1px solid rgba(240,234,216,0.3)', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Skip</button>
-            <button onClick={handleCropConfirm} style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: '#cc4400', color: '#f0ead8', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Confirm crop</button>
+            <button onClick={handleSkipCrop} style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', color: '#f0ead8', border: '1px solid rgba(240,234,216,0.3)', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Skip</button>
+            <button onClick={handleCropConfirm} style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: '#cc4400', color: '#f0ead8', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Confirm crop</button>
           </div>
         </div>
       )}

@@ -79,7 +79,7 @@ export default async function ListingsPage({
                   {isAdmin && (
                     <a
                       href={`/listings/${listing.id}/edit`}
-                      style={{ position: 'absolute', top: '8px', left: '8px', background: '#1a1408', color: '#FC7038', fontFamily: 'Barlow Condensed', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', textDecoration: 'none', zIndex: 2 }}
+                      style={{ position: 'absolute', top: '8px', left: '8px', background: '#1a1408', color: '#FC7038', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', textDecoration: 'none', zIndex: 2 }}
                     >
                       ✏️ Edit
                     </a>
@@ -87,10 +87,10 @@ export default async function ListingsPage({
                 </div>
                 <div className="listing-card-body">
                   {listing.sold && (
-                    <p style={{ fontFamily: 'Barlow Condensed', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#fff', background: '#aa2200', display: 'inline-block', padding: '2px 8px', borderRadius: 4, marginBottom: 6 }}>Sold</p>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#fff', background: '#aa2200', display: 'inline-block', padding: '2px 8px', borderRadius: 4, marginBottom: 6 }}>Sold</p>
                   )}
                   {!listing.sold && listing.listing_type === 'rent' && (
-                    <p style={{ fontFamily: 'Barlow Condensed', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#F5F3E6', background: '#5a7a84', display: 'inline-block', padding: '2px 8px', borderRadius: 4, marginBottom: 6 }}>Rent</p>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#F5F3E6', background: '#5a7a84', display: 'inline-block', padding: '2px 8px', borderRadius: 4, marginBottom: 6 }}>Rent</p>
                   )}
                   <h3 className="listing-card-title">{listing.title}</h3>
                   {listing.category && (
@@ -119,7 +119,7 @@ export default async function ListingsPage({
                   </p>
                   {displayName && (
                     <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(26,20,8,0.06)' }}>
-                      <span style={{ fontSize: '11px', color: '#7a7060', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>
+                      <span style={{ fontSize: '11px', color: '#7a7060', letterSpacing: '0.05em' }}>
                         {displayName}
                       </span>
                     </div>

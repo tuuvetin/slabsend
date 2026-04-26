@@ -287,7 +287,7 @@ export default function ListingPage() {
           )}
           <button onClick={closeLightbox} style={{ position: 'absolute', top: '16px', right: '20px', background: 'transparent', border: 'none', color: '#f0ead8', fontSize: '28px', cursor: 'pointer', lineHeight: 1 }}>×</button>
           {images.length > 1 && (
-            <p style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', color: 'rgba(240,234,216,0.6)', fontFamily: 'Barlow Condensed', fontSize: '13px', letterSpacing: '0.12em', margin: 0 }}>
+            <p style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', color: 'rgba(240,234,216,0.6)', fontSize: '13px', letterSpacing: '0.12em', margin: 0 }}>
               {lightboxIndex + 1} / {images.length}
             </p>
           )}
@@ -303,7 +303,7 @@ export default function ListingPage() {
           padding: '12px 16px', marginBottom: '16px',
         }}>
           <span style={{ fontSize: '16px' }}>🎉</span>
-          <p style={{ fontFamily: 'Barlow', fontSize: '14px', color: '#1a4a2a', margin: 0 }}>
+          <p style={{ fontSize: '14px', color: '#1a4a2a', margin: 0 }}>
             Your listing is live!
           </p>
         </div>
@@ -326,7 +326,7 @@ export default function ListingPage() {
                 {images.length > 1 && (
                   <button
                     onClick={e => { e.stopPropagation(); setLightboxIndex(0) }}
-                    style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(26,20,8,0.55)', color: '#F5F3E6', border: 'none', borderRadius: '6px', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', padding: '6px 12px', cursor: 'pointer' }}
+                    style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'rgba(26,20,8,0.55)', color: '#F5F3E6', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', padding: '6px 12px', cursor: 'pointer' }}
                   >
                     View all photos ({images.length})
                   </button>
@@ -348,7 +348,7 @@ export default function ListingPage() {
               )}
             </>
           ) : (
-            <div style={{ width: '100%', aspectRatio: '4/3', background: '#e8e4d8', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9a9080', fontSize: '14px', fontFamily: 'Barlow Condensed', letterSpacing: '0.1em', textTransform: 'uppercase' }}>No photos</div>
+            <div style={{ width: '100%', aspectRatio: '4/3', background: '#e8e4d8', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9a9080', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>No photos</div>
           )}
 
           {/* Review form */}
@@ -382,7 +382,7 @@ export default function ListingPage() {
             <div style={{ marginBottom: '4px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '6px' }}>
                 <span style={{ fontSize: '13px', color: '#9a9080' }}>€{listing.price}{isRental ? '/day' : ''}</span>
-                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '20px', fontWeight: 700, color: '#1a1408' }}>
+                <span style={{ fontSize: '20px', fontWeight: 700, color: '#1a1408' }}>
                   €{(listing.price * 1.08).toFixed(2)}{isRental ? '/day' : ''}
                 </span>
               </div>
@@ -491,8 +491,8 @@ export default function ListingPage() {
                 {/* Delivery toggle — buyer only, pre-purchase, both options available */}
                 {!isRental && isBuyerView && hasShipping && hasPickup && (
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                    <button onClick={() => setDeliveryMethod('shipping')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'shipping' ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'shipping' ? '#FC7038' : 'rgba(26,20,8,0.05)', color: deliveryMethod === 'shipping' ? '#fff' : '#7a7060' }}>Shipping</button>
-                    <button onClick={() => setDeliveryMethod('pickup')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'pickup' ? '2px solid #1a1408' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'pickup' ? '#1a1408' : 'rgba(26,20,8,0.05)', color: deliveryMethod === 'pickup' ? '#fff' : '#7a7060' }}>Pickup</button>
+                    <button onClick={() => setDeliveryMethod('shipping')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'shipping' ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'shipping' ? '#FC7038' : 'rgba(26,20,8,0.05)', color: deliveryMethod === 'shipping' ? '#fff' : '#7a7060' }}>Shipping</button>
+                    <button onClick={() => setDeliveryMethod('pickup')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'pickup' ? '2px solid #1a1408' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'pickup' ? '#1a1408' : 'rgba(26,20,8,0.05)', color: deliveryMethod === 'pickup' ? '#fff' : '#7a7060' }}>Pickup</button>
                   </div>
                 )}
 
@@ -504,7 +504,7 @@ export default function ListingPage() {
                       <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>€{shippingEur.toFixed(2)}</span>
                     </div>
                     {isBuyerView && (
-                      <select value={buyerCountry} onChange={e => setBuyerCountry(e.target.value)} style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontFamily: 'Barlow', fontSize: '13px', background: '#ede9d8', color: '#1a1408', cursor: 'pointer' }}>
+                      <select value={buyerCountry} onChange={e => setBuyerCountry(e.target.value)} style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontSize: '13px', background: '#ede9d8', color: '#1a1408', cursor: 'pointer' }}>
                         {BUYER_COUNTRIES.map(c => <option key={c} value={c}>{BUYER_COUNTRY_NAMES[c]}</option>)}
                       </select>
                     )}
@@ -526,7 +526,7 @@ export default function ListingPage() {
           {/* SERVICE items */}
           {isService && serviceItems.length > 0 && (
             <div style={{ padding: '16px 24px' }}>
-              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>Select services</p>
+              <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>Select services</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {serviceItems.map(item => {
                   const checked = selectedServices.includes(item.name)
@@ -537,7 +537,7 @@ export default function ListingPage() {
                         style={{ width: '18px', height: '18px', accentColor: '#FC7038', flexShrink: 0 }}
                       />
                       <span style={{ flex: 1, fontSize: '14px', color: '#1a1408' }}>{item.name}</span>
-                      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '15px', fontWeight: 700, color: item.price > 0 ? '#1a1408' : '#9a9080' }}>
+                      <span style={{ fontSize: '15px', fontWeight: 700, color: item.price > 0 ? '#1a1408' : '#9a9080' }}>
                         {item.price > 0 ? `€${item.price}` : '—'}
                       </span>
                     </label>
@@ -556,7 +556,7 @@ export default function ListingPage() {
             {/* Payment confirmed banner */}
             {order && !confirmDone && (
               <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
-                <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>✓ Payment confirmed</p>
+                <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>✓ Payment confirmed</p>
                 <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: 1.5, marginBottom: '12px' }}>
                   Confirm receipt once you have the item. The seller is paid after your confirmation or automatically after 48h.
                 </p>
@@ -570,7 +570,7 @@ export default function ListingPage() {
             )}
             {confirmDone && (
               <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
-                <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, color: '#2a6a2a', marginBottom: '4px' }}>✓ Receipt confirmed — thank you!</p>
+                <p style={{ fontSize: '13px', fontWeight: 700, color: '#2a6a2a', marginBottom: '4px' }}>✓ Receipt confirmed — thank you!</p>
                 <p style={{ fontSize: '13px', color: '#3a3428', margin: 0 }}>The seller will receive their payment shortly.</p>
               </div>
             )}
@@ -610,14 +610,14 @@ export default function ListingPage() {
 
                 {/* Make an offer */}
                 {!isRental && !isService && (
-                  <button onClick={() => setShowOffer(!showOffer)} style={{ width: '100%', marginBottom: '10px', fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#FC7038', border: '1.5px solid #FC7038', borderRadius: '8px', padding: '13px', transition: 'all 0.15s' }}>
+                  <button onClick={() => setShowOffer(!showOffer)} style={{ width: '100%', marginBottom: '10px', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#FC7038', border: '1.5px solid #FC7038', borderRadius: '8px', padding: '13px', transition: 'all 0.15s' }}>
                     Make an offer
                   </button>
                 )}
 
                 {showOffer && (
                   <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '8px', padding: '16px', marginBottom: '10px' }}>
-                    <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
+                    <p style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
                       Your offer (asking price: {listing.price} €)
                     </p>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
@@ -639,7 +639,7 @@ export default function ListingPage() {
 
                 {/* Ask seller toggle */}
                 {!showMessage ? (
-                  <button onClick={() => setShowMessage(true)} style={{ width: '100%', fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#1a1408', border: '1.5px solid rgba(26,20,8,0.2)', borderRadius: '8px', padding: '13px', transition: 'all 0.15s' }}>
+                  <button onClick={() => setShowMessage(true)} style={{ width: '100%', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#1a1408', border: '1.5px solid rgba(26,20,8,0.2)', borderRadius: '8px', padding: '13px', transition: 'all 0.15s' }}>
                     Ask seller
                   </button>
                 ) : (
@@ -650,7 +650,7 @@ export default function ListingPage() {
                       <button className="form-submit" onClick={handleSendMessage} style={{ flex: 1, background: 'transparent', color: '#1a1408', border: '1.5px solid rgba(26,20,8,0.2)' }}>
                         Send message
                       </button>
-                      <button onClick={() => { setShowMessage(false); setMessage('') }} style={{ padding: '0 16px', fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, background: 'transparent', color: '#9a9080', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '8px', cursor: 'pointer' }}>
+                      <button onClick={() => { setShowMessage(false); setMessage('') }} style={{ padding: '0 16px', fontSize: '13px', fontWeight: 700, background: 'transparent', color: '#9a9080', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '8px', cursor: 'pointer' }}>
                         Cancel
                       </button>
                     </div>
@@ -707,8 +707,8 @@ export default function ListingPage() {
             <div className="listing-owner-actions">
               {isAdmin && (
                 <div style={{ background: '#1a1408', borderRadius: '8px', padding: '10px 14px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#FC7038' }}>🔑 Admin</span>
-                  <button onClick={handleToggleSold} disabled={togglingSOLD} style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: listing.sold ? '#2a6a2a' : '#aa2200', color: '#F5F3E6', border: 'none', borderRadius: '6px', padding: '6px 16px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#FC7038' }}>🔑 Admin</span>
+                  <button onClick={handleToggleSold} disabled={togglingSOLD} style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: listing.sold ? '#2a6a2a' : '#aa2200', color: '#F5F3E6', border: 'none', borderRadius: '6px', padding: '6px 16px' }}>
                     {togglingSOLD ? '...' : listing.sold ? 'Mark as available' : 'Mark as sold'}
                   </button>
                 </div>

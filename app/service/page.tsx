@@ -49,7 +49,7 @@ export default function ServicePage() {
           <span style={{
             display: 'inline-flex',
             alignItems: 'center',
-            fontFamily: 'Barlow Condensed, sans-serif',
+            fontFamily: 'inherit',
             fontSize: '13px',
             fontWeight: 700,
             letterSpacing: '0.18em',
@@ -75,7 +75,7 @@ export default function ServicePage() {
           </span>
 
           <h1 style={{
-            fontFamily: 'Barlow Condensed, sans-serif',
+            fontFamily: 'inherit',
             fontSize: 'clamp(42px, 7vw, 66px)',
             fontWeight: 700,
             letterSpacing: '0.04em',
@@ -103,7 +103,7 @@ export default function ServicePage() {
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '64px 32px 80px' }}>
 
         <p style={{
-          fontFamily: 'Barlow Condensed, sans-serif',
+          fontFamily: 'inherit',
           fontSize: '11px',
           fontWeight: 700,
           letterSpacing: '0.18em',
@@ -146,7 +146,7 @@ export default function ServicePage() {
             }}>
               <div style={{ fontSize: '28px', marginBottom: '14px' }}>{item.icon}</div>
               <h3 style={{
-                fontFamily: 'Barlow Condensed, sans-serif',
+                fontFamily: 'inherit',
                 fontSize: '16px',
                 fontWeight: 700,
                 letterSpacing: '0.08em',
@@ -169,7 +169,7 @@ export default function ServicePage() {
           textAlign: 'center',
         }}>
           <p style={{
-            fontFamily: 'Barlow Condensed, sans-serif',
+            fontFamily: 'inherit',
             fontSize: '11px',
             fontWeight: 700,
             letterSpacing: '0.16em',
@@ -180,7 +180,7 @@ export default function ServicePage() {
             Are you a cobbler or resoler?
           </p>
           <h2 style={{
-            fontFamily: 'Barlow Condensed, sans-serif',
+            fontFamily: 'inherit',
             fontSize: '28px',
             fontWeight: 700,
             letterSpacing: '0.04em',
@@ -196,7 +196,7 @@ export default function ServicePage() {
             href="mailto:info@slabsend.com?subject=Service listing - I want to get listed"
             style={{
               display: 'inline-block',
-              fontFamily: 'Barlow Condensed, sans-serif',
+              fontFamily: 'inherit',
               fontWeight: 700,
               fontSize: '12px',
               letterSpacing: '0.14em',

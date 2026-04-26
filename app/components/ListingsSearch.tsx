@@ -58,7 +58,7 @@ export default function ListingsSearch({ tab, search, category, subcategory, cou
       {/* SELL / RENT TOGGLE */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', justifyContent: 'center' }}>
         <a href={buildHref('sell')} style={{
-          padding: '8px 24px', fontFamily: 'Barlow Condensed', fontSize: '13px',
+          padding: '8px 24px', fontSize: '13px',
           fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
           textDecoration: 'none', borderRadius: '8px',
           background: tab === 'sell' ? '#FC7038' : 'rgba(26,20,8,0.06)',
@@ -66,7 +66,7 @@ export default function ListingsSearch({ tab, search, category, subcategory, cou
           border: tab === 'sell' ? '1px solid #FC7038' : '1px solid rgba(26,20,8,0.1)',
         }}>For sale</a>
         <a href={buildHref('rent')} style={{
-          padding: '8px 24px', fontFamily: 'Barlow Condensed', fontSize: '13px',
+          padding: '8px 24px', fontSize: '13px',
           fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
           textDecoration: 'none', borderRadius: '8px',
           background: tab === 'rent' ? '#4a7c59' : 'rgba(26,20,8,0.06)',
@@ -86,22 +86,22 @@ export default function ListingsSearch({ tab, search, category, subcategory, cou
 
           {/* SEARCH */}
           <div className="search-field-search" style={{ flex: '2 1 140px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
-            <p className="search-field-label" style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Search</p>
+            <p className="search-field-label" style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Search</p>
             <input
               value={searchVal}
               onChange={e => setSearchVal(e.target.value)}
               placeholder="Search gear..."
-              style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0 }}
+              style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0 }}
             />
           </div>
 
           {/* CATEGORY */}
           <div className="search-field-cat" style={{ flex: '1 1 100px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
-            <p className="search-field-label" style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Category</p>
+            <p className="search-field-label" style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Category</p>
             <select
               value={categoryVal}
               onChange={e => { setCategoryVal(e.target.value); setSubcategoryVal('') }}
-              style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
+              style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
             >
               <option value="">All</option>
               {Object.keys(categories).map(cat => (
@@ -113,11 +113,11 @@ export default function ListingsSearch({ tab, search, category, subcategory, cou
           {/* SUBCATEGORY */}
           {subcategories.length > 0 && (
             <div className="search-field-sub" style={{ flex: '1 1 100px', borderRight: '1px solid rgba(26,20,8,0.1)', padding: '12px 16px' }}>
-              <p className="search-field-label" style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Type</p>
+              <p className="search-field-label" style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Type</p>
               <select
                 value={subcategoryVal}
                 onChange={e => setSubcategoryVal(e.target.value)}
-                style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
+                style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
               >
                 <option value="">All</option>
                 {subcategories.map(sub => (
@@ -129,11 +129,11 @@ export default function ListingsSearch({ tab, search, category, subcategory, cou
 
           {/* LOCATION */}
           <div className="search-field-loc" style={{ flex: '1 1 100px', padding: '12px 16px' }}>
-            <p className="search-field-label" style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Location</p>
+            <p className="search-field-label" style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: '2px' }}>Location</p>
             <select
               value={countryVal}
               onChange={e => setCountryVal(e.target.value)}
-              style={{ border: 'none', outline: 'none', background: 'transparent', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
+              style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '14px', color: '#1a1408', width: '100%', padding: 0, cursor: 'pointer', appearance: 'none' }}
             >
               {europeanCountries.map(c => (
                 <option key={c} value={c === 'All of Europe' ? '' : c}>{c}</option>

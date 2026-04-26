@@ -314,7 +314,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
           display: 'flex', alignItems: 'center', gap: '10px',
         }}>
           <span style={{ fontSize: '18px' }}>✅</span>
-          <p style={{ fontFamily: 'Barlow', fontSize: '14px', color: '#1a4a2a', margin: 0 }}>
+          <p style={{ fontSize: '14px', color: '#1a4a2a', margin: 0 }}>
             Payment account verified! You can now publish your listing.
           </p>
         </div>
@@ -327,7 +327,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
           zIndex: 1000, display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center', padding: '20px'
         }}>
-          <p style={{ color: '#f0ead8', fontFamily: 'Barlow Condensed', fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>
+          <p style={{ color: '#f0ead8', fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>
             Photo {cropIndex + 1} / {cropQueue.length} — Drag to crop
           </p>
           <div style={{ maxWidth: '94vw', maxHeight: '75vh', overflow: 'auto' }}>
@@ -336,8 +336,8 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
             </ReactCrop>
           </div>
           <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-            <button onClick={handleSkipCrop} style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', color: '#f0ead8', border: '1px solid rgba(240,234,216,0.3)', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Skip</button>
-            <button onClick={handleCropConfirm} style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: '#cc4400', color: '#f0ead8', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Confirm crop</button>
+            <button onClick={handleSkipCrop} style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', background: 'transparent', color: '#f0ead8', border: '1px solid rgba(240,234,216,0.3)', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Skip</button>
+            <button onClick={handleCropConfirm} style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: '#cc4400', color: '#f0ead8', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer' }}>Confirm crop</button>
           </div>
         </div>
       )}
@@ -350,12 +350,12 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
 
       {listingType === 'rent' && (
         <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '12px' }}>
-          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
             Long-term discounts (optional)
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', flex: 1 }}>Weekly discount (7+ days)</span>
+              <span style={{ fontSize: '14px', color: '#1a1408', flex: 1 }}>Weekly discount (7+ days)</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <input
                   type="number"
@@ -364,13 +364,13 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
                   value={weeklyDiscountPct || ''}
                   onChange={e => setWeeklyDiscountPct(Math.min(50, Math.max(0, parseInt(e.target.value) || 0)))}
                   placeholder="0"
-                  style={{ fontFamily: 'Barlow', fontSize: '14px', width: '70px', padding: '7px 10px', background: '#fff', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', color: '#1a1408', textAlign: 'right' }}
+                  style={{ fontSize: '14px', width: '70px', padding: '7px 10px', background: '#fff', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', color: '#1a1408', textAlign: 'right' }}
                 />
-                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', color: '#7a7060', minWidth: '20px' }}>%</span>
+                <span style={{ fontSize: '14px', color: '#7a7060', minWidth: '20px' }}>%</span>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', flex: 1 }}>Monthly discount (30+ days)</span>
+              <span style={{ fontSize: '14px', color: '#1a1408', flex: 1 }}>Monthly discount (30+ days)</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <input
                   type="number"
@@ -379,9 +379,9 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
                   value={monthlyDiscountPct || ''}
                   onChange={e => setMonthlyDiscountPct(Math.min(50, Math.max(0, parseInt(e.target.value) || 0)))}
                   placeholder="0"
-                  style={{ fontFamily: 'Barlow', fontSize: '14px', width: '70px', padding: '7px 10px', background: '#fff', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', color: '#1a1408', textAlign: 'right' }}
+                  style={{ fontSize: '14px', width: '70px', padding: '7px 10px', background: '#fff', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', color: '#1a1408', textAlign: 'right' }}
                 />
-                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', color: '#7a7060', minWidth: '20px' }}>%</span>
+                <span style={{ fontSize: '14px', color: '#7a7060', minWidth: '20px' }}>%</span>
               </div>
             </div>
           </div>
@@ -402,7 +402,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
         onChange={e => setTitle(e.target.value)}
       />
       {listingType === 'service' && (
-        <p style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '6px', marginTop: '4px' }}>
+        <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '6px', marginTop: '4px' }}>
           Free description — write whatever you want
         </p>
       )}
@@ -417,7 +417,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
         </div>
       )}
 
-      <p style={{ fontFamily: 'Barlow', fontSize: '12px', color: '#9a9080', marginBottom: '6px' }}>
+      <p style={{ fontSize: '12px', color: '#9a9080', marginBottom: '6px' }}>
         If your city isn't in the list, just type it in.
       </p>
       <div className="location-row">
@@ -456,7 +456,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
 
       {listingType === 'service' ? (
         <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '12px' }}>
-          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
             Services offered &amp; pricing
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -470,7 +470,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
                     onChange={() => toggleServiceType(t)}
                     style={{ width: '18px', height: '18px', accentColor: '#FC7038', flexShrink: 0, cursor: 'pointer' }}
                   />
-                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 600, color: active ? '#1a1408' : '#9a9080', flex: 1, cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleServiceType(t)}>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: active ? '#1a1408' : '#9a9080', flex: 1, cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleServiceType(t)}>
                     {t}
                   </span>
                   {active && (
@@ -480,9 +480,9 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
                         placeholder="0"
                         value={servicePrices[t]}
                         onChange={e => setServicePrices(prev => ({ ...prev, [t]: e.target.value }))}
-                        style={{ fontFamily: 'Barlow', fontSize: '14px', width: '90px', padding: '6px 10px', background: '#fff', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', color: '#1a1408', textAlign: 'right' }}
+                        style={{ fontSize: '14px', width: '90px', padding: '6px 10px', background: '#fff', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', color: '#1a1408', textAlign: 'right' }}
                       />
-                      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', color: '#7a7060' }}>€</span>
+                      <span style={{ fontSize: '13px', color: '#7a7060' }}>€</span>
                     </div>
                   )}
                 </div>
@@ -515,7 +515,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       {/* DELIVERY OPTIONS */}
       {listingType === 'sell' && (
         <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
             Delivery options
           </p>
 
@@ -527,7 +527,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
               onChange={e => setPickupEnabled(e.target.checked)}
               style={{ width: '18px', height: '18px', accentColor: '#FC7038' }}
             />
-            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
+            <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
               Pickup
             </span>
           </label>
@@ -540,7 +540,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
               onChange={e => setShippingEnabled(e.target.checked)}
               style={{ width: '18px', height: '18px', accentColor: '#FC7038' }}
             />
-            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
+            <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
               Shipping
             </span>
           </label>
@@ -550,7 +550,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
 
           {shippingEnabled && (
             <div style={{ marginTop: '14px', marginLeft: '28px' }}>
-              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
+              <p style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
                 Package size
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
@@ -559,7 +559,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
                     key={size.value}
                     onClick={() => setPackageSize(size.value)}
                     style={{
-                      fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700,
+                      fontSize: '14px', fontWeight: 700,
                       letterSpacing: '0.08em', textTransform: 'uppercase',
                       padding: '14px 10px', borderRadius: '8px', cursor: 'pointer',
                       border: packageSize === size.value ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)',
@@ -581,7 +581,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       {/* PACKAGE WEIGHT — pakollinen kaikille sell-ilmoituksille */}
       {listingType === 'sell' && (
         <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '4px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '4px' }}>
             Package weight <span style={{ color: '#FC7038' }}>*</span>
           </p>
           <p style={{ fontSize: '12px', color: '#9a9080', marginBottom: '10px' }}>
@@ -598,14 +598,14 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
               onChange={e => setPackageWeight(e.target.value)}
               style={{ marginBottom: 0, width: '120px' }}
             />
-            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', color: '#7a7060' }}>kg</span>
+            <span style={{ fontSize: '14px', color: '#7a7060' }}>kg</span>
           </div>
         </div>
       )}
 
       {listingType === 'rent' && (
         <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
             📍 Pickup only
           </p>
           <input
@@ -614,22 +614,22 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
             value={pickupLocation}
             onChange={e => setPickupLocation(e.target.value)}
           />
-          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', margin: '14px 0 8px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', margin: '14px 0 8px' }}>
             Pickup hours
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <select
               value={pickupHoursFrom}
               onChange={e => setPickupHoursFrom(e.target.value)}
-              style={{ flex: 1, padding: '9px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontFamily: 'Barlow', fontSize: '14px', background: '#fff', color: '#1a1408' }}
+              style={{ flex: 1, padding: '9px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontSize: '14px', background: '#fff', color: '#1a1408' }}
             >
               {ALL_TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
-            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', color: '#7a7060' }}>–</span>
+            <span style={{ fontSize: '13px', color: '#7a7060' }}>–</span>
             <select
               value={pickupHoursTo}
               onChange={e => setPickupHoursTo(e.target.value)}
-              style={{ flex: 1, padding: '9px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontFamily: 'Barlow', fontSize: '14px', background: '#fff', color: '#1a1408' }}
+              style={{ flex: 1, padding: '9px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontSize: '14px', background: '#fff', color: '#1a1408' }}
             >
               {ALL_TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
             </select>

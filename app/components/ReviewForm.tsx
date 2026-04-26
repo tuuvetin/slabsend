@@ -47,7 +47,7 @@ export default function ReviewForm({ orderId, sellerId }: { orderId: number, sel
 
   if (done) return (
     <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '14px 16px', marginTop: '16px' }}>
-      <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '8px' }}>Your review</p>
+      <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '8px' }}>Your review</p>
       <div style={{ display: 'flex', gap: '2px', marginBottom: displayComment ? '6px' : 0 }}>
         {[1,2,3,4,5].map(s => (
           <span key={s} style={{ fontSize: '20px', color: s <= displayRating ? '#FC7038' : '#d0c8b8' }}>★</span>
@@ -59,7 +59,7 @@ export default function ReviewForm({ orderId, sellerId }: { orderId: number, sel
 
   return (
     <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginTop: '16px' }}>
-      <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '12px' }}>
+      <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '12px' }}>
         Rate this seller
       </p>
       <div style={{ display: 'flex', gap: '2px', marginBottom: '12px' }}>
@@ -77,12 +77,12 @@ export default function ReviewForm({ orderId, sellerId }: { orderId: number, sel
         value={comment}
         onChange={e => setComment(e.target.value)}
         placeholder="Share your experience (optional)"
-        style={{ width: '100%', border: '1px solid rgba(26,20,8,0.15)', borderRadius: '8px', padding: '10px 12px', fontFamily: 'Barlow', fontSize: '14px', color: '#1a1408', background: '#fff', resize: 'vertical', minHeight: '80px', outline: 'none', marginBottom: '10px', boxSizing: 'border-box' }}
+        style={{ width: '100%', border: '1px solid rgba(26,20,8,0.15)', borderRadius: '8px', padding: '10px 12px', fontSize: '14px', color: '#1a1408', background: '#fff', resize: 'vertical', minHeight: '80px', outline: 'none', marginBottom: '10px', boxSizing: 'border-box' }}
       />
       <button
         onClick={handleSubmit}
         disabled={loading || rating === 0}
-        style={{ background: rating === 0 ? '#d0c8b8' : '#FC7038', color: '#F5F3E6', border: 'none', borderRadius: '8px', padding: '12px 24px', fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: rating === 0 ? 'not-allowed' : 'pointer', width: '100%', transition: 'background 0.15s' }}
+        style={{ background: rating === 0 ? '#d0c8b8' : '#FC7038', color: '#F5F3E6', border: 'none', borderRadius: '8px', padding: '12px 24px', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: rating === 0 ? 'not-allowed' : 'pointer', width: '100%', transition: 'background 0.15s' }}
       >
         {loading ? 'Submitting...' : 'Submit review'}
       </button>

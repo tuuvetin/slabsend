@@ -72,14 +72,14 @@ export default function AdminOrderDetailPage() {
   const fmt = (cents: number | null) => cents != null ? (cents / 100).toFixed(2) + ' €' : '—'
 
   if (authorized === null) return null
-  if (!authorized) return <div style={{ padding: '40px', fontFamily: 'Barlow' }}>Access denied.</div>
+  if (!authorized) return <div style={{ padding: '40px',  }}>Access denied.</div>
   if (loadError) return (
-    <div style={{ padding: '40px', fontFamily: 'Barlow' }}>
+    <div style={{ padding: '40px',  }}>
       <p style={{ color: '#c0392b' }}>Virhe ladattaessa tilausta: {loadError}</p>
       <button onClick={loadOrder} style={{ marginTop: '12px', padding: '8px 16px', cursor: 'pointer' }}>Yritä uudelleen</button>
     </div>
   )
-  if (!order) return <div style={{ padding: '40px', fontFamily: 'Barlow' }}>Ladataan...</div>
+  if (!order) return <div style={{ padding: '40px',  }}>Ladataan...</div>
 
   const statusColors: Record<string, string> = {
     paid: '#e07010', label_created: '#1060c0', shipped: '#7040c0',
@@ -89,14 +89,14 @@ export default function AdminOrderDetailPage() {
   const sellerProfile = order.seller_profile
 
   return (
-    <div style={{ fontFamily: 'Barlow', maxWidth: '800px', margin: '0 auto', padding: '40px 24px' }}>
-      <a href="/admin/orders" style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', textDecoration: 'none' }}>← Kaikki tilaukset</a>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 24px' }}>
+      <a href="/admin/orders" style={{ fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', textDecoration: 'none' }}>← Kaikki tilaukset</a>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', margin: '20px 0' }}>
-        <h1 style={{ fontFamily: 'Barlow Condensed', fontSize: '24px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>
           Tilaus #{order.order_number}
         </h1>
-        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '20px', background: statusColor + '20', color: statusColor, border: `1px solid ${statusColor}40` }}>
+        <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '20px', background: statusColor + '20', color: statusColor, border: `1px solid ${statusColor}40` }}>
           {order.status}
         </span>
       </div>
@@ -157,7 +157,7 @@ export default function AdminOrderDetailPage() {
           href="https://yritysportaali.matkahuolto.fi"
           target="_blank"
           rel="noreferrer"
-          style={{ display: 'inline-block', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', background: '#1a1408', color: '#F5F3E6', borderRadius: '6px', textDecoration: 'none', marginBottom: '16px' }}
+          style={{ display: 'inline-block', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 16px', background: '#1a1408', color: '#F5F3E6', borderRadius: '6px', textDecoration: 'none', marginBottom: '16px' }}
         >
           Avaa Matkahuollon Yritysportaali →
         </a>
@@ -186,7 +186,7 @@ export default function AdminOrderDetailPage() {
           <button
             onClick={handleSaveAndSend}
             disabled={saving}
-            style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 20px', background: '#FC7038', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+            style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 20px', background: '#FC7038', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
           >
             {saving ? 'Tallennetaan...' : 'Tallenna ja lähetä sähköpostit'}
           </button>
@@ -202,7 +202,7 @@ export default function AdminOrderDetailPage() {
               key={s}
               onClick={() => handleStatusUpdate(s)}
               disabled={order.status === s}
-              style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', background: order.status === s ? '#ddd' : '#fff', color: order.status === s ? '#aaa' : '#1a1408', border: '1px solid rgba(26,20,8,0.2)', borderRadius: '6px', cursor: order.status === s ? 'default' : 'pointer' }}
+              style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 14px', background: order.status === s ? '#ddd' : '#fff', color: order.status === s ? '#aaa' : '#1a1408', border: '1px solid rgba(26,20,8,0.2)', borderRadius: '6px', cursor: order.status === s ? 'default' : 'pointer' }}
             >
               → {s}
             </button>
@@ -224,12 +224,12 @@ const cardStyle: React.CSSProperties = {
   padding: '20px 24px', marginBottom: '16px',
 }
 const inputStyle: React.CSSProperties = {
-  fontFamily: 'Barlow', fontSize: '14px', padding: '10px 14px',
+  fontSize: '14px', padding: '10px 14px',
   background: '#fff', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px',
   color: '#1a1408', width: '100%', boxSizing: 'border-box',
 }
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px', marginTop: 0 }}>{children}</p>
+  return <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px', marginTop: 0 }}>{children}</p>
 }
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
@@ -246,7 +246,7 @@ function CopyBlock({ lines }: { lines: string[] }) {
       <div style={{ fontFamily: 'monospace', fontSize: '14px', background: '#fff', border: '1px solid rgba(26,20,8,0.12)', borderRadius: '8px', padding: '12px 16px', lineHeight: 1.8 }}>
         {lines.map((l, i) => <div key={i}>{l}</div>)}
       </div>
-      <button onClick={copy} style={{ position: 'absolute', top: '8px', right: '8px', fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', background: '#1a1408', color: '#F5F3E6', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+      <button onClick={copy} style={{ position: 'absolute', top: '8px', right: '8px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', background: '#1a1408', color: '#F5F3E6', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
         Kopioi
       </button>
     </div>

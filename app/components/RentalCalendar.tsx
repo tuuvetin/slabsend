@@ -193,7 +193,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
     <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '12px', padding: '20px', marginTop: '24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <button onClick={prevMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#1a1408', padding: '4px 8px' }}>‹</button>
-        <p style={{ fontFamily: 'Barlow Condensed', fontSize: '16px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', margin: 0 }}>
+        <p style={{ fontSize: '16px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', margin: 0 }}>
           {MONTHS[month]} {year}
         </p>
         <button onClick={nextMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#1a1408', padding: '4px 8px' }}>›</button>
@@ -201,7 +201,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '4px' }}>
         {DAYS.map(d => (
-          <div key={d} style={{ textAlign: 'center', fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', color: '#9a9080', textTransform: 'uppercase', padding: '4px 0' }}>{d}</div>
+          <div key={d} style={{ textAlign: 'center', fontSize: '11px', letterSpacing: '0.1em', color: '#9a9080', textTransform: 'uppercase', padding: '4px 0' }}>{d}</div>
         ))}
       </div>
 
@@ -239,7 +239,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
               key={date}
               onClick={() => isOwner ? handleOwnerClick(date) : handleRenterClick(date)}
               disabled={isPast}
-              style={{ background: bg, color, border, borderRadius: '6px', padding: '8px 4px', textAlign: 'center', cursor, fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: isStart || isEnd ? 700 : 400, opacity, transition: 'all 0.1s' }}
+              style={{ background: bg, color, border, borderRadius: '6px', padding: '8px 4px', textAlign: 'center', cursor, fontSize: '13px', fontWeight: isStart || isEnd ? 700 : 400, opacity, transition: 'all 0.1s' }}
             >
               {day}
             </button>
@@ -256,7 +256,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
         ].map(l => (
           <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: l.color, border: '1px solid rgba(26,20,8,0.15)' }} />
-            <span style={{ fontSize: '11px', color: '#7a7060', fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' }}>{l.label}</span>
+            <span style={{ fontSize: '11px', color: '#7a7060', letterSpacing: '0.05em' }}>{l.label}</span>
           </div>
         ))}
       </div>
@@ -285,7 +285,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
 
                 {/* TIME PICKERS */}
                 <div style={{ borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '10px', marginBottom: '10px' }}>
-                  <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '8px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '8px' }}>
                     Choose times (available {pickupHoursFrom}–{pickupHoursTo})
                   </p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -294,7 +294,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
                       <select
                         value={pickupTime}
                         onChange={e => setPickupTime(e.target.value)}
-                        style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: pickupTime ? '1px solid rgba(26,20,8,0.15)' : '1px solid #FC7038', fontFamily: 'Barlow', fontSize: '13px', background: '#fff', color: pickupTime ? '#1a1408' : '#9a9080' }}
+                        style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: pickupTime ? '1px solid rgba(26,20,8,0.15)' : '1px solid #FC7038', fontSize: '13px', background: '#fff', color: pickupTime ? '#1a1408' : '#9a9080' }}
                       >
                         <option value="">Select time</option>
                         {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
@@ -305,7 +305,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
                       <select
                         value={returnTime}
                         onChange={e => setReturnTime(e.target.value)}
-                        style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: returnTime ? '1px solid rgba(26,20,8,0.15)' : '1px solid #FC7038', fontFamily: 'Barlow', fontSize: '13px', background: '#fff', color: returnTime ? '#1a1408' : '#9a9080' }}
+                        style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: returnTime ? '1px solid rgba(26,20,8,0.15)' : '1px solid #FC7038', fontSize: '13px', background: '#fff', color: returnTime ? '#1a1408' : '#9a9080' }}
                       >
                         <option value="">Select time</option>
                         {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}

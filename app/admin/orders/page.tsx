@@ -45,7 +45,7 @@ export default function AdminOrdersPage() {
   }, [authorized, range])
 
   if (authorized === null) return null
-  if (!authorized) return <div style={{ padding: '40px', fontFamily: 'Barlow' }}>Access denied.</div>
+  if (!authorized) return <div style={{ padding: '40px',  }}>Access denied.</div>
 
   const totalRevenue = orders.reduce((s, o) => s + (o.service_fee || 0), 0)
   const totalVolume = orders.reduce((s, o) => s + (o.amount || 0) + (o.service_fee || 0), 0)
@@ -53,16 +53,16 @@ export default function AdminOrdersPage() {
   const pending = orders.filter(o => o.status === 'paid').length
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px', fontFamily: 'Barlow, sans-serif', color: '#1a1408' }}>
+    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px', fontFamily: 'inherit', color: '#1a1408' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 style={{ fontFamily: 'Barlow Condensed', fontSize: 32, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>Orders</h1>
-          <a href="/admin" style={{ fontSize: 12, color: '#9a9080', textDecoration: 'none', letterSpacing: '0.1em', fontFamily: 'Barlow Condensed', textTransform: 'uppercase' }}>← Back to admin</a>
+          <h1 style={{ fontSize: 32, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>Orders</h1>
+          <a href="/admin" style={{ fontSize: 12, color: '#9a9080', textDecoration: 'none', letterSpacing: '0.1em', textTransform: 'uppercase' }}>← Back to admin</a>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
           {(['1m','3m','6m','1y','all'] as const).map(r => (
             <button key={r} onClick={() => setRange(r)} style={{
-              fontFamily: 'Barlow Condensed', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em',
+              fontSize: 12, fontWeight: 700, letterSpacing: '0.1em',
               textTransform: 'uppercase', padding: '7px 14px', borderRadius: 6, cursor: 'pointer', border: 'none',
               background: range === r ? '#FC7038' : 'rgba(26,20,8,0.08)',
               color: range === r ? '#fff' : '#5a5040',
@@ -80,8 +80,8 @@ export default function AdminOrdersPage() {
           { label: 'Slabsend revenue', value: `${totalRevenue.toFixed(2)} €` },
         ].map(s => (
           <div key={s.label} style={{ background: '#fff', border: '1px solid rgba(26,20,8,0.08)', borderRadius: 10, padding: '18px 20px' }}>
-            <div style={{ fontFamily: 'Barlow Condensed', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: 6 }}>{s.label}</div>
-            <div style={{ fontFamily: 'Barlow Condensed', fontSize: 28, fontWeight: 700 }}>{s.value}</div>
+            <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', marginBottom: 6 }}>{s.label}</div>
+            <div style={{ fontSize: 28, fontWeight: 700 }}>{s.value}</div>
           </div>
         ))}
       </div>
@@ -96,7 +96,7 @@ export default function AdminOrdersPage() {
             <thead>
               <tr style={{ background: '#F5F3E6', borderBottom: '1px solid rgba(26,20,8,0.08)' }}>
                 {['Order #', 'Item', 'Date', 'Seller gets', 'Fee', 'Total', 'Status'].map(h => (
-                  <th key={h} style={{ fontFamily: 'Barlow Condensed', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', padding: '10px 14px', textAlign: 'left' }}>{h}</th>
+                  <th key={h} style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9a9080', padding: '10px 14px', textAlign: 'left' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -106,14 +106,14 @@ export default function AdminOrdersPage() {
                 const total = (o.amount || 0) + (o.service_fee || 0)
                 return (
                   <tr key={o.id} onClick={() => window.location.href = `/admin/orders/${o.id}`} style={{ borderBottom: '1px solid rgba(26,20,8,0.06)', background: i % 2 === 0 ? '#fff' : 'rgba(245,243,230,0.4)', cursor: 'pointer' }}>
-                    <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 13, fontWeight: 700 }}>{o.order_number || String(o.id || '').slice(0,8)}</td>
+                    <td style={{ padding: '12px 14px', fontSize: 13, fontWeight: 700 }}>{o.order_number || String(o.id || '').slice(0,8)}</td>
                     <td style={{ padding: '12px 14px', fontSize: 13 }}>{o.listing?.title || '—'}</td>
-                    <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 12, color: '#7a7060' }}>{new Date(o.created_at).toLocaleDateString('fi-FI')}</td>
-                    <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 13, fontWeight: 600 }}>{o.amount?.toFixed(2)} €</td>
-                    <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 13, color: '#FC7038', fontWeight: 600 }}>{o.service_fee?.toFixed(2)} €</td>
-                    <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 13, fontWeight: 700 }}>{total.toFixed(2)} €</td>
+                    <td style={{ padding: '12px 14px', fontSize: 12, color: '#7a7060' }}>{new Date(o.created_at).toLocaleDateString('fi-FI')}</td>
+                    <td style={{ padding: '12px 14px', fontSize: 13, fontWeight: 600 }}>{o.amount?.toFixed(2)} €</td>
+                    <td style={{ padding: '12px 14px', fontSize: 13, color: '#FC7038', fontWeight: 600 }}>{o.service_fee?.toFixed(2)} €</td>
+                    <td style={{ padding: '12px 14px', fontSize: 13, fontWeight: 700 }}>{total.toFixed(2)} €</td>
                     <td style={{ padding: '12px 14px' }}>
-                      <span style={{ fontFamily: 'Barlow Condensed', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: st.color, background: `${st.color}18`, padding: '3px 8px', borderRadius: 4 }}>{st.label}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: st.color, background: `${st.color}18`, padding: '3px 8px', borderRadius: 4 }}>{st.label}</span>
                     </td>
                   </tr>
                 )
@@ -121,10 +121,10 @@ export default function AdminOrdersPage() {
             </tbody>
             <tfoot>
               <tr style={{ borderTop: '2px solid rgba(26,20,8,0.1)', background: '#F5F3E6' }}>
-                <td colSpan={3} style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7a7060' }}>Total</td>
-                <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 14, fontWeight: 700 }}>{orders.reduce((s,o) => s+(o.amount||0), 0).toFixed(2)} €</td>
-                <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 14, fontWeight: 700, color: '#FC7038' }}>{totalRevenue.toFixed(2)} €</td>
-                <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 14, fontWeight: 700 }}>{totalVolume.toFixed(2)} €</td>
+                <td colSpan={3} style={{ padding: '12px 14px', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7a7060' }}>Total</td>
+                <td style={{ padding: '12px 14px', fontSize: 14, fontWeight: 700 }}>{orders.reduce((s,o) => s+(o.amount||0), 0).toFixed(2)} €</td>
+                <td style={{ padding: '12px 14px', fontSize: 14, fontWeight: 700, color: '#FC7038' }}>{totalRevenue.toFixed(2)} €</td>
+                <td style={{ padding: '12px 14px', fontSize: 14, fontWeight: 700 }}>{totalVolume.toFixed(2)} €</td>
                 <td />
               </tr>
             </tfoot>

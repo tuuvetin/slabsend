@@ -106,7 +106,7 @@ export default function NavBar() {
               }} />
             )}
           </a>
-          <a href="/listings/new" style={{ fontFamily: 'Barlow Condensed', fontWeight: 400, fontSize: '18px', color: '#F5F3E6', background: '#FC7038', textDecoration: 'none', width: '26px', height: '26px', borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>+</a>
+          <a href="/listings/new" style={{ fontWeight: 400, fontSize: '18px', color: '#F5F3E6', background: '#FC7038', textDecoration: 'none', width: '26px', height: '26px', borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>+</a>
           <button className="sb-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
             <span /><span /><span />
           </button>
