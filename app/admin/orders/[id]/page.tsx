@@ -1,10 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
 const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']
 
-export default function AdminOrderDetailPage({ params }: { params: { id: string } }) {
+export default function AdminOrderDetailPage() {
+  const params = useParams()
+  const id = params?.id as string
   const [authorized, setAuthorized] = useState<boolean | null>(null)
   const [order, setOrder] = useState<any>(null)
   const [loadError, setLoadError] = useState('')
@@ -12,19 +15,19 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
   const [trackingCode, setTrackingCode] = useState('')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
-  const supabase = createClient()
 
   useEffect(() => {
+    const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user || !ADMIN_EMAILS.includes(user.email || '')) { setAuthorized(false); return }
       setAuthorized(true)
       loadOrder()
-    })
+    }).catch(() => setAuthorized(false))
   }, [])
 
   const loadOrder = async () => {
     setLoadError('')
-    const res = await fetch(`/api/admin/orders/${params.id}`)
+    const res = await fetch(`/api/admin/orders/${id}`)
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
       setLoadError(err.error || `HTTP ${res.status}`)
@@ -45,7 +48,7 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
     const res = await fetch('/api/admin/order-codes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId: params.id, activationCode, trackingCode }),
+      body: JSON.stringify({ orderId: id, activationCode, trackingCode }),
     })
     const data = await res.json()
     if (data.error) setMessage('Virhe: ' + data.error)
@@ -60,7 +63,7 @@ export default function AdminOrderDetailPage({ params }: { params: { id: string 
     await fetch('/api/admin/order-codes', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId: params.id, status: newStatus }),
+      body: JSON.stringify({ orderId: id, status: newStatus }),
     })
     setMessage(`Status päivitetty: ${newStatus}`)
     await loadOrder()

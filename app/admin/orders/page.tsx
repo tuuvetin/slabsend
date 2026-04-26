@@ -19,16 +19,16 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [range, setRange] = useState('6m')
-  const supabase = createClient()
 
   useEffect(() => {
+    const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user || !ADMIN_EMAILS.includes(user.email || '')) {
         setAuthorized(false)
         return
       }
       setAuthorized(true)
-    })
+    }).catch(() => setAuthorized(false))
   }, [])
 
   useEffect(() => {
