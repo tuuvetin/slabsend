@@ -615,6 +615,19 @@ export default function ListingPage() {
                   </button>
                 )}
 
+                {/* Payment icons */}
+                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '10px', opacity: 0.5 }}>
+                  {[
+                    { label: 'VISA', bg: '#1a1f71', color: '#fff', italic: true },
+                    { label: 'MC', bg: '#eb001b', color: '#fff', italic: false },
+                    { label: 'AMEX', bg: '#007bc1', color: '#fff', italic: false },
+                    { label: '⌘ Pay', bg: '#000', color: '#fff', italic: false },
+                    { label: 'G Pay', bg: '#fff', color: '#3c4043', italic: false, border: '1px solid #dadce0' },
+                  ].map(m => (
+                    <span key={m.label} style={{ fontFamily: 'Barlow Condensed', fontSize: '9px', fontWeight: 700, letterSpacing: '0.04em', padding: '3px 6px', borderRadius: '4px', background: m.bg, color: m.color, border: m.border || 'none', fontStyle: m.italic ? 'italic' : 'normal', lineHeight: 1.4, whiteSpace: 'nowrap' }}>{m.label}</span>
+                  ))}
+                </div>
+
                 {/* Make an offer */}
                 {!isRental && !isService && (
                   <button onClick={() => setShowOffer(!showOffer)} style={{ width: '100%', marginBottom: '10px', fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'transparent', color: '#FC7038', border: '1.5px solid #FC7038', borderRadius: '8px', padding: '13px', transition: 'all 0.15s' }}>

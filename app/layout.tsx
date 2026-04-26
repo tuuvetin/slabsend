@@ -44,6 +44,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
           <div className="site-footer-bottom">
             <span className="site-footer-copy">© {new Date().getFullYear()} Slabsend</span>
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              {[
+                { label: 'VISA', bg: '#1a1f71', color: '#fff', italic: true },
+                { label: 'MC', bg: '#eb001b', color: '#fff' },
+                { label: 'AMEX', bg: '#007bc1', color: '#fff' },
+                { label: '⌘ Pay', bg: '#fff', color: '#000' },
+                { label: 'G Pay', bg: '#fff', color: '#3c4043', border: '1px solid rgba(255,255,255,0.2)' },
+              ].map(m => (
+                <span key={m.label} style={{ fontFamily: 'Barlow Condensed', fontSize: '8px', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: m.bg, color: m.color, border: (m as any).border || 'none', fontStyle: m.italic ? 'italic' : 'normal', lineHeight: 1.5, opacity: 0.7 }}>{m.label}</span>
+              ))}
+            </div>
             <a href="mailto:info@slabsend.com" className="site-footer-privacy">info@slabsend.com</a>
             <a href="/privacy" className="site-footer-privacy">Privacy & Terms</a>
           </div>
