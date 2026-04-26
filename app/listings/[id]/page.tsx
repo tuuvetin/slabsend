@@ -609,16 +609,36 @@ export default function ListingPage() {
                 )}
 
                 {/* Payment icons */}
-                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '10px', opacity: 0.5 }}>
-                  {[
-                    { label: 'VISA', bg: '#1a1f71', color: '#fff', italic: true },
-                    { label: 'MC', bg: '#eb001b', color: '#fff', italic: false },
-                    { label: 'AMEX', bg: '#007bc1', color: '#fff', italic: false },
-                    { label: '⌘ Pay', bg: '#000', color: '#fff', italic: false },
-                    { label: 'G Pay', bg: '#fff', color: '#3c4043', italic: false, border: '1px solid #dadce0' },
-                  ].map(m => (
-                    <span key={m.label} style={{ fontFamily: 'Barlow Condensed', fontSize: '9px', fontWeight: 700, letterSpacing: '0.04em', padding: '3px 6px', borderRadius: '4px', background: m.bg, color: m.color, border: m.border || 'none', fontStyle: m.italic ? 'italic' : 'normal', lineHeight: 1.4, whiteSpace: 'nowrap' }}>{m.label}</span>
-                  ))}
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px', alignItems: 'center' }}>
+                  {/* Visa */}
+                  <svg height="20" viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ height: '20px', width: 'auto' }}>
+                    <rect width="60" height="20" rx="3" fill="#1A1F71"/>
+                    <text x="50%" y="14" textAnchor="middle" fill="#FFFFFF" fontSize="11" fontFamily="Arial" fontWeight="bold" fontStyle="italic" letterSpacing="0.5">VISA</text>
+                  </svg>
+                  {/* Mastercard */}
+                  <svg height="20" viewBox="0 0 38 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ height: '20px', width: 'auto' }}>
+                    <rect width="38" height="20" rx="3" fill="#252525"/>
+                    <circle cx="15" cy="10" r="7" fill="#EB001B"/>
+                    <circle cx="23" cy="10" r="7" fill="#F79E1B"/>
+                    <path d="M19 4.8a7 7 0 0 1 0 10.4A7 7 0 0 1 19 4.8z" fill="#FF5F00"/>
+                  </svg>
+                  {/* Amex */}
+                  <svg height="20" viewBox="0 0 48 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ height: '20px', width: 'auto' }}>
+                    <rect width="48" height="20" rx="3" fill="#2E77BC"/>
+                    <text x="50%" y="14" textAnchor="middle" fill="#FFFFFF" fontSize="8.5" fontFamily="Arial" fontWeight="bold" letterSpacing="0.5">AMEX</text>
+                  </svg>
+                  {/* Apple Pay */}
+                  <svg height="20" viewBox="0 0 50 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ height: '20px', width: 'auto' }}>
+                    <rect width="50" height="20" rx="3" fill="#000000"/>
+                    <text x="50%" y="14" textAnchor="middle" fill="#FFFFFF" fontSize="9" fontFamily="-apple-system, Arial" fontWeight="500" letterSpacing="0.3"> Pay</text>
+                    <text x="12" y="14" fill="#FFFFFF" fontSize="11" fontFamily="-apple-system, Arial"></text>
+                    <path d="M11 6.5c.6-.7.9-1.6.8-2.5-.8.1-1.7.5-2.3 1.2-.5.6-.9 1.5-.8 2.4.9 0 1.8-.4 2.3-1.1zM11.8 7.8c-1.3-.1-2.4.7-3 .7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.3 2.3-.4 5.7.9 7.6.6.9 1.3 1.9 2.3 1.8.9 0 1.2-.6 2.3-.6s1.4.6 2.4.5c1 0 1.6-.9 2.2-1.8.7-1 1-2 1-2-.1 0-1.9-.7-1.9-2.8 0-1.8 1.4-2.6 1.5-2.6-.8-1.2-2.1-1.9-2.1-2z" fill="#FFFFFF"/>
+                  </svg>
+                  {/* Google Pay */}
+                  <svg height="20" viewBox="0 0 52 20" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ height: '20px', width: 'auto' }}>
+                    <rect width="52" height="20" rx="3" fill="#FFFFFF" stroke="#E0E0E0" strokeWidth="0.5"/>
+                    <text x="50%" y="14" textAnchor="middle" fontSize="9" fontFamily="Arial" fontWeight="500" fill="#3C4043" letterSpacing="0.2">G Pay</text>
+                  </svg>
                 </div>
 
                 {/* Make an offer */}
