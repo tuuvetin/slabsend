@@ -31,9 +31,7 @@ export async function GET(req: Request) {
     .from('orders')
     .select(`
       id, order_number, status, amount, service_fee, created_at, confirmed_at, auto_confirm_at,
-      listing:listing_id ( title, price ),
-      buyer:buyer_id ( id ),
-      seller:seller_id ( id )
+      listing:listing_id ( title, price )
     `)
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: false })
