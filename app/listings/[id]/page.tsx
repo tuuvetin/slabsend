@@ -389,9 +389,9 @@ export default function ListingPage() {
           {/* Price block — sell/rent */}
           {!isService && (
             <div style={{ marginBottom: '4px' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '6px' }}>
-                <span style={{ fontSize: '15px', color: '#9a9080' }}>€{listing.price}{isRental ? '/day' : ''}</span>
-                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '28px', fontWeight: 700, color: '#1a1408' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '6px' }}>
+                <span style={{ fontSize: '13px', color: '#9a9080' }}>€{listing.price}{isRental ? '/day' : ''}</span>
+                <span style={{ fontFamily: 'Barlow Condensed', fontSize: '20px', fontWeight: 700, color: '#1a1408' }}>
                   €{(listing.price * 1.08).toFixed(2)}{isRental ? '/day' : ''}
                 </span>
               </div>
