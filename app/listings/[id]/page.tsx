@@ -677,7 +677,7 @@ export default function ListingPage() {
 
             {/* Payment icons — bottom of card */}
             {!listing.sold && (
-              <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid rgba(26,20,8,0.07)' }}>
+              <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', paddingTop: '14px', borderTop: '1px solid rgba(26,20,8,0.07)' }}>
                 {['visa', 'mastercard', 'apple-pay', 'google-pay'].map(icon => (
                   <img key={icon} src={`/pay/${icon}.svg`} alt={icon} style={{ height: '20px', width: 'auto', borderRadius: '3px', display: 'block' }} />
                 ))}
