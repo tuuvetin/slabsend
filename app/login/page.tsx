@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { SUPPORTED_COUNTRIES } from '@/app/lib/countries'
 
@@ -15,6 +16,8 @@ export default function LoginPage() {
   const [logoUrl, setLogoUrl] = useState<string>('')
   const [logoReady, setLogoReady] = useState(false)
   const supabase = createClient()
+  const searchParams = useSearchParams()
+  const returnTo = searchParams.get('returnTo') || '/profile'
 
   useEffect(() => {
     const tryLogo = async () => {
@@ -57,11 +60,12 @@ export default function LoginPage() {
         )
         if (profileError) console.error('Profile creation error:', profileError.message)
       }
-      setMessage('Check your email to confirm your account!')
+      setMessage('Check your email to confirm your account, then sign in below.')
+      setIsSignUp(false)
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setMessage(error.message)
-      else window.location.href = '/profile'
+      else window.location.href = returnTo
     }
   }
 

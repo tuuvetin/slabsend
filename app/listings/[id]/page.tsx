@@ -162,7 +162,7 @@ export default function ListingPage() {
   }
 
   const handleSendMessage = async () => {
-    if (!currentUser) { window.location.href = '/login'; return }
+    if (!currentUser) { window.location.href = `/login?returnTo=/listings/${listing.id}`; return }
     if (!message.trim()) return
     const { error } = await supabase.from('messages').insert({
       sender_id: currentUser.id, receiver_id: listing.user_id,
@@ -173,7 +173,7 @@ export default function ListingPage() {
   }
 
   const handleBuyNow = async () => {
-    if (!currentUser) { window.location.href = '/login'; return }
+    if (!currentUser) { window.location.href = `/login?returnTo=/listings/${listing.id}`; return }
     proceedToCheckout()
   }
 
@@ -203,7 +203,7 @@ export default function ListingPage() {
   }
 
   const handleSendOffer = async () => {
-    if (!currentUser) { window.location.href = '/login'; return }
+    if (!currentUser) { window.location.href = `/login?returnTo=/listings/${listing.id}`; return }
     if (!offerAmount || isNaN(Number(offerAmount))) return
     setOfferLoading(true)
     const offerMsg = `💰 Offer: ${offerAmount} €`

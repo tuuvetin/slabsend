@@ -363,16 +363,23 @@ export default function ConversationPage() {
                         </p>
                         <p style={{ fontSize: '24px', fontWeight: 700, color: isMine ? '#F5F3E6' : '#1a1408', margin: '0 0 10px' }}>{msg.offer_amount} €</p>
 
-                        {isSellerMsg && isPending && !isBuyerMsg && (
-                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                            <button onClick={() => handleOfferAction(msg.id, 'accepted')} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept</button>
-                            <button onClick={() => setShowCounter(showCounter === msg.id ? null : msg.id)} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: isMine ? '#F5F3E6' : '#FC7038', border: `1px solid ${isMine ? 'rgba(245,243,230,0.5)' : '#FC7038'}`, padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Counter</button>
-                            <button onClick={() => handleOfferAction(msg.id, 'declined')} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: isMine ? 'rgba(245,243,230,0.7)' : '#aa2200', border: `1px solid ${isMine ? 'rgba(245,243,230,0.3)' : '#aa2200'}`, padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Decline</button>
+                        {/* Pending offer not sent by me → show action buttons for the recipient */}
+                        {!isMine && isPending && (
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                            {listing && listing.user_id === currentUser?.id ? (
+                              // Seller receiving buyer's offer → Accept (notify only, no payment)
+                              <button onClick={() => handleOfferAction(msg.id, 'accepted')} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept</button>
+                            ) : (
+                              // Buyer receiving seller's counter → Accept & Pay
+                              <button onClick={() => handleAcceptAndPay(msg)} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept & Pay</button>
+                            )}
+                            <button onClick={() => setShowCounter(showCounter === msg.id ? null : msg.id)} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Counter</button>
+                            <button onClick={() => handleOfferAction(msg.id, 'declined')} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#aa2200', border: '1px solid #aa2200', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Decline</button>
                           </div>
                         )}
 
-                        {/* Accept & Pay: own offer was accepted, OR seller sent a counter offer (pending) */}
-                        {((isMine && isAccepted) || (!isMine && isPending && listing && listing.user_id !== currentUser?.id)) && (
+                        {/* Accept & Pay: own offer was accepted by seller */}
+                        {isMine && isAccepted && (
                           <button onClick={() => handleAcceptAndPay(msg)} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept & Pay</button>
                         )}
 
