@@ -5,7 +5,7 @@
 }
 
 body {
-  font-family: 'Barlow', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   background: #F5F3E6;
   color: #1a1408;
 }
@@ -16,11 +16,11 @@ body {
 .site-footer-value { padding: 48px 36px; border-right: 1px solid rgba(245,243,230,0.08); }
 .site-footer-value:last-child { border-right: none; }
 .site-footer-value-icon { font-size: 28px; display: block; margin-bottom: 20px; }
-.site-footer-value-title { font-family: 'Barlow', sans-serif; font-size: 22px; font-weight: 600; color: #F5F3E6; margin-bottom: 12px; line-height: 1.2; }
+.site-footer-value-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 600; color: #F5F3E6; margin-bottom: 12px; line-height: 1.2; }
 .site-footer-value-text { font-size: 14px; color: rgba(245,243,230,0.55); line-height: 1.6; }
 .site-footer-bottom { display: flex; align-items: center; justify-content: space-between; padding: 20px 36px; }
-.site-footer-copy { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,243,230,0.35); }
-.site-footer-privacy { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,243,230,0.45); text-decoration: none; border-bottom: 1px solid rgba(245,243,230,0.2); padding-bottom: 1px; }
+.site-footer-copy { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,243,230,0.35); }
+.site-footer-privacy { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,243,230,0.45); text-decoration: none; border-bottom: 1px solid rgba(245,243,230,0.2); padding-bottom: 1px; }
 .site-footer-privacy:hover { color: #FC7038; border-color: #FC7038; }
 @media (max-width: 800px) { .site-footer-values { grid-template-columns: 1fr 1fr; } .site-footer-value { border-right: none; border-bottom: 1px solid rgba(245,243,230,0.08); padding: 32px 24px; } .site-footer-value:last-child { border-bottom: none; } .site-footer-bottom { padding: 16px 24px; } }
 
@@ -40,36 +40,36 @@ body {
   justify-content: space-between;
   height: 64px;
 }
-.sb-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1408; text-decoration: none; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; height: 100%; }
+.sb-logo { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1408; text-decoration: none; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; height: 100%; }
 .sb-logo span { color: #FC7038; }
 .sb-nav-links { display: -webkit-flex; display: flex; gap: 32px; position: absolute; left: 50%; transform: translateX(-50%); }
-.sb-nav-link { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #7a7060; text-decoration: none; -webkit-transition: color 0.15s; transition: color 0.15s; }
+.sb-nav-link { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #7a7060; text-decoration: none; -webkit-transition: color 0.15s; transition: color 0.15s; }
 .sb-nav-link:hover { color: #1a1408; }
 .sb-nav-right { display: -webkit-flex; display: flex; gap: 10px; -webkit-align-items: center; align-items: center; }
-.sb-btn-login { font-family: 'Barlow Condensed', sans-serif; background: transparent; border: 1px solid rgba(26, 20, 8, 0.2); color: #5a5040; padding: 8px 18px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border-radius: 4px; text-decoration: none; -webkit-transition: background 0.15s; transition: background 0.15s; }
+.sb-btn-login { font-family: 'Plus Jakarta Sans', sans-serif; background: transparent; border: 1px solid rgba(26, 20, 8, 0.2); color: #5a5040; padding: 8px 18px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border-radius: 4px; text-decoration: none; -webkit-transition: background 0.15s; transition: background 0.15s; }
 .sb-btn-login:hover { background: rgba(26, 20, 8, 0.06); }
-.sb-btn-sell { font-family: 'Barlow Condensed', sans-serif; background: #FC7038; color: #F5F3E6; border: none; padding: 9px 20px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; cursor: pointer; border-radius: 4px; text-decoration: none; -webkit-transition: background 0.15s; transition: background 0.15s; }
+.sb-btn-sell { font-family: 'Plus Jakarta Sans', sans-serif; background: #FC7038; color: #F5F3E6; border: none; padding: 9px 20px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; cursor: pointer; border-radius: 4px; text-decoration: none; -webkit-transition: background 0.15s; transition: background 0.15s; }
 .sb-btn-sell:hover { background: #e05e28; }
 
 /* ── LOGO IMAGE ── */
 .sb-logo-img { height: 36px; width: auto; display: block; -o-object-fit: contain; object-fit: contain; max-width: 180px; max-height: 36px; }
 
 /* ── LISTINGS PAGE ── */
-.listing-loading { padding: 40px; color: #7a7060; font-family: 'Barlow', sans-serif; }
+.listing-loading { padding: 40px; color: #7a7060; font-family: 'Plus Jakarta Sans', sans-serif; }
 .listings-page { max-width: 1100px; margin: 0 auto; padding: 40px 32px; }
 .listings-header-row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between; margin-bottom: 24px; }
-.listings-title { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1408; margin: 0; }
+.listings-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1408; margin: 0; }
 .listings-tab-toggle { display: -webkit-flex; display: flex; border: 1px solid rgba(26, 20, 8, 0.18); border-radius: 8px; overflow: hidden; }
-.listings-tab-btn { font-family: 'Barlow Condensed', sans-serif; padding: 10px 24px; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; background: #F5F3E6; color: #9a9080; border: none; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; }
+.listings-tab-btn { font-family: 'Plus Jakarta Sans', sans-serif; padding: 10px 24px; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; background: #F5F3E6; color: #9a9080; border: none; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; }
 .listings-tab-btn.active { background: #FC7038; color: #F5F3E6; }
 .listings-tab-btn.active.rent { background: #5a7a84; color: #F5F3E6; }
 .listings-search-row { display: -webkit-flex; display: flex; gap: 10px; margin-bottom: 10px; }
 .listings-filter-row { display: -webkit-flex; display: flex; gap: 10px; margin-bottom: 10px; -webkit-flex-wrap: wrap; flex-wrap: wrap; -webkit-align-items: center; align-items: center; }
 .listings-location-row { display: -webkit-flex; display: flex; gap: 10px; margin-bottom: 28px; }
-.listings-input { font-family: 'Barlow', sans-serif; -webkit-flex: 1; flex: 1; padding: 10px 14px; border: 1px solid rgba(26, 20, 8, 0.15); background: #F5F3E6; color: #1a1408; font-size: 14px; border-radius: 8px; }
+.listings-input { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-flex: 1; flex: 1; padding: 10px 14px; border: 1px solid rgba(26, 20, 8, 0.15); background: #F5F3E6; color: #1a1408; font-size: 14px; border-radius: 8px; }
 .listings-input::placeholder { color: #9a9080; }
 .listings-input-xs { -webkit-flex: 0; flex: 0; min-width: 90px; }
-.listings-select { font-family: 'Barlow', sans-serif; padding: 10px 14px; border: 1px solid rgba(26, 20, 8, 0.15); background: #F5F3E6; color: #1a1408; font-size: 14px; border-radius: 8px; cursor: pointer; }
+.listings-select { font-family: 'Plus Jakarta Sans', sans-serif; padding: 10px 14px; border: 1px solid rgba(26, 20, 8, 0.15); background: #F5F3E6; color: #1a1408; font-size: 14px; border-radius: 8px; cursor: pointer; }
 .listings-select-full { width: 100%; }
 .listings-empty { color: #9a9080; font-size: 15px; padding: 20px 0; }
 .listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
@@ -79,31 +79,31 @@ body {
 .listing-card-img { width: 100%; height: 300px; -o-object-fit: cover; object-fit: cover; object-position: top; display: block; border-radius: 10px 10px 0 0; }
 .listing-card-no-img { width: 100%; height: 300px; background: #e8e6d8; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; color: #9a9080; font-size: 13px; border-radius: 10px 10px 0 0; }
 .listing-card-body { padding: 14px 16px 16px; }
-.listing-card-title { font-family: 'Barlow', sans-serif; font-size: 15px; font-weight: 600; color: #1a1408; margin: 0 0 6px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.listing-card-cat { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9080; margin: 0 0 8px 0; }
-.listing-card-price { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 500; color: #9a9080; margin: 0 0 2px 0; }
-.listing-card-price-total { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 500; color: #FC7038; margin: 0 0 6px 0; display: flex; align-items: center; gap: 4px; }
+.listing-card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 600; color: #1a1408; margin: 0 0 6px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.listing-card-cat { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9080; margin: 0 0 8px 0; }
+.listing-card-price { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 500; color: #9a9080; margin: 0 0 2px 0; }
+.listing-card-price-total { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 500; color: #FC7038; margin: 0 0 6px 0; display: flex; align-items: center; gap: 4px; }
 .listing-card-meta { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 8px; margin: 0; }
-.listing-card-cond { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; background: #F5F3E6; color: #5a5040; padding: 2px 8px; border-radius: 20px; }
+.listing-card-cond { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; background: #F5F3E6; color: #5a5040; padding: 2px 8px; border-radius: 20px; }
 .listing-card-loc { font-size: 12px; color: #9a9080; }
 
 /* ── NEW LISTING / EDIT PAGE ── */
 .new-listing-page { max-width: 560px; margin: 48px auto; padding: 0 24px 60px; }
-.new-listing-title { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1408; margin-bottom: 28px; }
+.new-listing-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1408; margin-bottom: 28px; }
 .listing-type-toggle { display: -webkit-flex; display: flex; margin-bottom: 8px; border: 1px solid rgba(26, 20, 8, 0.18); border-radius: 6px; overflow: hidden; }
-.listing-type-btn { font-family: 'Barlow Condensed', sans-serif; -webkit-flex: 1; flex: 1; padding: 12px; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; background: #F5F3E6; color: #9a9080; border: none; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; }
+.listing-type-btn { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-flex: 1; flex: 1; padding: 12px; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; background: #F5F3E6; color: #9a9080; border: none; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; }
 .listing-type-btn.active { background: #FC7038; color: #F5F3E6; }
 .listing-type-btn.active.rent { background: #5a7a84; color: #F5F3E6; }
 .listing-type-btn.active.service { background: #1a1408; color: #FC7038; }
-.form-input { font-family: 'Barlow', sans-serif; display: block; width: 100%; margin-bottom: 12px; padding: 11px 14px; background: #F5F3E6; color: #1a1408; border: 1px solid rgba(26, 20, 8, 0.18); border-radius: 8px; font-size: 14px; }
+.form-input { font-family: 'Plus Jakarta Sans', sans-serif; display: block; width: 100%; margin-bottom: 12px; padding: 11px 14px; background: #F5F3E6; color: #1a1408; border: 1px solid rgba(26, 20, 8, 0.18); border-radius: 8px; font-size: 14px; }
 .form-input::placeholder { color: #9a9080; }
-select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px; font-family: 'Barlow', sans-serif; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px; font-family: 'Plus Jakarta Sans', sans-serif; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
 .form-textarea { height: 110px; resize: vertical; }
 .form-images { margin-bottom: 16px; }
-.form-label { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #7a7060; margin-bottom: 8px; }
-.form-file { font-family: 'Barlow', sans-serif; font-size: 13px; color: #5a5040; }
+.form-label { display: block; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #7a7060; margin-bottom: 8px; }
+.form-file { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #5a5040; }
 .form-file-count { font-size: 12px; color: #7a7060; margin-top: 6px; }
-.form-submit { font-family: 'Barlow Condensed', sans-serif; width: 100%; padding: 14px; background: #FC7038; color: #F5F3E6; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: background 0.15s; transition: background 0.15s; }
+.form-submit { font-family: 'Plus Jakarta Sans', sans-serif; width: 100%; padding: 14px; background: #FC7038; color: #F5F3E6; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: background 0.15s; transition: background 0.15s; }
 .form-submit:hover { background: #e05e28; }
 .form-submit:disabled { background: #c0b8a8; cursor: not-allowed; }
 .form-message { margin-top: 14px; font-size: 14px; padding: 10px 14px; border-radius: 8px; }
@@ -111,44 +111,44 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .form-message.error { background: #fce8e8; color: #aa2200; }
 .rental-period-section { margin-bottom: 16px; }
 .rental-period-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
-.rental-period-btn { font-family: 'Barlow Condensed', sans-serif; padding: 10px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; background: #F5F3E6; color: #7a7060; border: 1px solid rgba(26, 20, 8, 0.18); border-radius: 8px; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; white-space: nowrap; }
+.rental-period-btn { font-family: 'Plus Jakarta Sans', sans-serif; padding: 10px 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; background: #F5F3E6; color: #7a7060; border: 1px solid rgba(26, 20, 8, 0.18); border-radius: 8px; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; white-space: nowrap; }
 .rental-period-btn.active { background: #5a7a84; color: #F5F3E6; border-color: #5a7a84; }
 .price-input-row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 12px; margin-bottom: 12px; }
 .price-input-row .form-input { -webkit-flex: 1; flex: 1; }
-.price-period-label { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #5a7a84; white-space: nowrap; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.price-period-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #5a7a84; white-space: nowrap; -webkit-flex-shrink: 0; flex-shrink: 0; }
 .location-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
 
 /* ── LISTING DETAIL PAGE ── */
 .listing-detail-page { max-width: 1100px; margin: 0 auto; padding: 32px 32px 60px; }
-.listing-back { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #9a9080; text-decoration: none; -webkit-transition: color 0.15s; transition: color 0.15s; }
+.listing-back { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #9a9080; text-decoration: none; -webkit-transition: color 0.15s; transition: color 0.15s; }
 .listing-back:hover { color: #FC7038; }
 .listing-detail-grid { display: grid; grid-template-columns: 1fr 400px; gap: 52px; margin-top: 28px; align-items: start; }
 .listing-detail-info { position: sticky; top: 24px; }
 .listing-no-image { width: 100%; aspect-ratio: 4/3; background: #e8e6d8; border-radius: 8px; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; color: #9a9080; font-size: 14px; }
-.listing-rental-badge { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: #5a7a84; color: #F5F3E6; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 12px; }
-.listing-detail-title { font-family: 'Barlow', sans-serif; font-size: 28px; font-weight: 600; color: #1a1408; margin-bottom: 10px; line-height: 1.2; }
-.listing-detail-price { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 700; color: #1a1408; margin-bottom: 16px; }
+.listing-rental-badge { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: #5a7a84; color: #F5F3E6; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 12px; }
+.listing-detail-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 600; color: #1a1408; margin-bottom: 10px; line-height: 1.2; }
+.listing-detail-price { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 36px; font-weight: 700; color: #1a1408; margin-bottom: 16px; }
 .listing-detail-meta { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-.listing-meta-item { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; background: #F5F3E6; color: #5a5040; padding: 4px 12px; border-radius: 20px; }
+.listing-meta-item { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; background: #F5F3E6; color: #5a5040; padding: 4px 12px; border-radius: 20px; }
 .listing-meta-cond { background: #e8e6d8; }
 .listing-detail-desc { font-size: 15px; line-height: 1.7; color: #3a3020; margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid rgba(26, 20, 8, 0.1); }
 .listing-contact { margin-top: 8px; }
-.listing-contact-title { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1408; margin-bottom: 12px; }
+.listing-contact-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1408; margin-bottom: 12px; }
 .listing-owner-actions { display: -webkit-flex; display: flex; gap: 10px; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(26, 20, 8, 0.1); }
-.listing-edit-btn { font-family: 'Barlow Condensed', sans-serif; -webkit-flex: 1; flex: 1; padding: 12px; background: #F5F3E6; color: #1a1408; border: 1px solid rgba(26, 20, 8, 0.2); border-radius: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: background 0.15s; transition: background 0.15s; }
+.listing-edit-btn { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-flex: 1; flex: 1; padding: 12px; background: #F5F3E6; color: #1a1408; border: 1px solid rgba(26, 20, 8, 0.2); border-radius: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: background 0.15s; transition: background 0.15s; }
 .listing-edit-btn:hover { background: #e8e6d8; }
-.listing-delete-btn { font-family: 'Barlow Condensed', sans-serif; -webkit-flex: 1; flex: 1; padding: 12px; background: transparent; color: #aa2200; border: 1px solid #aa2200; border-radius: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; }
+.listing-delete-btn { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-flex: 1; flex: 1; padding: 12px; background: transparent; color: #aa2200; border: 1px solid #aa2200; border-radius: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; }
 .listing-delete-btn:hover { background: #aa2200; color: #F5F3E6; }
 
 /* ── PROFILE PAGE ── */
 .profile-page { max-width: 1100px; margin: 0 auto; padding: 40px 32px 60px; }
 .profile-header { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 20px; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid rgba(26, 20, 8, 0.1); }
-.profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: #FC7038; color: #F5F3E6; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.profile-name { font-family: 'Barlow', sans-serif; font-size: 24px; font-weight: 600; color: #1a1408; margin-bottom: 4px; }
+.profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: #FC7038; color: #F5F3E6; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 700; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.profile-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 600; color: #1a1408; margin-bottom: 4px; }
 .profile-email { font-size: 14px; color: #9a9080; }
 .profile-grid { display: grid; grid-template-columns: 380px 1fr; gap: 48px; -webkit-align-items: start; align-items: start; }
-.profile-section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #7a7060; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(26, 20, 8, 0.1); }
-.profile-signout-btn { font-family: 'Barlow Condensed', sans-serif; width: 100%; padding: 12px; margin-top: 12px; background: transparent; color: #9a9080; border: 1px solid rgba(26, 20, 8, 0.15); border-radius: 8px; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; }
+.profile-section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #7a7060; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(26, 20, 8, 0.1); }
+.profile-signout-btn { font-family: 'Plus Jakarta Sans', sans-serif; width: 100%; padding: 12px; margin-top: 12px; background: transparent; color: #9a9080; border: 1px solid rgba(26, 20, 8, 0.15); border-radius: 8px; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: all 0.15s; transition: all 0.15s; }
 .profile-signout-btn:hover { border-color: #aa2200; color: #aa2200; }
 .profile-empty { color: #9a9080; font-size: 14px; }
 
@@ -159,7 +159,7 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .seller-hero-gradient { position: absolute; inset: 0; background: linear-gradient(160deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.52) 100%); }
 .seller-hero-av-wrap { position: absolute; bottom: -46px; left: 36px; z-index: 2; }
 .seller-hero-av { width: 92px; height: 92px; border-radius: 50%; object-fit: cover; border: 4px solid #F5F3E6; background: #F5F3E6; display: block; }
-.seller-hero-av-placeholder { width: 92px; height: 92px; border-radius: 50%; background: #FC7038; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 34px; font-weight: 700; color: #F5F3E6; border: 4px solid #F5F3E6; }
+.seller-hero-av-placeholder { width: 92px; height: 92px; border-radius: 50%; background: #FC7038; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 34px; font-weight: 700; color: #F5F3E6; border: 4px solid #F5F3E6; }
 .seller-hero-av-edit { position: absolute; bottom: 2px; right: 2px; background: #FC7038; border-radius: 50%; width: 26px; height: 26px; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; border: 2px solid #F5F3E6; font-size: 12px; cursor: pointer; }
 .profile-listings { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 12px; }
 .profile-listing-link { text-decoration: none; color: inherit; }
@@ -173,31 +173,31 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 /* ── LOGIN PAGE ── */
 .login-page { min-height: calc(100vh - 64px); display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; padding: 40px 24px; background: #F5F3E6; }
 .login-card { background: #F5F3E6; border: 1px solid rgba(26, 20, 8, 0.1); border-radius: 12px; padding: 40px; width: 100%; max-width: 420px; }
-.login-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1408; margin-bottom: 24px; }
+.login-logo { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1408; margin-bottom: 24px; }
 .login-logo span { color: #FC7038; }
-.login-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #1a1408; margin-bottom: 6px; }
+.login-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #1a1408; margin-bottom: 6px; }
 .login-subtitle { font-size: 14px; color: #9a9080; margin-bottom: 28px; line-height: 1.5; }
-.login-switch-btn { font-family: 'Barlow', sans-serif; width: 100%; padding: 12px; margin-top: 12px; background: transparent; color: #7a7060; border: none; font-size: 13px; cursor: pointer; text-decoration: underline; -webkit-transition: color 0.15s; transition: color 0.15s; }
+.login-switch-btn { font-family: 'Plus Jakarta Sans', sans-serif; width: 100%; padding: 12px; margin-top: 12px; background: transparent; color: #7a7060; border: none; font-size: 13px; cursor: pointer; text-decoration: underline; -webkit-transition: color 0.15s; transition: color 0.15s; }
 .login-switch-btn:hover { color: #FC7038; }
-.google-signin-btn { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; gap: 10px; width: 100%; padding: 11px 16px; background: #fff; border: 1px solid rgba(26,20,8,0.18); border-radius: 6px; font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 500; color: #1a1408; cursor: pointer; -webkit-transition: background 0.15s, border-color 0.15s; transition: background 0.15s, border-color 0.15s; margin-bottom: 4px; }
+.google-signin-btn { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; gap: 10px; width: 100%; padding: 11px 16px; background: #fff; border: 1px solid rgba(26,20,8,0.18); border-radius: 6px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; color: #1a1408; cursor: pointer; -webkit-transition: background 0.15s, border-color 0.15s; transition: background 0.15s, border-color 0.15s; margin-bottom: 4px; }
 .google-signin-btn:hover { background: #f8f6ee; border-color: rgba(26,20,8,0.3); }
 .login-divider { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 12px; margin: 16px 0 12px; color: #b0a890; font-size: 12px; }
 .login-divider::before, .login-divider::after { content: ''; -webkit-flex: 1; flex: 1; height: 1px; background: rgba(26,20,8,0.1); }
-.login-divider span { white-space: nowrap; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.1em; text-transform: uppercase; }
+.login-divider span { white-space: nowrap; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.1em; text-transform: uppercase; }
 
 /* ── MESSAGES PAGE ── */
 .messages-page { max-width: 700px; margin: 0 auto; padding: 40px 32px 60px; }
-.messages-title { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1408; margin-bottom: 28px; }
+.messages-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1408; margin-bottom: 28px; }
 .messages-empty { padding: 40px 0; text-align: center; }
 .messages-empty p { color: #9a9080; font-size: 15px; margin-bottom: 12px; }
-.messages-empty-link { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #FC7038; text-decoration: none; }
+.messages-empty-link { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #FC7038; text-decoration: none; }
 .messages-list { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 10px; }
 .conversation-link { text-decoration: none; color: inherit; }
 .conversation-card { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 16px; background: #F5F3E6; border: 1px solid rgba(26, 20, 8, 0.08); border-radius: 10px; padding: 16px 20px; -webkit-transition: -webkit-transform 0.15s; transition: transform 0.15s; cursor: pointer; }
 .conversation-card:hover { -webkit-transform: translateX(4px); transform: translateX(4px); }
 .conversation-icon { font-size: 24px; -webkit-flex-shrink: 0; flex-shrink: 0; }
 .conversation-body { -webkit-flex: 1; flex: 1; min-width: 0; }
-.conversation-listing { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #7a7060; margin: 0 0 4px 0; }
+.conversation-listing { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #7a7060; margin: 0 0 4px 0; }
 .conversation-preview { font-size: 14px; color: #1a1408; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .conversation-meta { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: flex-end; align-items: flex-end; gap: 6px; -webkit-flex-shrink: 0; flex-shrink: 0; }
 .conversation-date { font-size: 12px; color: #9a9080; }
@@ -206,25 +206,25 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 /* ── CONVERSATION PAGE ── */
 .conversation-page { max-width: 700px; margin: 0 auto; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; height: calc(100dvh - 64px); }
 .conversation-header { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid rgba(26,20,8,0.08); background: #F5F3E6; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.conversation-back-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #7a7060; text-decoration: none; }
+.conversation-back-btn { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #7a7060; text-decoration: none; }
 .conversation-back-btn:hover { color: #1a1408; }
 .conversation-header-center { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 10px; }
-.conversation-header-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.04em; color: #1a1408; }
+.conversation-header-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.04em; color: #1a1408; }
 .conversation-scroll { -webkit-flex: 1; flex: 1; overflow-y: auto; padding: 16px 24px 8px; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; }
 .conversation-listing-header { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 14px; background: #F5F3E6; border: 1px solid rgba(26, 20, 8, 0.08); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; -webkit-flex-shrink: 0; flex-shrink: 0; }
 .conversation-listing-img { width: 52px; height: 52px; -o-object-fit: cover; object-fit: cover; border-radius: 6px; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.conversation-listing-title { font-family: 'Barlow', sans-serif; font-size: 15px; font-weight: 600; color: #1a1408; margin: 0 0 3px 0; }
-.conversation-listing-price { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; color: #FC7038; margin: 0; }
+.conversation-listing-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 600; color: #1a1408; margin: 0 0 3px 0; }
+.conversation-listing-price { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; color: #FC7038; margin: 0; }
 .conversation-messages { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 4px; padding: 8px 0 16px; }
 .message-date-sep { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; margin: 18px 0 10px; }
-.message-date-sep span { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9080; }
+.message-date-sep span { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #9a9080; }
 .message-row { display: -webkit-flex; display: flex; -webkit-align-items: flex-end; align-items: flex-end; gap: 8px; margin-bottom: 4px; }
 .message-row.mine { -webkit-justify-content: flex-end; justify-content: flex-end; }
 .message-row.theirs { -webkit-justify-content: flex-start; justify-content: flex-start; }
 .message-body { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; max-width: 75%; }
 .message-row.mine .message-body { -webkit-align-items: flex-end; align-items: flex-end; }
 .message-row.theirs .message-body { -webkit-align-items: flex-start; align-items: flex-start; }
-.message-sender-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.05em; color: #9a9080; margin: 0 0 4px 4px; }
+.message-sender-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; letter-spacing: 0.05em; color: #9a9080; margin: 0 0 4px 4px; }
 .message-bubble { padding: 10px 14px; border-radius: 18px; }
 .message-bubble.mine { background: #FC7038; border-bottom-right-radius: 4px; }
 .message-bubble.theirs { background: #fff; border: 1px solid rgba(26, 20, 8, 0.1); border-bottom-left-radius: 4px; }
@@ -233,17 +233,17 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .message-bubble.theirs .message-content { color: #1a1408; }
 .message-time-mine { font-size: 11px; color: #9a9080; margin: 3px 4px 0 0; }
 .message-time-theirs { font-size: 11px; color: #9a9080; margin: 3px 0 0 4px; }
-.message-seen-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.06em; color: #9a9080; margin: 2px 4px 0 0; }
+.message-seen-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; letter-spacing: 0.06em; color: #9a9080; margin: 2px 4px 0 0; }
 .conversation-input-row { display: -webkit-flex; display: flex; -webkit-align-items: flex-end; align-items: flex-end; gap: 10px; padding: 12px 20px; padding-bottom: max(16px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(26,20,8,0.08); background: #F5F3E6; -webkit-flex-shrink: 0; flex-shrink: 0; }
-.conversation-input { font-family: 'Barlow', sans-serif; -webkit-flex: 1; flex: 1; padding: 10px 18px; background: #fff; border: 1px solid rgba(26,20,8,0.18); border-radius: 20px; font-size: 14px; color: #1a1408; outline: none; resize: none; overflow: hidden; line-height: 1.5; min-height: 42px; max-height: 120px; }
+.conversation-input { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-flex: 1; flex: 1; padding: 10px 18px; background: #fff; border: 1px solid rgba(26,20,8,0.18); border-radius: 20px; font-size: 14px; color: #1a1408; outline: none; resize: none; overflow: hidden; line-height: 1.5; min-height: 42px; max-height: 120px; }
 .conversation-input::placeholder { color: #9a9080; }
 .conversation-img-btn { background: transparent; border: none; color: #9a9080; cursor: pointer; padding: 8px; -webkit-flex-shrink: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: color 0.15s; margin-bottom: 1px; }
 .conversation-img-btn:hover { color: #FC7038; }
 .conversation-img-btn:disabled { opacity: 0.4; cursor: default; }
-.conversation-send-btn { font-family: 'Barlow Condensed', sans-serif; background: #FC7038; color: #F5F3E6; border: none; padding: 10px 20px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: background 0.15s; transition: background 0.15s; white-space: nowrap; -webkit-flex-shrink: 0; flex-shrink: 0; margin-bottom: 1px; }
+.conversation-send-btn { font-family: 'Plus Jakarta Sans', sans-serif; background: #FC7038; color: #F5F3E6; border: none; padding: 10px 20px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; -webkit-transition: background 0.15s; transition: background 0.15s; white-space: nowrap; -webkit-flex-shrink: 0; flex-shrink: 0; margin-bottom: 1px; }
 .conversation-send-btn:hover { background: #e05e28; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.login-forgot-btn { font-family: 'Barlow', sans-serif; width: 100%; padding: 8px; margin-top: 4px; background: transparent; color: #9a9080; border: none; font-size: 12px; cursor: pointer; text-align: right; }
+.login-forgot-btn { font-family: 'Plus Jakarta Sans', sans-serif; width: 100%; padding: 8px; margin-top: 4px; background: transparent; color: #9a9080; border: none; font-size: 12px; cursor: pointer; text-align: right; }
 .login-forgot-btn:hover { color: #FC7038; }
 @media (max-width: 600px) { .conversation-scroll { padding: 12px 14px 6px; } .conversation-header { padding: 10px 14px; } .conversation-input-row { padding: 10px 14px; padding-bottom: max(14px, env(safe-area-inset-bottom)); } .message-body { max-width: 82%; } }
 
@@ -298,28 +298,28 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
   gap: 40px;
 }
 .home-hero-text { display: flex; flex-direction: column; }
-.home-hero-title { font-family: 'Barlow Condensed', sans-serif; font-size: 56px; font-weight: 700; text-transform: uppercase; color: #F5F3E6; line-height: 1; letter-spacing: 0.02em; margin-bottom: 16px; }
-.home-hero-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(245, 243, 230, 0.55); margin: 0; }
+.home-hero-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 56px; font-weight: 700; text-transform: uppercase; color: #F5F3E6; line-height: 1; letter-spacing: 0.02em; margin-bottom: 16px; }
+.home-hero-eyebrow { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(245, 243, 230, 0.55); margin: 0; }
 .home-action-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; -webkit-flex-shrink: 0; flex-shrink: 0; -webkit-align-self: flex-end; align-self: flex-end; }
 .home-action-box-sm { background: transparent; border: 1px solid #FC7038; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; padding: 10px 14px; cursor: pointer; -webkit-transition: background 0.15s; transition: background 0.15s; text-decoration: none; border-radius: 4px; white-space: nowrap; min-width: 130px; text-align: center; }
 .home-action-box-sm:hover { background: rgba(245, 243, 230, 0.1); }
 .home-action-box-sm .home-action-arrow { display: none; }
-.home-action-label-sm { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #F5F3E6; line-height: 1; margin-bottom: 3px; }
-.home-action-desc-sm { font-family: 'Barlow', sans-serif; font-size: 11px; color: rgba(245, 243, 230, 0.55); line-height: 1.3; }
+.home-action-label-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #F5F3E6; line-height: 1; margin-bottom: 3px; }
+.home-action-desc-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; color: rgba(245, 243, 230, 0.55); line-height: 1.3; }
 
 .home-hero-search-wrap { background: #F5F3E6; padding: 24px 32px 16px; display: flex; justify-content: center; }
 .home-hero-search-form { max-width: 600px; width: 100%; display: -webkit-flex; display: flex; gap: 10px; }
-.home-hero-search-input { -webkit-flex: 1; flex: 1; font-family: 'Barlow', sans-serif; font-size: 15px; color: #1a1408; background: #F5F3E6; border: 1px solid rgba(26,20,8,0.18); border-radius: 8px; padding: 12px 16px; outline: none; -webkit-transition: border-color 0.15s; transition: border-color 0.15s; }
+.home-hero-search-input { -webkit-flex: 1; flex: 1; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; color: #1a1408; background: #F5F3E6; border: 1px solid rgba(26,20,8,0.18); border-radius: 8px; padding: 12px 16px; outline: none; -webkit-transition: border-color 0.15s; transition: border-color 0.15s; }
 .home-hero-search-input::placeholder { color: #b0a898; }
 .home-hero-search-input:focus { border-color: #FC7038; }
-.home-hero-search-btn { display: -webkit-flex; display: flex; align-items: center; gap: 8px; background: #FC7038; color: #fff; border: none; border-radius: 8px; padding: 12px 20px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; white-space: nowrap; -webkit-transition: background 0.15s; transition: background 0.15s; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.home-hero-search-btn { display: -webkit-flex; display: flex; align-items: center; gap: 8px; background: #FC7038; color: #fff; border: none; border-radius: 8px; padding: 12px 20px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; white-space: nowrap; -webkit-transition: background 0.15s; transition: background 0.15s; -webkit-flex-shrink: 0; flex-shrink: 0; }
 .home-hero-search-btn:hover { background: #e55f28; }
 .home-section { max-width: 1100px; margin: 0 auto; padding: 48px 32px 60px; }
 .home-section.full-bleed { max-width: 100%; padding-left: 0; padding-right: 0; }
 .home-section.full-bleed .home-section-header { padding-left: 32px; padding-right: 32px; }
 .home-section-header { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; -webkit-align-items: center; align-items: center; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid rgba(26, 20, 8, 0.1); }
-.home-section-title { font-family: 'Barlow', sans-serif; font-size: 20px; font-weight: 600; color: #1a1408; }
-.home-see-all { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #FC7038; text-decoration: none; }
+.home-section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 600; color: #1a1408; }
+.home-see-all { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #FC7038; text-decoration: none; }
 .home-listings-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 
 .home-cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
@@ -328,17 +328,17 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .home-cat-img { width: 100%; height: 100%; -o-object-fit: cover; object-fit: cover; display: block; -webkit-transition: -webkit-transform 0.3s ease; transition: transform 0.3s ease; }
 .home-cat-card:hover .home-cat-img { -webkit-transform: scale(1.03); transform: scale(1.03); }
 .home-cat-img-fallback { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; border-radius: 12px; }
-.home-cat-name { font-family: 'Barlow', sans-serif; font-size: 17px; font-weight: 600; color: #1a1408; margin-bottom: 6px; }
-.home-cat-shop-btn { display: inline-block; margin-top: 6px; background: #1a1408; color: #F5F3E6; font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.01em; text-transform: none; padding: 7px 18px; border-radius: 20px; -webkit-transition: background 0.15s; transition: background 0.15s; }
+.home-cat-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 600; color: #1a1408; margin-bottom: 6px; }
+.home-cat-shop-btn { display: inline-block; margin-top: 6px; background: #1a1408; color: #F5F3E6; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.01em; text-transform: none; padding: 7px 18px; border-radius: 20px; -webkit-transition: background 0.15s; transition: background 0.15s; }
 .home-cat-card:hover .home-cat-shop-btn { background: #FC7038; }
 
 /* ── SERVICE PAGE ── */
 .service-page { max-width: 1100px; margin: 0 auto; padding: 40px 32px 60px; }
 .service-header { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; -webkit-align-items: flex-start; align-items: flex-start; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid rgba(26, 20, 8, 0.1); }
-.service-title { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1408; margin-bottom: 6px; }
+.service-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1408; margin-bottom: 6px; }
 .service-subtitle { font-size: 14px; color: #9a9080; }
 .service-form { background: #F5F3E6; border: 1px solid rgba(26, 20, 8, 0.1); border-radius: 10px; padding: 28px; margin-bottom: 32px; }
-.service-form-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1408; margin-bottom: 20px; }
+.service-form-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1408; margin-bottom: 20px; }
 .service-filters { display: -webkit-flex; display: flex; gap: 10px; margin-bottom: 28px; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
 .service-empty { text-align: center; padding: 60px 0; color: #9a9080; }
 .service-empty p { margin-bottom: 6px; font-size: 15px; }
@@ -352,29 +352,29 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .service-card-link-wrap:hover .service-card-image img { transform: scale(1.04); }
 .service-card-body { padding: 18px 20px 20px; }
 .service-card-header { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; -webkit-align-items: flex-start; align-items: flex-start; margin-bottom: 10px; }
-.service-card-name { font-family: 'Barlow', sans-serif; font-size: 16px; font-weight: 600; color: #1a1408; margin-bottom: 4px; }
+.service-card-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 600; color: #1a1408; margin-bottom: 4px; }
 .service-card-dark .service-card-name { color: #F5F3E6; }
-.service-card-type { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5a7a84; }
+.service-card-type { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5a7a84; }
 .service-card-dark .service-card-type { color: #FC7038; opacity: 0.85; }
-.service-card-price { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; color: #FC7038; white-space: nowrap; }
+.service-card-price { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700; color: #FC7038; white-space: nowrap; }
 .service-card-desc { font-size: 13px; color: #5a5040; line-height: 1.55; margin-bottom: 14px; }
 .service-card-dark .service-card-desc { color: rgba(245,243,230,0.6); }
 .service-card-tags { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.service-card-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; background: rgba(252,112,56,0.15); color: #FC7038; border: 1px solid rgba(252,112,56,0.3); white-space: nowrap; }
+.service-card-tag { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; background: rgba(252,112,56,0.15); color: #FC7038; border: 1px solid rgba(252,112,56,0.3); white-space: nowrap; }
 .service-card-tag-more { background: rgba(245,243,230,0.08); color: rgba(245,243,230,0.5); border-color: rgba(245,243,230,0.15); }
-.service-card-location { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 5px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: #9a9080; margin-top: 10px; }
+.service-card-location { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 5px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: #9a9080; margin-top: 10px; }
 .service-card-dark .service-card-location { color: rgba(245,243,230,0.5); }
 .service-card-meta { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 4px; font-size: 12px; color: #9a9080; }
 .service-card-link { font-size: 12px; color: #FC7038; text-decoration: none; }
-.service-delete-btn { font-family: 'Barlow Condensed', sans-serif; background: transparent; color: #aa2200; border: 1px solid #aa2200; padding: 4px 10px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: 4px; -webkit-transition: all 0.15s; transition: all 0.15s; }
+.service-delete-btn { font-family: 'Plus Jakarta Sans', sans-serif; background: transparent; color: #aa2200; border: 1px solid #aa2200; padding: 4px 10px; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: 4px; -webkit-transition: all 0.15s; transition: all 0.15s; }
 .service-delete-btn:hover { background: #aa2200; color: #F5F3E6; }
 
 /* ── ADMIN PAGE ── */
 .admin-page { max-width: 1100px; margin: 0 auto; padding: 40px 32px 60px; }
-.admin-title { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1408; margin-bottom: 6px; }
+.admin-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1408; margin-bottom: 6px; }
 .admin-subtitle { font-size: 14px; color: #9a9080; margin-bottom: 40px; }
 .admin-section { margin-bottom: 48px; padding-bottom: 48px; border-bottom: 1px solid rgba(26, 20, 8, 0.1); }
-.admin-section-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1408; margin-bottom: 6px; }
+.admin-section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1408; margin-bottom: 6px; }
 .admin-section-desc { font-size: 13px; color: #9a9080; margin-bottom: 20px; }
 .admin-upload-row { display: -webkit-flex; display: flex; gap: 28px; -webkit-align-items: flex-start; align-items: flex-start; }
 .admin-upload-controls { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-justify-content: flex-start; justify-content: flex-start; }
@@ -384,7 +384,7 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .admin-preview-placeholder { width: 100%; aspect-ratio: 1/1; background: #e8e6d8; border-radius: 8px; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; font-size: 13px; color: #9a9080; }
 .admin-cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .admin-cat-card { background: #F5F3E6; border: 1px solid rgba(26, 20, 8, 0.08); border-radius: 10px; padding: 16px; }
-.admin-cat-label { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1408; margin-bottom: 12px; }
+.admin-cat-label { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #1a1408; margin-bottom: 12px; }
 
 /* ── MOBILE ── */
 .sb-hamburger {
@@ -424,7 +424,7 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
   display: flex;
 }
 .sb-mobile-menu a {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 32px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -479,7 +479,7 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
   border: 1px solid rgba(252,112,56,0.3);
   box-shadow: 0 4px 16px rgba(26,20,8,0.12);
   font-size: 12px;
-  font-family: 'Barlow', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   line-height: 1.5;
   padding: 10px 14px;
   border-radius: 8px;
@@ -503,7 +503,7 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
   display: block;
 }
 .info-tooltip-wrap:focus { outline: none; }
-.pickup-tooltip { text-transform: none !important; font-family: 'Barlow', sans-serif !important; letter-spacing: normal !important; font-weight: 400 !important; }
+.pickup-tooltip { text-transform: none !important; font-family: 'Plus Jakarta Sans', sans-serif !important; letter-spacing: normal !important; font-weight: 400 !important; }
 .pickup-tooltip::after { display: none !important; }
 .price-tooltip {
   bottom: auto !important;
