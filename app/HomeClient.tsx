@@ -241,50 +241,59 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
       </div>
 
       {/* HOW IT WORKS */}
-      <div style={{ background: '#1a1408', padding: '64px 24px' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <h2 style={{ fontFamily: 'Barlow Condensed', fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#F5F3E6', textAlign: 'center', marginBottom: '8px' }}>How it works</h2>
-          <p style={{ textAlign: 'center', color: 'rgba(245,243,230,0.5)', fontFamily: 'Barlow', fontSize: '14px', marginBottom: '48px', letterSpacing: '0.04em' }}>Buy and sell climbing gear — safe, simple, shipped.</p>
+      <div style={{ background: '#F5F3E6', padding: '52px 24px' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <h2 style={{ fontFamily: 'Barlow Condensed', fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#1a1408', textAlign: 'center', marginBottom: '6px' }}>How it works</h2>
+          <p style={{ textAlign: 'center', color: '#9a9080', fontFamily: 'Barlow', fontSize: '13px', marginBottom: '32px' }}>Buy and sell climbing gear — safe, simple, shipped.</p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', alignItems: 'stretch' }}>
             {/* SELLING */}
-            <div style={{ background: 'rgba(245,243,230,0.05)', border: '1px solid rgba(245,243,230,0.1)', borderRadius: '16px', padding: '28px 24px' }}>
-              <div style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#FC7038', marginBottom: '20px' }}>For sellers</div>
-              {[
-                { n: '1', title: 'List your gear', desc: 'Add photos and set your price. Free to list, always.' },
-                { n: '2', title: 'Ship it', desc: 'Buyer pays, you get a Matkahuolto activation code by email. Drop it at the nearest service point.' },
-                { n: '3', title: 'Get paid', desc: 'Money lands in your account once the buyer confirms receipt — or automatically after 48h.' },
-              ].map(s => (
-                <div key={s.n} style={{ display: 'flex', gap: '14px', marginBottom: '20px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#FC7038', color: '#fff', fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>{s.n}</div>
-                  <div>
-                    <div style={{ fontFamily: 'Barlow Condensed', fontSize: '15px', fontWeight: 700, color: '#F5F3E6', marginBottom: '3px', letterSpacing: '0.02em' }}>{s.title}</div>
-                    <div style={{ fontSize: '13px', color: 'rgba(245,243,230,0.6)', lineHeight: 1.5 }}>{s.desc}</div>
+            <div style={{ background: '#1a1408', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#FC7038', marginBottom: '18px' }}>For sellers</div>
+              <div style={{ flex: 1 }}>
+                {[
+                  { n: '1', title: 'List your gear', desc: 'Add photos and set your price. Free to list, always.' },
+                  { n: '2', title: 'Ship it', desc: 'Once sold, you receive a shipping code by email. Write it on the package and drop it off at your nearest pickup point.' },
+                  { n: '3', title: 'Get paid', desc: 'You get paid once the buyer confirms the item matches the listing — or automatically 48h after delivery.' },
+                ].map(s => (
+                  <div key={s.n} style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#FC7038', color: '#fff', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>{s.n}</div>
+                    <div>
+                      <div style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, color: '#F5F3E6', marginBottom: '2px', letterSpacing: '0.02em' }}>{s.title}</div>
+                      <div style={{ fontSize: '12px', color: 'rgba(245,243,230,0.55)', lineHeight: 1.5 }}>{s.desc}</div>
+                    </div>
                   </div>
-                </div>
-              ))}
-              <a href="/listings/new" style={{ display: 'inline-block', fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', background: '#FC7038', color: '#fff', borderRadius: '8px', textDecoration: 'none', marginTop: '4px' }}>Start selling →</a>
+                ))}
+              </div>
+              <a href="/listings/new" style={{ display: 'inline-block', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '9px 18px', background: '#FC7038', color: '#fff', borderRadius: '7px', textDecoration: 'none', marginTop: '8px', alignSelf: 'flex-start' }}>Start selling →</a>
             </div>
 
             {/* BUYING */}
-            <div style={{ background: 'rgba(245,243,230,0.05)', border: '1px solid rgba(245,243,230,0.1)', borderRadius: '16px', padding: '28px 24px' }}>
-              <div style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#a0c8a0', marginBottom: '20px' }}>For buyers</div>
-              {[
-                { n: '1', title: 'Find your gear', desc: 'Browse climbing gear from sellers across Europe.' },
-                { n: '2', title: 'Buy with protection', desc: 'Pay securely. Your money is held until you confirm the item arrived as described.' },
-                { n: '3', title: 'Confirm & done', desc: 'Confirm receipt or raise a dispute within 48h. Seller gets paid, you go climbing.' },
-              ].map(s => (
-                <div key={s.n} style={{ display: 'flex', gap: '14px', marginBottom: '20px' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#3a6a3a', color: '#fff', fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>{s.n}</div>
-                  <div>
-                    <div style={{ fontFamily: 'Barlow Condensed', fontSize: '15px', fontWeight: 700, color: '#F5F3E6', marginBottom: '3px', letterSpacing: '0.02em' }}>{s.title}</div>
-                    <div style={{ fontSize: '13px', color: 'rgba(245,243,230,0.6)', lineHeight: 1.5 }}>{s.desc}</div>
+            <div style={{ background: '#1a1408', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontFamily: 'Barlow Condensed', fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#7abf7a', marginBottom: '18px' }}>For buyers</div>
+              <div style={{ flex: 1 }}>
+                {[
+                  { n: '1', title: 'Find your gear', desc: 'Browse climbing gear from sellers across Europe.' },
+                  { n: '2', title: 'Buy with protection', desc: 'Pay securely. Your money is held until you confirm the item arrived as described.' },
+                  { n: '3', title: 'Confirm & done', desc: "Mark the item as accepted within 48h of receiving it. If it doesn't match the listing, contact us and get your money back." },
+                ].map(s => (
+                  <div key={s.n} style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#3a6a3a', color: '#fff', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>{s.n}</div>
+                    <div>
+                      <div style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, color: '#F5F3E6', marginBottom: '2px', letterSpacing: '0.02em' }}>{s.title}</div>
+                      <div style={{ fontSize: '12px', color: 'rgba(245,243,230,0.55)', lineHeight: 1.5 }}>{s.desc}</div>
+                    </div>
                   </div>
-                </div>
-              ))}
-              <a href="/listings" style={{ display: 'inline-block', fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '10px 20px', background: '#3a6a3a', color: '#fff', borderRadius: '8px', textDecoration: 'none', marginTop: '4px' }}>Browse listings →</a>
+                ))}
+              </div>
+              <a href="/listings" style={{ display: 'inline-block', fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '9px 18px', background: '#3a6a3a', color: '#fff', borderRadius: '7px', textDecoration: 'none', marginTop: '8px', alignSelf: 'flex-start' }}>Browse listings →</a>
             </div>
           </div>
+
+          {/* Stripe trust line */}
+          <p style={{ textAlign: 'center', fontFamily: 'Barlow', fontSize: '12px', color: '#9a9080', marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            🔒 Payments secured by Stripe — your card details are never shared with sellers.
+          </p>
         </div>
       </div>
 
