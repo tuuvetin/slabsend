@@ -106,7 +106,7 @@ export default function AdminOrdersPage() {
                 const total = (o.amount || 0) + (o.service_fee || 0)
                 return (
                   <tr key={o.id} onClick={() => window.location.href = `/admin/orders/${o.id}`} style={{ borderBottom: '1px solid rgba(26,20,8,0.06)', background: i % 2 === 0 ? '#fff' : 'rgba(245,243,230,0.4)', cursor: 'pointer' }}>
-                    <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 13, fontWeight: 700 }}>{o.order_number || o.id?.slice(0,8)}</td>
+                    <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 13, fontWeight: 700 }}>{o.order_number || String(o.id || '').slice(0,8)}</td>
                     <td style={{ padding: '12px 14px', fontSize: 13 }}>{o.listing?.title || '—'}</td>
                     <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 12, color: '#7a7060' }}>{new Date(o.created_at).toLocaleDateString('fi-FI')}</td>
                     <td style={{ padding: '12px 14px', fontFamily: 'Barlow Condensed', fontSize: 13, fontWeight: 600 }}>{o.amount?.toFixed(2)} €</td>
