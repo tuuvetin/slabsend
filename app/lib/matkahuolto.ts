@@ -121,7 +121,7 @@ function buildShipmentXml(
     <ReceiverCity>${escapeXml(params.receiverCity)}</ReceiverCity>
     <ReceiverContactNumber>${normalizePhone(params.receiverPhone)}</ReceiverContactNumber>
     <ReceiverEmail>${params.receiverEmail}</ReceiverEmail>
-    <PayerCode>L</PayerCode>
+    <PayerCode>S</PayerCode>
     <PayerId>${userId}</PayerId>
     <ProductCode>${testMode ? '84' : '80'}</ProductCode>
     <VAKDescription/>
