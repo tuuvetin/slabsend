@@ -367,28 +367,6 @@ export default function ListingPage() {
           {/* ── CARD TOP: title, seller, price ── */}
           <div style={{ padding: '24px 24px 20px' }}>
 
-          {/* Seller widget — top of card */}
-          {sellerProfile && (
-            <a
-              href={`/sellers/${listing.user_id}`}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none', marginBottom: '14px', padding: '7px 14px 7px 8px', borderRadius: '40px', background: 'rgba(26,20,8,0.06)' }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.11)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.06)')}
-            >
-              {sellerProfile.avatar_url ? (
-                <img src={sellerProfile.avatar_url} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-              ) : (
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#d0c8b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, color: '#7a7060', flexShrink: 0 }}>
-                  {(sellerName || '?').charAt(0).toUpperCase()}
-                </div>
-              )}
-              <div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408', lineHeight: 1.2 }}>{sellerName}</div>
-                <div style={{ fontSize: '11px', color: '#9a9080' }}>View profile →</div>
-              </div>
-            </a>
-          )}
-
           {/* Title + status badges */}
           {(isRental || isService || listing.sold) && (
             <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
@@ -466,6 +444,28 @@ export default function ListingPage() {
                 {listing.pickup_location && <span>📍 Pickup: <strong>{listing.pickup_location}</strong></span>}
                 {listing.pickup_hours_from && listing.pickup_hours_to && <span>🕐 Hours: <strong>{listing.pickup_hours_from} – {listing.pickup_hours_to}</strong></span>}
               </div>
+            )}
+
+            {/* Seller widget — above description */}
+            {sellerProfile && (
+              <a
+                href={`/sellers/${listing.user_id}`}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '9px', textDecoration: 'none', marginBottom: '10px', padding: '6px 12px 6px 6px', borderRadius: '40px', background: 'rgba(26,20,8,0.06)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.11)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.06)')}
+              >
+                {sellerProfile.avatar_url ? (
+                  <img src={sellerProfile.avatar_url} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#d0c8b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: '#7a7060', flexShrink: 0 }}>
+                    {(sellerName || '?').charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#1a1408', lineHeight: 1.2 }}>{sellerName}</div>
+                  <div style={{ fontSize: '10px', color: '#9a9080' }}>View profile →</div>
+                </div>
+              </a>
             )}
 
             {/* Description */}
@@ -677,12 +677,33 @@ export default function ListingPage() {
 
             {/* Payment icons — bottom of card */}
             {!listing.sold && (
-              <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid rgba(26,20,8,0.07)', opacity: 0.45 }}>
-                <svg height="18" viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg" style={{ height: '18px', width: 'auto' }}><rect width="60" height="20" rx="3" fill="#1A1F71"/><text x="50%" y="14" textAnchor="middle" fill="#fff" fontSize="11" fontFamily="Arial" fontWeight="bold" fontStyle="italic" letterSpacing="0.5">VISA</text></svg>
-                <svg height="18" viewBox="0 0 38 20" xmlns="http://www.w3.org/2000/svg" style={{ height: '18px', width: 'auto' }}><rect width="38" height="20" rx="3" fill="#252525"/><circle cx="15" cy="10" r="7" fill="#EB001B"/><circle cx="23" cy="10" r="7" fill="#F79E1B"/><path d="M19 4.8a7 7 0 0 1 0 10.4A7 7 0 0 1 19 4.8z" fill="#FF5F00"/></svg>
-                <svg height="18" viewBox="0 0 48 20" xmlns="http://www.w3.org/2000/svg" style={{ height: '18px', width: 'auto' }}><rect width="48" height="20" rx="3" fill="#2E77BC"/><text x="50%" y="14" textAnchor="middle" fill="#fff" fontSize="8.5" fontFamily="Arial" fontWeight="bold" letterSpacing="0.5">AMEX</text></svg>
-                <svg height="18" viewBox="0 0 50 20" xmlns="http://www.w3.org/2000/svg" style={{ height: '18px', width: 'auto' }}><rect width="50" height="20" rx="3" fill="#000"/><path d="M11 6.5c.6-.7.9-1.6.8-2.5-.8.1-1.7.5-2.3 1.2-.5.6-.9 1.5-.8 2.4.9 0 1.8-.4 2.3-1.1zM11.8 7.8c-1.3-.1-2.4.7-3 .7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.1 1.9-1.3 2.3-.4 5.7.9 7.6.6.9 1.3 1.9 2.3 1.8.9 0 1.2-.6 2.3-.6s1.4.6 2.4.5c1 0 1.6-.9 2.2-1.8.7-1 1-2 1-2-.1 0-1.9-.7-1.9-2.8 0-1.8 1.4-2.6 1.5-2.6-.8-1.2-2.1-1.9-2.1-2z" fill="#fff"/><text x="28" y="14" fill="#fff" fontSize="9" fontFamily="-apple-system,Arial" fontWeight="500"> Pay</text></svg>
-                <svg height="18" viewBox="0 0 52 20" xmlns="http://www.w3.org/2000/svg" style={{ height: '18px', width: 'auto' }}><rect width="52" height="20" rx="3" fill="#fff" stroke="#ddd" strokeWidth="0.8"/><text x="50%" y="14" textAnchor="middle" fontSize="9" fontFamily="Arial" fontWeight="500" fill="#3C4043">G Pay</text></svg>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid rgba(26,20,8,0.07)' }}>
+                {/* Mastercard */}
+                <div style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', padding: '3px 8px', display: 'flex', alignItems: 'center', gap: '4px', height: '28px' }}>
+                  <svg width="26" height="16" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="12" r="10" fill="#EB001B"/><circle cx="24" cy="12" r="10" fill="#F79E1B"/><path d="M19 4.5a10 10 0 0 1 0 15A10 10 0 0 1 19 4.5z" fill="#FF5F00"/></svg>
+                </div>
+                {/* Visa */}
+                <div style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', padding: '3px 8px', display: 'flex', alignItems: 'center', height: '28px' }}>
+                  <svg width="38" height="12" viewBox="0 0 80 26" xmlns="http://www.w3.org/2000/svg"><text x="0" y="22" fill="#1A1F71" fontSize="26" fontFamily="Arial" fontWeight="900" fontStyle="italic" letterSpacing="1">VISA</text></svg>
+                </div>
+                {/* Amex */}
+                <div style={{ background: '#2E77BC', border: '1px solid #2E77BC', borderRadius: '6px', padding: '3px 10px', display: 'flex', alignItems: 'center', height: '28px' }}>
+                  <svg width="32" height="12" viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg"><text x="0" y="15" fill="#fff" fontSize="15" fontFamily="Arial" fontWeight="bold" letterSpacing="1">AMEX</text></svg>
+                </div>
+                {/* Apple Pay */}
+                <div style={{ background: '#000', border: '1px solid #000', borderRadius: '6px', padding: '3px 10px', display: 'flex', alignItems: 'center', gap: '3px', height: '28px' }}>
+                  <svg width="11" height="14" viewBox="0 0 14 17" xmlns="http://www.w3.org/2000/svg" fill="#fff"><path d="M13.2 5.8c-.1 0-2.4 1-2.4 3.5 0 2.8 2.8 3.7 2.8 3.7-.1.2-.4 1.4-1.3 2.6-.8 1.1-1.6 2.2-2.9 2.2-1.2 0-1.6-.7-3-.7-1.3 0-1.8.7-2.9.7-1.2 0-2.1-1.1-3-2.3C.2 14 0 11.5 0 9.1c0-4.2 2.7-6.4 5.4-6.4 1.4 0 2.5.9 3.4.9.8 0 2.2-1 3.7-1 .6 0 2.4.1 3.6 1.8l-2.9 1.4zM9.3.4C9.8-.2 10.6-.5 11.3-.5c.1.9-.3 1.8-.8 2.4-.5.6-1.3 1.1-2.1 1-.1-.8.3-1.7.9-2.5z"/></svg>
+                  <svg width="22" height="12" viewBox="0 0 36 16" xmlns="http://www.w3.org/2000/svg"><text x="0" y="13" fill="#fff" fontSize="14" fontFamily="-apple-system,Arial" fontWeight="400" letterSpacing="0.3">Pay</text></svg>
+                </div>
+                {/* Google Pay */}
+                <div style={{ background: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', padding: '3px 8px', display: 'flex', alignItems: 'center', height: '28px' }}>
+                  <svg width="36" height="14" viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="15" fontSize="15" fontFamily="Arial" fontWeight="500" fill="#3C4043">G </text>
+                    <text x="14" y="15" fontSize="15" fontFamily="Arial" fontWeight="500" fill="#3C4043">Pay</text>
+                    <circle cx="5" cy="8" r="5" fill="none"/>
+                    <text x="0" y="15" fontSize="15" fontFamily="Arial" fontWeight="700" fill="#4285F4">G</text>
+                  </svg>
+                </div>
               </div>
             )}
 
