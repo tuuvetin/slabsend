@@ -375,7 +375,7 @@ export default function ListingPage() {
                   </div>
                 </div>
                 {!isRental && listing.shipping_enabled !== false && (
-                  <span style={{ fontSize: '13px', color: '#7a7060' }}>Shipping from €8.90</span>
+                  <span style={{ fontSize: '13px', color: '#7a7060', display: 'inline-flex', alignItems: 'center', gap: '5px', paddingLeft: '20px' }}>Shipping from €8.90</span>
                 )}
               </div>
             </div>
