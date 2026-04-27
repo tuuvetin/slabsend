@@ -518,7 +518,7 @@ export default function ListingPage() {
                 {/* Buy now — sell */}
                 {!isRental && !isService && (
                   <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ width: '100%', marginBottom: '10px' }}>
-                    {buyLoading ? 'Loading...' : `Buy now — €${(listing.price * 1.08).toFixed(2)} + shipping`}
+                    {buyLoading ? 'Loading...' : 'Buy now'}
                   </button>
                 )}
 
