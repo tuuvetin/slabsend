@@ -21,7 +21,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
 
   const [{ data: profile }, { data: listings }, { data: reviewsData }] = await Promise.all([
     supabase.from('profiles').select('*').eq('user_id', id).single(),
-    supabase.from('listings').select('*').eq('user_id', id).order('created_at', { ascending: false }),
+    supabase.from('listings').select('*').eq('user_id', id).neq('sold', true).order('created_at', { ascending: false }),
     supabase.from('reviews').select('*').eq('seller_id', id).order('created_at', { ascending: false }),
   ])
 

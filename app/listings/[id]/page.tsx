@@ -5,7 +5,6 @@ import ReviewForm from '@/app/components/ReviewForm'
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { calculateShippingCost, getShippingZone, BUYER_COUNTRIES, BUYER_COUNTRY_NAMES } from '@/app/lib/shipping'
 
 const conditionLabels: Record<string, string> = {
   'Uusi': 'New', 'Erinomainen': 'Excellent', 'Hyvä': 'Good', 'Tyydyttävä': 'Fair', 'Huono': 'Poor',
@@ -36,9 +35,6 @@ export default function ListingPage() {
   const [togglingSOLD, setTogglingSOLD] = useState(false)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [justPublished, setJustPublished] = useState(false)
-  // Shipping / delivery
-  const [buyerCountry, setBuyerCountry] = useState('FI')
-  const [deliveryMethod, setDeliveryMethod] = useState<'shipping' | 'pickup'>('shipping')
   const supabase = createClient()
 
   useEffect(() => {
@@ -82,19 +78,9 @@ export default function ListingPage() {
 
       setListing(data)
       setLoading(false)
-      // Oletusvalinta: jos ei toimitusta → nouto; jos molemmat → toimitus
-      if (!data.shipping_enabled && data.pickup_enabled) setDeliveryMethod('pickup')
-      else setDeliveryMethod('shipping')
 
       if (data?.user_id) {
         supabase.from('profiles').select('username, full_name, avatar_url, location').eq('user_id', data.user_id).single().then(({ data: p }) => setSellerProfile(p))
-      }
-
-      // Pre-select buyer's country from profile (address_country)
-      if (user) {
-        supabase.from('profiles').select('address_country').eq('user_id', user.id).single().then(({ data: profile }) => {
-          if (profile?.address_country) setBuyerCountry(profile.address_country)
-        })
       }
 
       if (user) {
@@ -378,7 +364,7 @@ export default function ListingPage() {
                   €{(listing.price * 1.08).toFixed(2)}{isRental ? '/day' : ''}
                 </span>
               </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <div style={{ position: 'relative' }} className="info-tooltip-wrap">
                   <span style={{ fontSize: '13px', color: '#2a6a2a', cursor: 'default', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                     🛡️ Includes buyer protection
@@ -474,52 +460,6 @@ export default function ListingPage() {
           {/* ── DIVIDER ── */}
           <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)' }} />
 
-          {/* ── DELIVERY SECTION ── */}
-          {!isService && (() => {
-            const isPickup = deliveryMethod === 'pickup'
-            const zone = !isPickup ? getShippingZone(buyerCountry) : null
-            const shippingCents = !isPickup && listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
-            const shippingEur = shippingCents / 100
-            const hasShipping = !!listing.shipping_enabled
-            const hasPickup = !!listing.pickup_enabled
-            const isBuyerView = !order && !(currentUser && currentUser.id === listing.user_id)
-            return (
-              <div style={{ padding: '16px 24px' }}>
-                {/* Delivery toggle — buyer only, pre-purchase, both options available */}
-                {!isRental && isBuyerView && hasShipping && hasPickup && (
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                    <button onClick={() => setDeliveryMethod('shipping')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'shipping' ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'shipping' ? '#FC7038' : 'rgba(26,20,8,0.05)', color: deliveryMethod === 'shipping' ? '#fff' : '#7a7060' }}>Shipping</button>
-                    <button onClick={() => setDeliveryMethod('pickup')} style={{ flex: 1, padding: '8px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', border: deliveryMethod === 'pickup' ? '2px solid #1a1408' : '1px solid rgba(26,20,8,0.15)', background: deliveryMethod === 'pickup' ? '#1a1408' : 'rgba(26,20,8,0.05)', color: deliveryMethod === 'pickup' ? '#fff' : '#7a7060' }}>Pickup</button>
-                  </div>
-                )}
-
-                {/* Shipping info line */}
-                {!isRental && hasShipping && !isPickup && listing.weight_kg && (
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '13px', color: '#5a5040' }}>Shipping · Matkahuolto</span>
-                      <span style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>€{shippingEur.toFixed(2)}</span>
-                    </div>
-                    {isBuyerView && (
-                      <select value={buyerCountry} onChange={e => setBuyerCountry(e.target.value)} style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', fontSize: '13px', background: '#ede9d8', color: '#1a1408', cursor: 'pointer' }}>
-                        {BUYER_COUNTRIES.map(c => <option key={c} value={c}>{BUYER_COUNTRY_NAMES[c]}</option>)}
-                      </select>
-                    )}
-                  </div>
-                )}
-                {!isRental && isPickup && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '13px', color: '#5a5040' }}>Pickup</span>
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: '#2a6a2a' }}>Free</span>
-                  </div>
-                )}
-                {!isRental && !hasShipping && hasPickup && isBuyerView && (
-                  <span style={{ fontSize: '13px', color: '#5a5040' }}>Pickup only — agree location with seller</span>
-                )}
-              </div>
-            )
-          })()}
-
           {/* SERVICE items */}
           {isService && serviceItems.length > 0 && (
             <div style={{ padding: '16px 24px' }}>
@@ -576,17 +516,11 @@ export default function ListingPage() {
             {!listing.sold && !order && currentUser && currentUser.id !== listing.user_id && (
               <>
                 {/* Buy now — sell */}
-                {!isRental && !isService && (() => {
-                  const isPickup = deliveryMethod === 'pickup'
-                  const zone = !isPickup ? getShippingZone(buyerCountry) : null
-                  const shippingCents = !isPickup && listing.weight_kg && zone ? calculateShippingCost(zone, listing.weight_kg) : 0
-                  const total = listing.price * 1.08 + shippingCents / 100
-                  return (
-                    <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ width: '100%', marginBottom: '10px' }}>
-                      {buyLoading ? 'Loading...' : `Buy now — €${total.toFixed(2)}`}
-                    </button>
-                  )
-                })()}
+                {!isRental && !isService && (
+                  <button className="form-submit" onClick={handleBuyNow} disabled={buyLoading} style={{ width: '100%', marginBottom: '10px' }}>
+                    {buyLoading ? 'Loading...' : `Buy now — €${(listing.price * 1.08).toFixed(2)} + shipping`}
+                  </button>
+                )}
 
                 {/* Buy now — service */}
                 {isService && serviceItems.length > 0 && (

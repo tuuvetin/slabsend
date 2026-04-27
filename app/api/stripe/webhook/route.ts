@@ -30,7 +30,14 @@ export async function POST(req: Request) {
   }
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session
+    const rawSession = event.data.object as Stripe.Checkout.Session
+    if (!rawSession.metadata?.listing_id) return NextResponse.json({ received: true })
+
+    // Retrieve full session so that shipping_cost and shipping_details are expanded
+    const session = await stripe.checkout.sessions.retrieve(rawSession.id, {
+      expand: ['shipping_cost.shipping_rate'],
+    })
+
     const listingId = session.metadata?.listing_id
     const sellerUserId = session.metadata?.seller_user_id
     const buyerId = session.metadata?.buyer_id
@@ -44,17 +51,17 @@ export async function POST(req: Request) {
     // Lasketaan summat (senttiinä)
     const totalCents = session.amount_total || 0
     const itemPriceCents = session.metadata?.base_amount ? parseInt(session.metadata.base_amount) : 0
-    // Shipping cost comes from Stripe's shipping_options selection
-    const shippingCostCents = (session as any).shipping_cost?.amount_total ?? (session.metadata?.shipping_cost ? parseInt(session.metadata.shipping_cost) : 0)
+    // Shipping cost comes from Stripe's shipping_cost (fully expanded via retrieve)
+    const sessionAny = session as any
+    const shippingCostCents: number = sessionAny.shipping_cost?.amount_total ?? 0
     const serviceFeeCents = session.metadata?.service_fee ? parseInt(session.metadata.service_fee) : 0
     // Backwards compat
     const totalAmount = totalCents / 100
     const baseAmount = parseFloat((itemPriceCents / 100).toFixed(2))
     const serviceFee = parseFloat((serviceFeeCents / 100).toFixed(2))
     // Detect shipping zone from buyer's country (set by Stripe address collection)
-    const sessionAny2 = session as any
-    const shippingCountry = sessionAny2.shipping_details?.address?.country || session.metadata?.buyer_country || ''
-    const shippingZone: string = shippingCostCents === 0 ? 'pickup' : (shippingCountry || session.metadata?.shipping_zone || '')
+    const shippingCountry = sessionAny.shipping_details?.address?.country || ''
+    const shippingZone: string = shippingCostCents === 0 ? 'pickup' : (shippingCountry || '')
 
     // 48h auto-confirm
     const autoConfirmAt = new Date()
@@ -64,10 +71,9 @@ export async function POST(req: Request) {
     const orderNumber = generateOrderNumber()
 
     // Ostajan osoite Stripe-sessiosta
-    const sessionAny = session as any
     const buyerAddress = sessionAny.shipping_details?.address || session.customer_details?.address || {}
     const buyerPhone = session.customer_details?.phone || ''
-    const buyerCountry = buyerAddress.country || session.metadata?.buyer_country || ''
+    const buyerCountry = buyerAddress.country || ''
 
     // Haetaan ostajan profiiliosoite jos ei tule Stripestä
     let buyerAddressStreet = buyerAddress.line1 || ''
