@@ -375,7 +375,7 @@ export default function ListingPage() {
                   </div>
                 </div>
                 {!isRental && listing.shipping_enabled !== false && (
-                  <span style={{ fontSize: '13px', color: '#7a7060' }}>📦 Shipping from €8.90</span>
+                  <span style={{ fontSize: '13px', color: '#7a7060' }}>Shipping from €8.90</span>
                 )}
               </div>
             </div>
@@ -407,7 +407,7 @@ export default function ListingPage() {
                   {listing.location && (
                     <tr style={{ borderBottom: listing.weight_kg && (isAdmin || (currentUser && currentUser.id === listing.user_id)) ? '1px solid rgba(26,20,8,0.07)' : 'none' }}>
                       <td style={{ padding: '9px 0', fontSize: '13px', color: '#9a9080' }}>Location</td>
-                      <td style={{ padding: '9px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>📍 {listing.location}</td>
+                      <td style={{ padding: '9px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>{listing.location}</td>
                     </tr>
                   )}
                   {/* Weight only for seller/admin */}
@@ -424,8 +424,8 @@ export default function ListingPage() {
             {/* Rental pickup info */}
             {isRental && (listing.pickup_location || listing.pickup_hours_from) && (
               <div style={{ fontSize: '13px', color: '#3a3020', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {listing.pickup_location && <span>📍 Pickup: <strong>{listing.pickup_location}</strong></span>}
-                {listing.pickup_hours_from && listing.pickup_hours_to && <span>🕐 Hours: <strong>{listing.pickup_hours_from} – {listing.pickup_hours_to}</strong></span>}
+                {listing.pickup_location && <span>Pickup: <strong>{listing.pickup_location}</strong></span>}
+                {listing.pickup_hours_from && listing.pickup_hours_to && <span>Hours: <strong>{listing.pickup_hours_from} – {listing.pickup_hours_to}</strong></span>}
               </div>
             )}
 
@@ -493,12 +493,12 @@ export default function ListingPage() {
             {/* Payment confirmed banner */}
             {order && !confirmDone && (
               <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
-                <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>✓ Payment confirmed</p>
+                <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>Payment confirmed</p>
                 <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: 1.5, marginBottom: '12px' }}>
                   Confirm receipt once you have the item. The seller is paid after your confirmation or automatically after 48h.
                 </p>
                 <button className="form-submit" onClick={handleConfirmReceipt} disabled={confirmLoading} style={{ background: '#2a6a2a', width: '100%', marginBottom: '6px' }}>
-                  {confirmLoading ? 'Confirming...' : 'Item received ✓'}
+                  {confirmLoading ? 'Confirming...' : 'Item received'}
                 </button>
                 <p style={{ fontSize: '11px', color: '#7a7060', textAlign: 'center', margin: 0 }}>
                   Problem? <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a> within 48h
@@ -507,7 +507,7 @@ export default function ListingPage() {
             )}
             {confirmDone && (
               <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
-                <p style={{ fontSize: '13px', fontWeight: 700, color: '#2a6a2a', marginBottom: '4px' }}>✓ Receipt confirmed — thank you!</p>
+                <p style={{ fontSize: '13px', fontWeight: 700, color: '#2a6a2a', marginBottom: '4px' }}>Receipt confirmed — thank you!</p>
                 <p style={{ fontSize: '13px', color: '#3a3428', margin: 0 }}>The seller will receive their payment shortly.</p>
               </div>
             )}
@@ -638,7 +638,7 @@ export default function ListingPage() {
             <div className="listing-owner-actions">
               {isAdmin && (
                 <div style={{ background: '#1a1408', borderRadius: '8px', padding: '10px 14px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#FC7038' }}>🔑 Admin</span>
+                  <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#FC7038' }}>Admin</span>
                   <button onClick={handleToggleSold} disabled={togglingSOLD} style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: listing.sold ? '#2a6a2a' : '#aa2200', color: '#F5F3E6', border: 'none', borderRadius: '6px', padding: '6px 16px' }}>
                     {togglingSOLD ? '...' : listing.sold ? 'Mark as available' : 'Mark as sold'}
                   </button>

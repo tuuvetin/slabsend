@@ -313,7 +313,6 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
           padding: '12px 16px', marginBottom: '16px',
           display: 'flex', alignItems: 'center', gap: '10px',
         }}>
-          <span style={{ fontSize: '18px' }}>✅</span>
           <p style={{ fontSize: '14px', color: '#1a4a2a', margin: 0 }}>
             Payment account verified! You can now publish your listing.
           </p>
@@ -606,7 +605,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       {listingType === 'rent' && (
         <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
           <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
-            📍 Pickup only
+            Pickup only
           </p>
           <input
             className="form-input"

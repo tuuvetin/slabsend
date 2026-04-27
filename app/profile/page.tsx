@@ -260,7 +260,7 @@ export default function ProfilePage() {
               ? <img src={avatarUrl} alt="Avatar" className="seller-hero-av" style={{ cursor: 'pointer' }} />
               : <div className="seller-hero-av-placeholder" style={{ cursor: 'pointer' }}>{(fullName || username || '?')[0].toUpperCase()}</div>
             }
-            <div className="seller-hero-av-edit">✏️</div>
+            <div className="seller-hero-av-edit">Edit</div>
           </div>
         </div>
       </div>
@@ -398,7 +398,6 @@ export default function ProfilePage() {
               <p style={{ fontSize: '13px', color: '#9a9080' }}>Checking payment status...</p>
             ) : stripeOnboarded ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#e6f4ea', border: '1px solid #a8d5b0', borderRadius: '8px', padding: '12px 16px', marginBottom: '12px' }}>
-                <span style={{ fontSize: '18px' }}>✅</span>
                 <div>
                   <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a4a2a', margin: 0 }}>Stripe verified</p>
                   <p style={{ fontSize: '12px', color: '#3a7a4a', margin: '2px 0 0' }}>Your account is set up to receive payments.</p>

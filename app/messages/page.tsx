@@ -95,7 +95,7 @@ export default function MessagesPage() {
           const unread = msg.unreadCount || 0
 
           const preview = msg.image_url
-            ? '📷 Photo'
+            ? 'Photo'
             : (msg.content?.length > 60 ? msg.content.substring(0, 60) + '...' : (msg.content || ''))
 
           return (
@@ -124,7 +124,7 @@ export default function MessagesPage() {
                     <p className="conversation-listing" style={{ fontWeight: unread > 0 ? 700 : 600, margin: 0, color: unread > 0 ? '#1a1408' : undefined }}>{displayName}</p>
                     {hasOrder && (
                       <span style={{ background: msg.order.status === 'confirmed' ? '#2a6a2a' : '#FC7038', color: '#fff', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
-                        {msg.order.status === 'confirmed' ? '✓ Completed' : '⏳ Awaiting confirmation'}
+                        {msg.order.status === 'confirmed' ? 'Completed' : 'Awaiting confirmation'}
                       </span>
                     )}
                   </div>

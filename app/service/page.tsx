@@ -123,17 +123,14 @@ export default function ServicePage() {
         }}>
           {[
             {
-              icon: '👟',
               title: 'Shoe resoling',
               desc: 'Professional rubber replacement for worn climbing shoes. Full resole, half resole, rand repair.',
             },
             {
-              icon: '🪡',
               title: 'Stitching & repairs',
               desc: 'Rand repair, toe patches, stitching fixes — extend the life of your favourite shoes.',
             },
             {
-              icon: '📍',
               title: 'Find near you',
               desc: 'Filter by country and city. Ship your shoes or drop them off locally.',
             },
@@ -144,7 +141,6 @@ export default function ServicePage() {
               borderRadius: '12px',
               padding: '28px 24px',
             }}>
-              <div style={{ fontSize: '28px', marginBottom: '14px' }}>{item.icon}</div>
               <h3 style={{
                 fontFamily: 'inherit',
                 fontSize: '16px',

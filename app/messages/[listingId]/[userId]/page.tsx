@@ -146,13 +146,13 @@ export default function ConversationPage() {
         sender_id: currentUser.id,
         receiver_id: otherUserId,
         listing_id: listingId,
-        content: '📷 Photo',
+        content: 'Photo',
         image_url: publicUrl,
       })
       fetch('/api/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'message', recipientId: otherUserId, listingId, preview: '📷 Photo' }),
+        body: JSON.stringify({ type: 'message', recipientId: otherUserId, listingId, preview: 'Photo' }),
       })
     } finally {
       setImageUploading(false)
@@ -275,12 +275,12 @@ export default function ConversationPage() {
 
         {order && order.status === 'paid' && isBuyer && !confirmDone && (
           <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-            <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>✓ Payment confirmed</p>
+            <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>Payment confirmed</p>
             <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: '1.5', marginBottom: '14px' }}>
               Once you receive the item and everything looks good, confirm below. The seller will receive payment after your confirmation or automatically after 48 hours.
             </p>
             <button className="form-submit" onClick={handleConfirmReceipt} disabled={confirmLoading} style={{ background: '#2a6a2a', width: '100%' }}>
-              {confirmLoading ? 'Confirming...' : 'Item received ✓'}
+              {confirmLoading ? 'Confirming...' : 'Item received'}
             </button>
             <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '8px', textAlign: 'center' }}>
               Problem? Contact <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a> within 48h
@@ -290,7 +290,7 @@ export default function ConversationPage() {
 
         {order && order.status === 'paid' && isSellerOrder && (
           <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-            <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>✓ Item sold — payment received</p>
+            <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>Item sold — payment received</p>
             <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: '1.5' }}>
               The buyer has paid. You will receive <strong>{order.amount} €</strong> to your bank account once the buyer confirms receipt or automatically after 48 hours.
             </p>
@@ -302,7 +302,7 @@ export default function ConversationPage() {
 
         {(order?.status === 'confirmed' || confirmDone) && (
           <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-            <p style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', color: '#2a6a2a' }}>✓ Transaction complete</p>
+            <p style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', color: '#2a6a2a' }}>Transaction complete</p>
             <p style={{ fontSize: '13px', color: '#3a3428', marginTop: '4px' }}>
               {isBuyer ? 'Thank you for your purchase!' : 'Payment will be transferred to your account shortly.'}
             </p>
