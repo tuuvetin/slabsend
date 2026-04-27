@@ -392,70 +392,78 @@ export default function ListingPage() {
           {/* ── DIVIDER ── */}
           <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)' }} />
 
-          {/* ── ATTRIBUTES + DESCRIPTION ── */}
-          <div style={{ padding: '20px 24px' }}>
-            {/* Attributes: condition + location (no category, no weight for buyers) */}
-            {!isService && (listing.condition || listing.location || (isAdmin || (currentUser && currentUser.id === listing.user_id))) && (
-              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: listing.description ? '16px' : '0' }}>
+          {/* ── SELLER ── */}
+          {sellerProfile && (
+            <div style={{ padding: '16px 24px' }}>
+              <a
+                href={`/sellers/${listing.user_id}`}
+                style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', padding: '10px 12px', borderRadius: '12px', background: 'rgba(26,20,8,0.05)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.10)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.05)')}
+              >
+                {sellerProfile.avatar_url ? (
+                  <img src={sellerProfile.avatar_url} alt="" style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#d0c8b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700, color: '#7a7060', flexShrink: 0 }}>
+                    {(sellerName || '?').charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>{sellerName}</div>
+                  <div style={{ fontSize: '11px', color: '#9a9080' }}>View profile →</div>
+                </div>
+              </a>
+            </div>
+          )}
+
+          {/* ── DIVIDER ── */}
+          <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)' }} />
+
+          {/* ── ATTRIBUTES ── */}
+          {!isService && (listing.condition || listing.location || (isAdmin || (currentUser && currentUser.id === listing.user_id))) && (
+            <div style={{ padding: '4px 24px 8px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <tbody>
                   {listing.condition && (
                     <tr style={{ borderBottom: '1px solid rgba(26,20,8,0.07)' }}>
-                      <td style={{ padding: '9px 0', fontSize: '13px', color: '#9a9080', width: '42%' }}>Condition</td>
-                      <td style={{ padding: '9px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>{conditionLabels[listing.condition] || listing.condition}</td>
+                      <td style={{ padding: '10px 0', fontSize: '13px', color: '#9a9080', width: '42%' }}>Condition</td>
+                      <td style={{ padding: '10px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>{conditionLabels[listing.condition] || listing.condition}</td>
                     </tr>
                   )}
                   {listing.location && (
                     <tr style={{ borderBottom: listing.weight_kg && (isAdmin || (currentUser && currentUser.id === listing.user_id)) ? '1px solid rgba(26,20,8,0.07)' : 'none' }}>
-                      <td style={{ padding: '9px 0', fontSize: '13px', color: '#9a9080' }}>Location</td>
-                      <td style={{ padding: '9px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>{listing.location}</td>
+                      <td style={{ padding: '10px 0', fontSize: '13px', color: '#9a9080' }}>Location</td>
+                      <td style={{ padding: '10px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>{listing.location}</td>
                     </tr>
                   )}
-                  {/* Weight only for seller/admin */}
                   {listing.weight_kg && currentUser && (currentUser.id === listing.user_id || isAdmin) && (
                     <tr>
-                      <td style={{ padding: '9px 0', fontSize: '13px', color: '#9a9080' }}>Weight</td>
-                      <td style={{ padding: '9px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>{listing.weight_kg} kg</td>
+                      <td style={{ padding: '10px 0', fontSize: '13px', color: '#9a9080' }}>Weight</td>
+                      <td style={{ padding: '10px 0', fontSize: '13px', fontWeight: 600, color: '#1a1408' }}>{listing.weight_kg} kg</td>
                     </tr>
                   )}
                 </tbody>
               </table>
-            )}
+            </div>
+          )}
 
-            {/* Rental pickup info */}
-            {isRental && (listing.pickup_location || listing.pickup_hours_from) && (
-              <div style={{ fontSize: '13px', color: '#3a3020', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {listing.pickup_location && <span>Pickup: <strong>{listing.pickup_location}</strong></span>}
-                {listing.pickup_hours_from && listing.pickup_hours_to && <span>Hours: <strong>{listing.pickup_hours_from} – {listing.pickup_hours_to}</strong></span>}
+          {/* Rental pickup info */}
+          {isRental && (listing.pickup_location || listing.pickup_hours_from) && (
+            <div style={{ padding: '0 24px 16px', fontSize: '13px', color: '#3a3020', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {listing.pickup_location && <span>Pickup: <strong>{listing.pickup_location}</strong></span>}
+              {listing.pickup_hours_from && listing.pickup_hours_to && <span>Hours: <strong>{listing.pickup_hours_from} – {listing.pickup_hours_to}</strong></span>}
+            </div>
+          )}
+
+          {/* ── DESCRIPTION ── */}
+          {listing.description && (
+            <>
+              <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)' }} />
+              <div style={{ padding: '16px 24px' }}>
+                <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#3a3020', margin: 0 }}>{listing.description}</p>
               </div>
-            )}
-
-            {/* Seller widget — above description */}
-            {sellerProfile && (
-              <a
-                href={`/sellers/${listing.user_id}`}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '9px', textDecoration: 'none', marginBottom: '10px', padding: '6px 12px 6px 6px', borderRadius: '40px', background: 'rgba(26,20,8,0.06)' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.11)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(26,20,8,0.06)')}
-              >
-                {sellerProfile.avatar_url ? (
-                  <img src={sellerProfile.avatar_url} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                ) : (
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#d0c8b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: '#7a7060', flexShrink: 0 }}>
-                    {(sellerName || '?').charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#1a1408', lineHeight: 1.2 }}>{sellerName}</div>
-                  <div style={{ fontSize: '10px', color: '#9a9080' }}>View profile →</div>
-                </div>
-              </a>
-            )}
-
-            {/* Description */}
-            {listing.description && (
-              <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#3a3020', margin: 0 }}>{listing.description}</p>
-            )}
-          </div>
+            </>
+          )}
 
           {/* ── DIVIDER ── */}
           <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)' }} />
