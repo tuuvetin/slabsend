@@ -1,34 +1,26 @@
-// Slabsend supported countries
-// Update this list to expand/restrict availability
+// Countries where Slabsend currently operates (shipping supported)
+// Update this list when expanding to new markets
 
 export const SUPPORTED_COUNTRIES = [
-  // Nordics
-  'Denmark',
   'Finland',
-  'Iceland',
-  'Norway',
   'Sweden',
-  // Baltics
   'Estonia',
   'Latvia',
   'Lithuania',
-  // Central Europe
-  'Belgium',
-  'Czech Republic',
-  'Germany',
-  'Luxembourg',
-  'Netherlands',
-  'Poland',
-  // Alps
-  'Austria',
-  'Liechtenstein',
-  'Slovenia',
-  'Switzerland',
-  // South & West Europe
-  'Croatia',
-  'France',
-  'Italy',
-  'Portugal',
-  'Slovakia',
-  'Spain',
 ]
+
+// ISO-2 codes for the same countries — used in checkout and shipping logic
+export const SUPPORTED_COUNTRY_CODES = ['FI', 'SE', 'EE', 'LV', 'LT']
+
+// Map country name → ISO-2
+export const COUNTRY_NAME_TO_ISO: Record<string, string> = {
+  'Finland':   'FI',
+  'Sweden':    'SE',
+  'Estonia':   'EE',
+  'Latvia':    'LV',
+  'Lithuania': 'LT',
+}
+
+export function countryToISO(country: string): string {
+  return COUNTRY_NAME_TO_ISO[country] || country.toUpperCase().slice(0, 2)
+}

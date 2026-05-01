@@ -235,10 +235,16 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
     if (!user) { window.location.href = '/login'; return }
 
     if (listingType !== 'rent') {
-      // Tarkista että profiilissa on osoitetiedot
-      const { data: profile } = await supabase.from('profiles').select('address_street, address_postcode, address_city, phone').eq('user_id', user.id).single()
+      // Check seller has address and is in a supported country
+      const { data: profile } = await supabase.from('profiles').select('address_street, address_postcode, address_city, phone, country').eq('user_id', user.id).single()
       if (!profile?.address_street || !profile?.address_postcode || !profile?.address_city || !profile?.phone) {
-        setMessage('Täytä ensin kotiosoitteesi profiilisivulla ennen ilmoituksen julkaisua.')
+        setMessage('Please fill in your home address on your profile page before publishing a listing.')
+        setLoading(false)
+        return
+      }
+      const SUPPORTED = ['Finland', 'Sweden', 'Estonia', 'Latvia', 'Lithuania']
+      if (profile?.country && !SUPPORTED.includes(profile.country)) {
+        setMessage('Slabsend currently supports sellers in Finland, Sweden, Estonia, Latvia and Lithuania only.')
         setLoading(false)
         return
       }

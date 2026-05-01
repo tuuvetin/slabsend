@@ -1,17 +1,9 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@/utils/supabase/server'
+import { SUPPORTED_COUNTRY_CODES, COUNTRY_NAME_TO_ISO } from '@/app/lib/countries'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-
-// Map profile country names/codes to ISO-2
-const COUNTRY_TO_ISO: Record<string, string> = {
-  'Finland': 'FI', 'FI': 'FI',
-  'Sweden': 'SE', 'SE': 'SE',
-  'Estonia': 'EE', 'EE': 'EE',
-  'Latvia': 'LV', 'LV': 'LV',
-  'Lithuania': 'LT', 'LT': 'LT',
-}
 
 const FINLAND = ['FI']
 const NORDIC_BALTIC = ['EE', 'LV', 'LT', 'SE']
@@ -32,7 +24,18 @@ export async function POST(req: Request) {
 
   // Resolve buyer's country to ISO-2 code
   const rawCountry = buyerProfile?.address_country || buyerProfile?.country || ''
-  const buyerISO = COUNTRY_TO_ISO[rawCountry] || rawCountry.toUpperCase().slice(0, 2)
+  const buyerISO = COUNTRY_NAME_TO_ISO[rawCountry] || (SUPPORTED_COUNTRY_CODES.includes(rawCountry.toUpperCase()) ? rawCountry.toUpperCase() : '')
+
+  // Rentals are pickup-only — no country restriction
+  const isPickupOnly = listing.listing_type === 'rent' || (listing.pickup_enabled && listing.shipping_enabled === false)
+
+  // Block buyers from unsupported countries for shipped goods
+  if (!isPickupOnly && rawCountry && !buyerISO) {
+    return NextResponse.json({
+      error: 'Slabsend currently ships only to Finland, Sweden, Estonia, Latvia and Lithuania. Your profile country is not supported.',
+    }, { status: 400 })
+  }
+
   const isFinland = FINLAND.includes(buyerISO)
   const isNordic = NORDIC_BALTIC.includes(buyerISO)
   const unknownCountry = !isFinland && !isNordic
