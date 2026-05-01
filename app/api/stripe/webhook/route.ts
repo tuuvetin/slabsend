@@ -230,13 +230,13 @@ export async function POST(req: Request) {
       .eq('listing_id', listingId)
       .eq('offer_status', 'pending')
 
-    // Lisätään viesti chattiin ostajan ja myyjän välille
+    // Lisätään järjestelmäviesti chattiin
     if (buyerId && sellerUserId) {
       await supabaseAdmin.from('messages').insert({
         sender_id: buyerId,
         receiver_id: sellerUserId,
         listing_id: parseInt(listingId),
-        content: `✅ Payment confirmed for "${listing?.title}". Order #${orderNumber}. The seller will receive ${baseAmount} € when you confirm receipt.`,
+        content: `__SYSTEM__:Payment confirmed — Order #${orderNumber}`,
       })
     }
 

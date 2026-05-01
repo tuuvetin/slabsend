@@ -332,6 +332,22 @@ export default function ConversationPage() {
             const isLastMine = isMine && idx === lastMyMsgIdx
             const showSeen = isLastMine && msg.is_read
 
+            // System messages render as centered pill, skip normal row layout
+            if (msg.content?.startsWith('__SYSTEM__:') || msg.content?.startsWith('✅ Payment confirmed')) {
+              return (
+                <div key={msg.id}>
+                  {showDateSep && <div className="message-date-sep"><span>{dateLabel}</span></div>}
+                  <div style={{ textAlign: 'center', margin: '10px 0' }}>
+                    <span style={{ display: 'inline-block', background: 'rgba(26,20,8,0.07)', color: '#7a7060', fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em', padding: '5px 14px', borderRadius: '20px' }}>
+                      {msg.content.startsWith('__SYSTEM__:')
+                        ? msg.content.replace('__SYSTEM__:', '')
+                        : msg.content.replace('✅ ', '')}
+                    </span>
+                  </div>
+                </div>
+              )
+            }
+
             return (
               <div key={msg.id}>
                 {showDateSep && (
@@ -364,7 +380,7 @@ export default function ConversationPage() {
                         <p style={{ fontSize: '24px', fontWeight: 700, color: isMine ? '#F5F3E6' : '#1a1408', margin: '0 0 10px' }}>{msg.offer_amount} €</p>
 
                         {/* Pending offer not sent by me → show action buttons for the recipient */}
-                        {!isMine && isPending && (
+                        {!isMine && isPending && !listing?.sold && !order && (
                           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
                             {listing && listing.user_id === currentUser?.id ? (
                               // Seller receiving buyer's offer → Accept (notify only, no payment)
@@ -382,7 +398,7 @@ export default function ConversationPage() {
                         )}
 
                         {/* Accept & Pay: own offer was accepted by seller */}
-                        {isMine && isAccepted && (
+                        {isMine && isAccepted && !listing?.sold && !order && (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             <button onClick={() => handleAcceptAndPay(msg)} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept & Pay</button>
                             <span style={{ fontSize: '10px', color: 'rgba(245,243,230,0.6)' }}>+{(msg.offer_amount * 0.10).toFixed(2)} € buyer protection · shipping selected at checkout</span>
