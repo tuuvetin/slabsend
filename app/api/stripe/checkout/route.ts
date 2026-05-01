@@ -4,6 +4,18 @@ import { createClient } from '@/utils/supabase/server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
+// Map profile country names/codes to ISO-2
+const COUNTRY_TO_ISO: Record<string, string> = {
+  'Finland': 'FI', 'FI': 'FI',
+  'Sweden': 'SE', 'SE': 'SE',
+  'Estonia': 'EE', 'EE': 'EE',
+  'Latvia': 'LV', 'LV': 'LV',
+  'Lithuania': 'LT', 'LT': 'LT',
+}
+
+const FINLAND = ['FI']
+const NORDIC_BALTIC = ['EE', 'LV', 'LT', 'SE']
+
 export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -11,13 +23,19 @@ export async function POST(req: Request) {
 
   const { listingId, amount } = await req.json()
 
-  const { data: listing } = await supabase
-    .from('listings')
-    .select('*')
-    .eq('id', listingId)
-    .single()
+  const [{ data: listing }, { data: buyerProfile }] = await Promise.all([
+    supabase.from('listings').select('*').eq('id', listingId).single(),
+    supabase.from('profiles').select('country, address_country').eq('user_id', user.id).single(),
+  ])
 
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
+
+  // Resolve buyer's country to ISO-2 code
+  const rawCountry = buyerProfile?.address_country || buyerProfile?.country || ''
+  const buyerISO = COUNTRY_TO_ISO[rawCountry] || rawCountry.toUpperCase().slice(0, 2)
+  const isFinland = FINLAND.includes(buyerISO)
+  const isNordic = NORDIC_BALTIC.includes(buyerISO)
+  const unknownCountry = !isFinland && !isNordic
 
   const commissionRate = parseFloat(process.env.NEXT_PUBLIC_COMMISSION_RATE || '0.08')
   const baseAmount = Math.round(amount * 100)
@@ -55,31 +73,37 @@ export async function POST(req: Request) {
   }
 
   if (listing.shipping_enabled !== false) {
-    shippingOptions.push({
-      shipping_rate_data: {
-        type: 'fixed_amount',
-        fixed_amount: { amount: 890, currency: 'eur' },
-        display_name: 'Standard shipping — Finland (Matkahuolto)',
-        delivery_estimate: {
-          minimum: { unit: 'business_day' as const, value: 1 },
-          maximum: { unit: 'business_day' as const, value: 3 },
+    // Show Finland option only to Finnish buyers (or unknown as fallback)
+    if (isFinland || unknownCountry) {
+      shippingOptions.push({
+        shipping_rate_data: {
+          type: 'fixed_amount',
+          fixed_amount: { amount: 890, currency: 'eur' },
+          display_name: 'Standard shipping — Finland (Matkahuolto)',
+          delivery_estimate: {
+            minimum: { unit: 'business_day' as const, value: 1 },
+            maximum: { unit: 'business_day' as const, value: 3 },
+          },
         },
-      },
-    })
-    shippingOptions.push({
-      shipping_rate_data: {
-        type: 'fixed_amount',
-        fixed_amount: { amount: 1490, currency: 'eur' },
-        display_name: 'Standard shipping — Nordic & Baltic',
-        delivery_estimate: {
-          minimum: { unit: 'business_day' as const, value: 3 },
-          maximum: { unit: 'business_day' as const, value: 7 },
+      })
+    }
+    // Show Nordic option to non-Finnish buyers (or unknown as fallback)
+    if (isNordic || unknownCountry) {
+      shippingOptions.push({
+        shipping_rate_data: {
+          type: 'fixed_amount',
+          fixed_amount: { amount: 1490, currency: 'eur' },
+          display_name: 'Standard shipping — Nordic & Baltic',
+          delivery_estimate: {
+            minimum: { unit: 'business_day' as const, value: 3 },
+            maximum: { unit: 'business_day' as const, value: 7 },
+          },
         },
-      },
-    })
+      })
+    }
   }
 
-  // Fallback: if no options (e.g. shipping_enabled=false and pickup_enabled=false), add basic shipping
+  // Fallback: if nothing resolved, show basic shipping
   if (shippingOptions.length === 0) {
     shippingOptions.push({
       shipping_rate_data: {
@@ -90,6 +114,7 @@ export async function POST(req: Request) {
     })
   }
 
+  // Allowed countries: show address collection for all supported countries
   const allowedCountries = ['FI', 'EE', 'LV', 'LT', 'SE'] as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[]
 
   const session = await stripe.checkout.sessions.create({
