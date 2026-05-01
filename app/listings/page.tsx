@@ -87,7 +87,8 @@ export default async function ListingsPage({
           const displayName = profile?.username || profile?.full_name || ''
 
           return (
-            <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
+            <div key={listing.id} style={{ position: 'relative' }}>
+              <a href={`/listings/${listing.id}`} className="listing-card-link">
               <div className="listing-card" style={listing.sold ? { opacity: 0.6 } : undefined}>
                 <div style={{ position: 'relative' }}>
                   {listing.images && listing.images.length > 0 ? (
@@ -96,14 +97,6 @@ export default async function ListingsPage({
                     <div className="listing-card-no-img">No image</div>
                   )}
                   <FavoriteButton listingId={listing.id} initialFavorited={favoriteIds.has(String(listing.id))} />
-                  {isAdmin && (
-                    <button
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); window.location.href = `/listings/${listing.id}/edit` }}
-                      style={{ position: 'absolute', top: '8px', left: '8px', background: '#1a1408', color: '#FC7038', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', border: 'none', cursor: 'pointer', zIndex: 2 }}
-                    >
-                      Edit
-                    </button>
-                  )}
                 </div>
                 <div className="listing-card-body">
                   {listing.sold && (
@@ -146,7 +139,16 @@ export default async function ListingsPage({
                   )}
                 </div>
               </div>
-            </a>
+              </a>
+              {isAdmin && (
+                <a
+                  href={`/listings/${listing.id}/edit`}
+                  style={{ position: 'absolute', top: '8px', left: '8px', background: '#1a1408', color: '#FC7038', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', textDecoration: 'none', zIndex: 2 }}
+                >
+                  Edit
+                </a>
+              )}
+            </div>
           )
         })}
       </div>
