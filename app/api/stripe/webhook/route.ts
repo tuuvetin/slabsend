@@ -241,13 +241,28 @@ export async function POST(req: Request) {
     }
 
     // ── Sähköpostit ──────────────────────────────────────────────────────────────
+    const FROM = 'Slabsend <info@slabsend.com>'
+    const emailErrors: string[] = []
+
+    const sendEmail = async (opts: Parameters<typeof resend.emails.send>[0]) => {
+      try {
+        const result = await resend.emails.send(opts)
+        if ((result as any).error) {
+          emailErrors.push(`to=${opts.to} error=${JSON.stringify((result as any).error)}`)
+          console.error('Resend error:', opts.to, (result as any).error)
+        }
+      } catch (e) {
+        emailErrors.push(`to=${opts.to} exception=${String(e)}`)
+        console.error('Resend exception:', opts.to, e)
+      }
+    }
 
     // Myyjälle
     if (sellerEmail) {
       const sellerStripeOnboarded = sellerProfile?.stripe_onboarded === true
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://slabsend.com'
-      await resend.emails.send({
-        from: 'Slabsend <info@slabsend.com>',
+      await sendEmail({
+        from: FROM,
         to: sellerEmail,
         subject: labelCreated
           ? `Ship now — activation code for "${listing?.title}"`
@@ -260,8 +275,8 @@ export async function POST(req: Request) {
 
     // Ostajalle
     if (buyerEmail) {
-      await resend.emails.send({
-        from: 'Slabsend <info@slabsend.com>',
+      await sendEmail({
+        from: FROM,
         to: buyerEmail,
         subject: `Order confirmed: ${listing?.title}`,
         html: buyerConfirmationEmail({ listingTitle: listing?.title || '', orderNumber, totalAmount, trackingNumber }),
@@ -269,10 +284,10 @@ export async function POST(req: Request) {
     }
 
     // Adminille
-    await resend.emails.send({
-      from: 'Slabsend <info@slabsend.com>',
+    await sendEmail({
+      from: FROM,
       to: 'info@slabsend.com',
-      subject: `${labelCreated ? '✅' : shippingZone === 'FI' ? '⚠️' : '📦'} New order: ${listing?.title} — ${orderNumber}`,
+      subject: `${labelCreated ? '✅' : shippingZone === 'FI' ? '⚠️' : '📦'} New order: ${listing?.title} — ${orderNumber}${emailErrors.length ? ' ⚠️ EMAIL ERRORS' : ''}`,
       html: adminOrderEmail({
         orderNumber,
         listingTitle: listing?.title || '',
@@ -290,6 +305,7 @@ export async function POST(req: Request) {
         matkahuoltoError,
         matkahuoltoRaw,
         orderId,
+        emailErrors,
       }),
     })
   }
@@ -430,6 +446,7 @@ function adminOrderEmail(p: {
   matkahuoltoError?: string
   matkahuoltoRaw?: string
   orderId: number | null
+  emailErrors?: string[]
 }): string {
   const mhBlock = p.shippingZone === 'FI'
     ? p.labelCreated
@@ -460,6 +477,7 @@ function adminOrderEmail(p: {
         <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Shipping zone</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.shippingZone || 'N/A'}</td></tr>
         <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Stripe session</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.sessionId}</td></tr>
         ${mhBlock}
+        ${p.emailErrors && p.emailErrors.length > 0 ? `<tr style="background:#fff0f0;"><td style="padding:8px;border-bottom:1px solid #eee;" colspan="2"><strong>⚠️ Email delivery errors:</strong><br/><pre style="font-size:11px;color:#c0392b;white-space:pre-wrap;">${p.emailErrors.join('\n')}</pre></td></tr>` : ''}
       </table>
       <p><strong>Action needed:</strong> Transfer ${p.baseAmount} € to seller after buyer confirms receipt or after 48 hours.</p>
     </div>
