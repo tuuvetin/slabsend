@@ -242,9 +242,8 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
         setLoading(false)
         return
       }
-      const SUPPORTED = ['Finland', 'Sweden', 'Estonia', 'Latvia', 'Lithuania']
-      if (profile?.country && !SUPPORTED.includes(profile.country)) {
-        setMessage('Slabsend currently supports sellers in Finland, Sweden, Estonia, Latvia and Lithuania only.')
+      if (profile?.country && profile.country !== 'Finland') {
+        setMessage('Slabsend shipping is currently only available from Finland. Sellers must be based in Finland.')
         setLoading(false)
         return
       }
