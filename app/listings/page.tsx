@@ -97,12 +97,12 @@ export default async function ListingsPage({
                   )}
                   <FavoriteButton listingId={listing.id} initialFavorited={favoriteIds.has(String(listing.id))} />
                   {isAdmin && (
-                    <a
-                      href={`/listings/${listing.id}/edit`}
-                      style={{ position: 'absolute', top: '8px', left: '8px', background: '#1a1408', color: '#FC7038', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', textDecoration: 'none', zIndex: 2 }}
+                    <button
+                      onClick={e => { e.preventDefault(); e.stopPropagation(); window.location.href = `/listings/${listing.id}/edit` }}
+                      style={{ position: 'absolute', top: '8px', left: '8px', background: '#1a1408', color: '#FC7038', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', border: 'none', cursor: 'pointer', zIndex: 2 }}
                     >
                       Edit
-                    </a>
+                    </button>
                   )}
                 </div>
                 <div className="listing-card-body">
