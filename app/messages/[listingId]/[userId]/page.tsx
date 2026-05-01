@@ -334,14 +334,21 @@ export default function ConversationPage() {
 
             // System messages render as centered pill, skip normal row layout
             if (msg.content?.startsWith('__SYSTEM__:') || msg.content?.startsWith('✅ Payment confirmed')) {
+              let systemText: string
+              if (msg.content.startsWith('__SYSTEM__:')) {
+                systemText = msg.content.replace('__SYSTEM__:', '')
+              } else {
+                // Old format: "✅ Payment confirmed for "X". Order #Y. The seller will receive..."
+                // Extract just the order number and show clean neutral text
+                const orderMatch = msg.content.match(/Order #([\w-]+)/)
+                systemText = orderMatch ? `Payment confirmed — Order #${orderMatch[1]}` : 'Payment confirmed'
+              }
               return (
                 <div key={msg.id}>
                   {showDateSep && <div className="message-date-sep"><span>{dateLabel}</span></div>}
                   <div style={{ textAlign: 'center', margin: '10px 0' }}>
                     <span style={{ display: 'inline-block', background: 'rgba(26,20,8,0.07)', color: '#7a7060', fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em', padding: '5px 14px', borderRadius: '20px' }}>
-                      {msg.content.startsWith('__SYSTEM__:')
-                        ? msg.content.replace('__SYSTEM__:', '')
-                        : msg.content.replace('✅ ', '')}
+                      {systemText}
                     </span>
                   </div>
                 </div>

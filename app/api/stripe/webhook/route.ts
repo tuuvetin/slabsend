@@ -59,9 +59,6 @@ export async function POST(req: Request) {
     const totalAmount = totalCents / 100
     const baseAmount = parseFloat((itemPriceCents / 100).toFixed(2))
     const serviceFee = parseFloat((serviceFeeCents / 100).toFixed(2))
-    // Detect shipping zone from buyer's country (set by Stripe address collection)
-    const shippingCountry = sessionAny.shipping_details?.address?.country || ''
-    const shippingZone: string = shippingCostCents === 0 ? 'pickup' : (shippingCountry || '')
 
     // 48h auto-confirm
     const autoConfirmAt = new Date()
@@ -71,9 +68,14 @@ export async function POST(req: Request) {
     const orderNumber = generateOrderNumber()
 
     // Ostajan osoite Stripe-sessiosta
+    // shipping_details is populated when buyer fills in shipping address at checkout
+    // fall back to customer_details.address (billing address) if shipping_details is missing
     const buyerAddress = sessionAny.shipping_details?.address || session.customer_details?.address || {}
     const buyerPhone = session.customer_details?.phone || ''
     const buyerCountry = buyerAddress.country || ''
+
+    // Shipping zone: derive from buyer's country (covers both shipping_details and customer_details fallback)
+    const shippingZone: string = shippingCostCents === 0 ? 'pickup' : (buyerCountry || '')
 
     // Haetaan ostajan profiiliosoite jos ei tule Stripestä
     let buyerAddressStreet = buyerAddress.line1 || ''
