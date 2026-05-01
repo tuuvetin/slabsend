@@ -330,7 +330,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '6px' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px', position: 'relative' }} className="info-tooltip-wrap">
-                      🛡️ Rental protection (8%)
+                      🛡️ Rental protection (10%)
                       <button className="info-btn">i</button>
                       <div className="info-tooltip">
                         Rental is protected if item is not as described, not delivered, or significantly damaged on arrival. Does not cover wear and tear or accidents during use. Contact info@slabsend.com within 48h.

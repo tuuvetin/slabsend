@@ -144,7 +144,7 @@ export default function AdminOrderDetailPage() {
           <tbody>
             <Row label="Tuote" value={fmt(order.item_price_cents)} />
             <Row label="Toimitus" value={fmt(order.shipping_cost_cents)} />
-            <Row label="Palvelumaksu (8%)" value={fmt(order.service_fee_cents)} />
+            <Row label="Palvelumaksu (10%)" value={fmt(order.service_fee_cents)} />
             <Row label="Yhteensä" value={fmt(order.total_cents)} bold />
           </tbody>
         </table>
