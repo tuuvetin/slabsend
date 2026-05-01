@@ -59,7 +59,27 @@ export default async function ListingsPage({
 
       <ListingsSearch tab={tab} search={search} category={category} subcategory={subcategory} country={country} />
 
-      {filtered.length === 0 && <p className="listings-empty">No listings found.</p>}
+      {filtered.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '60px 24px' }}>
+          <p style={{ fontSize: '32px', marginBottom: '12px' }}>🏔</p>
+          <p style={{ fontSize: '16px', fontWeight: 700, color: '#1a1408', marginBottom: '8px' }}>
+            Nothing here yet
+          </p>
+          <p style={{ fontSize: '14px', color: '#9a9080', marginBottom: '24px' }}>
+            {search
+              ? `No results for "${search}" — try a different search term.`
+              : category
+              ? `No listings in this category yet. Be the first to add one!`
+              : 'No listings yet. Be the first to add one!'}
+          </p>
+          <a
+            href="/listings/new"
+            style={{ display: 'inline-block', background: '#FC7038', color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '11px 22px', borderRadius: '8px', textDecoration: 'none' }}
+          >
+            Add listing
+          </a>
+        </div>
+      )}
 
       <div className="listings-grid">
         {filtered.map((listing: any) => {
