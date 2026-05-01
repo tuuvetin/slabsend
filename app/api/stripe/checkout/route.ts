@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   const isNordic = NORDIC_BALTIC.includes(buyerISO)
   const unknownCountry = !isFinland && !isNordic
 
-  const commissionRate = parseFloat(process.env.NEXT_PUBLIC_COMMISSION_RATE || '0.08')
+  const commissionRate = parseFloat(process.env.NEXT_PUBLIC_COMMISSION_RATE || '0.10')
   const baseAmount = Math.round(amount * 100)
   const serviceFee = Math.round(baseAmount * commissionRate)
 

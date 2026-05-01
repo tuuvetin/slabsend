@@ -121,7 +121,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
                   </p>
                   {listing.listing_type !== 'rent' && (
                     <p className="listing-card-price-total">
-                      {(listing.price * 1.08).toFixed(2)} € incl. <PriceTooltipIcon />
+                      {(listing.price * 1.10).toFixed(2)} € incl. <PriceTooltipIcon />
                     </p>
                   )}
                   <p className="listing-card-meta">

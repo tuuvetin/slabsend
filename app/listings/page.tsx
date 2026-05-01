@@ -126,7 +126,7 @@ export default async function ListingsPage({
                   </p>
                   {listing.listing_type !== 'rent' && listing.listing_type !== 'service' && listing.price && (
                     <p className="listing-card-price-total">
-                      {(listing.price * 1.08).toFixed(2)} € incl. <PriceTooltipIcon />
+                      {(listing.price * 1.10).toFixed(2)} € incl. <PriceTooltipIcon />
                     </p>
                   )}
                   <p className="listing-card-meta">

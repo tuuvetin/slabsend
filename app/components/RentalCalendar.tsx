@@ -336,10 +336,10 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
                         Rental is protected if item is not as described, not delivered, or significantly damaged on arrival. Does not cover wear and tear or accidents during use. Contact info@slabsend.com within 48h.
                       </div>
                     </span>
-                    <span>{(total * 0.08).toFixed(2)} €</span>
+                    <span>{(total * 0.10).toFixed(2)} €</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 700, color: '#1a1408', borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '8px', marginTop: '4px' }}>
-                    <span>Total</span><span>{(total * 1.08).toFixed(2)} €</span>
+                    <span>Total</span><span>{(total * 1.10).toFixed(2)} €</span>
                   </div>
                   <button
                     className="form-submit"

@@ -380,7 +380,7 @@ export default function ListingPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '6px' }}>
                 <span style={{ fontSize: '13px', color: '#9a9080' }}>{listing.price}{isRental ? '/day' : ''} €</span>
                 <span style={{ fontSize: '20px', fontWeight: 700, color: '#1a1408' }}>
-                  {(listing.price * 1.08).toFixed(2)}{isRental ? '/day' : ''} €
+                  {(listing.price * 1.10).toFixed(2)}{isRental ? '/day' : ''} €
                 </span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -562,7 +562,7 @@ export default function ListingPage() {
                     }}
                     style={{ width: '100%', marginBottom: '10px', opacity: (!hasServiceSelection || serviceTotal === 0) ? 0.45 : 1 }}
                   >
-                    {buyLoading ? 'Loading...' : hasServiceSelection && serviceTotal > 0 ? `Buy now — ${(serviceTotal * 1.08).toFixed(2)} €` : 'Select services above'}
+                    {buyLoading ? 'Loading...' : hasServiceSelection && serviceTotal > 0 ? `Buy now — ${(serviceTotal * 1.10).toFixed(2)} €` : 'Select services above'}
                   </button>
                 )}
 
@@ -587,9 +587,9 @@ export default function ListingPage() {
                     {offerAmount && !isNaN(Number(offerAmount)) && Number(offerAmount) > 0 && (
                       <div style={{ background: '#fff', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.08)', padding: '10px 12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}><span>Your offer</span><span>{Number(offerAmount).toFixed(2)} €</span></div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}><span>Buyer protection</span><span>{(Number(offerAmount) * 0.08).toFixed(2)} €</span></div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#7a7060', marginBottom: '4px' }}><span>Buyer protection</span><span>{(Number(offerAmount) * 0.10).toFixed(2)} €</span></div>
                         <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)', margin: '6px 0' }} />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 700, color: '#1a1408' }}><span>Total you pay</span><span>{(Number(offerAmount) * 1.08).toFixed(2)} €</span></div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 700, color: '#1a1408' }}><span>Total you pay</span><span>{(Number(offerAmount) * 1.10).toFixed(2)} €</span></div>
                       </div>
                     )}
                   </div>

@@ -373,7 +373,7 @@ export default function ConversationPage() {
                               // Buyer receiving seller's counter → Accept & Pay
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                 <button onClick={() => handleAcceptAndPay(msg)} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept & Pay</button>
-                                <span style={{ fontSize: '10px', color: isMine ? 'rgba(245,243,230,0.6)' : '#9a9080' }}>+{(msg.offer_amount * 0.08).toFixed(2)} € buyer protection · shipping selected at checkout</span>
+                                <span style={{ fontSize: '10px', color: isMine ? 'rgba(245,243,230,0.6)' : '#9a9080' }}>+{(msg.offer_amount * 0.10).toFixed(2)} € buyer protection · shipping selected at checkout</span>
                               </div>
                             )}
                             <button onClick={() => setShowCounter(showCounter === msg.id ? null : msg.id)} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#FC7038', border: '1px solid #FC7038', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Counter</button>
@@ -385,7 +385,7 @@ export default function ConversationPage() {
                         {isMine && isAccepted && (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             <button onClick={() => handleAcceptAndPay(msg)} style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: '#2a6a2a', color: '#F5F3E6', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}>Accept & Pay</button>
-                            <span style={{ fontSize: '10px', color: 'rgba(245,243,230,0.6)' }}>+{(msg.offer_amount * 0.08).toFixed(2)} € buyer protection · shipping selected at checkout</span>
+                            <span style={{ fontSize: '10px', color: 'rgba(245,243,230,0.6)' }}>+{(msg.offer_amount * 0.10).toFixed(2)} € buyer protection · shipping selected at checkout</span>
                           </div>
                         )}
 
