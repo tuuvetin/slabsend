@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { listingId, amount } = await req.json()
+  const { listingId, amount, rentalBookingId } = await req.json()
 
   const [{ data: listing }, { data: buyerProfile }] = await Promise.all([
     supabase.from('listings').select('*').eq('id', listingId).single(),
@@ -135,6 +135,7 @@ export async function POST(req: Request) {
       buyer_id: user.id,
       base_amount: baseAmount.toString(),
       service_fee: serviceFee.toString(),
+      ...(rentalBookingId ? { rental_booking_id: String(rentalBookingId) } : {}),
     },
   })
 

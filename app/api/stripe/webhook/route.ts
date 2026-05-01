@@ -45,8 +45,20 @@ export async function POST(req: Request) {
 
     if (!listingId) return NextResponse.json({ received: true })
 
-    // Merkitään ilmoitus myydyksi
-    await supabaseAdmin.from('listings').update({ sold: true }).eq('id', listingId)
+    const rentalBookingId = session.metadata?.rental_booking_id || null
+
+    // Merkitään ilmoitus myydyksi — paitsi vuokraukset (niitä voi vuokrata uudelleen)
+    if (!rentalBookingId) {
+      await supabaseAdmin.from('listings').update({ sold: true }).eq('id', listingId)
+    }
+
+    // Konfirmoidaan rental booking jos kyseessä on vuokraus
+    if (rentalBookingId) {
+      await supabaseAdmin
+        .from('rental_bookings')
+        .update({ status: 'confirmed' })
+        .eq('id', parseInt(rentalBookingId))
+    }
 
     // Lasketaan summat (senttiinä)
     const totalCents = session.amount_total || 0

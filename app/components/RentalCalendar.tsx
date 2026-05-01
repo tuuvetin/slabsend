@@ -148,7 +148,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
     setLoading(true)
     const { total } = calculatePrice()
 
-    const { error } = await supabase.from('rental_bookings').insert({
+    const { data: bookingData, error } = await supabase.from('rental_bookings').insert({
       listing_id: listingId,
       renter_id: currentUserId,
       start_date: selectedStart,
@@ -157,9 +157,9 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
       return_time: returnTime,
       total_price: total,
       status: 'pending'
-    })
+    }).select('id').single()
 
-    if (error) {
+    if (error || !bookingData) {
       setLoading(false)
       return
     }
@@ -167,7 +167,7 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
     const res = await fetch('/api/stripe/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ listingId, amount: total }),
+      body: JSON.stringify({ listingId, amount: total, rentalBookingId: bookingData.id }),
     })
     const data = await res.json()
     if (data.url) {
