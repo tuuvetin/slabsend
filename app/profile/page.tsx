@@ -375,18 +375,18 @@ export default function ProfilePage() {
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
             <h2 className="profile-section-title">Shipping address</h2>
             <p style={{ fontSize: '12px', color: '#9a9080', marginBottom: '14px', lineHeight: 1.5 }}>
-              Näkyy lähetystietoina pakettitarrassa. Pakollinen ennen ilmoituksen julkaisua.
+              Used as sender address on shipping labels. Required before publishing a listing.
             </p>
-            <input className="form-input" placeholder="Katuosoite *" value={addressStreet} onChange={e => setAddressStreet(e.target.value)} />
+            <input className="form-input" placeholder="Street address *" value={addressStreet} onChange={e => setAddressStreet(e.target.value)} />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '10px' }}>
-              <input className="form-input" placeholder="Postinumero *" value={addressPostcode} onChange={e => setAddressPostcode(e.target.value)} style={{ marginBottom: 0 }} />
-              <input className="form-input" placeholder="Kaupunki *" value={addressCity} onChange={e => setAddressCity(e.target.value)} style={{ marginBottom: 0 }} />
+              <input className="form-input" placeholder="Postal code *" value={addressPostcode} onChange={e => setAddressPostcode(e.target.value)} style={{ marginBottom: 0 }} />
+              <input className="form-input" placeholder="City *" value={addressCity} onChange={e => setAddressCity(e.target.value)} style={{ marginBottom: 0 }} />
             </div>
-            <input className="form-input" placeholder="Puhelinnumero * (+358...)" value={phone} onChange={e => setPhone(e.target.value)} style={{ marginTop: '10px' }} />
+            <input className="form-input" placeholder="Phone number * (+358...)" value={phone} onChange={e => setPhone(e.target.value)} style={{ marginTop: '10px' }} />
             <div style={{ background: '#f0ede3', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '6px', padding: '10px 14px', marginBottom: '12px', fontSize: '12px', color: '#7a7060' }}>
-              🇫🇮 Maa: Suomi (toistaiseksi vain suomalaiset myyjät)
+              Finland only — international seller support coming soon.
             </div>
-            <button className="form-submit" onClick={handleSave}>Tallenna</button>
+            <button className="form-submit" onClick={handleSave}>Save</button>
             {message && (
               <p className={`form-message ${message.startsWith('Error') ? 'error' : 'success'}`}>{message}</p>
             )}
