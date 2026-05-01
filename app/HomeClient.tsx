@@ -292,7 +292,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
 
           {/* Stripe trust line */}
           <p style={{ textAlign: 'center', fontSize: '12px', color: '#9a9080', marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-            Payments secured by Stripe — your card details are never shared with sellers.
+Powered by Stripe — connect your account to receive payouts directly to your bank. Buyers are protected until delivery is confirmed.
           </p>
         </div>
       </div>
