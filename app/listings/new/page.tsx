@@ -589,21 +589,35 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
           <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '4px' }}>
             Package weight <span style={{ color: '#FC7038' }}>*</span>
           </p>
-          <p style={{ fontSize: '12px', color: '#9a9080', marginBottom: '10px' }}>
-            Used to calculate the shipping cost shown to buyers.
+          <p style={{ fontSize: '12px', color: '#9a9080', marginBottom: '12px' }}>
+            Used for the shipping label. Estimate is fine.
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <input
-              className="form-input"
-              type="number"
-              min="0.1"
-              step="0.1"
-              placeholder="e.g. 0.5"
-              value={packageWeight}
-              onChange={e => setPackageWeight(e.target.value)}
-              style={{ marginBottom: 0, width: '120px' }}
-            />
-            <span style={{ fontSize: '14px', color: '#7a7060' }}>kg</span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+            {[
+              { label: '0–0.5 kg', value: '0.5' },
+              { label: '0.5–2 kg', value: '2' },
+              { label: '2–5 kg',   value: '5' },
+              { label: '5–10 kg',  value: '10' },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setPackageWeight(opt.value)}
+                style={{
+                  padding: '10px 6px',
+                  borderRadius: '8px',
+                  border: packageWeight === opt.value ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)',
+                  background: packageWeight === opt.value ? '#FC7038' : '#fff',
+                  color: packageWeight === opt.value ? '#F5F3E6' : '#1a1408',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
       )}
