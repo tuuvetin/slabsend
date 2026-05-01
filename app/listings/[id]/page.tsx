@@ -35,6 +35,13 @@ export default function ListingPage() {
   const [togglingSOLD, setTogglingSOLD] = useState(false)
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [justPublished, setJustPublished] = useState(false)
+  // Address prompt for first-time sellers
+  const [addrStreet, setAddrStreet] = useState('')
+  const [addrPostcode, setAddrPostcode] = useState('')
+  const [addrCity, setAddrCity] = useState('')
+  const [addrPhone, setAddrPhone] = useState('')
+  const [addrSaving, setAddrSaving] = useState(false)
+  const [addrSaved, setAddrSaved] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -80,7 +87,7 @@ export default function ListingPage() {
       setLoading(false)
 
       if (data?.user_id) {
-        supabase.from('profiles').select('username, full_name, avatar_url, location').eq('user_id', data.user_id).single().then(({ data: p }) => setSellerProfile(p))
+        supabase.from('profiles').select('username, full_name, avatar_url, location, address_street, address_postcode, address_city, phone').eq('user_id', data.user_id).single().then(({ data: p }) => setSellerProfile(p))
       }
 
       if (user) {
@@ -214,6 +221,18 @@ export default function ListingPage() {
     setConfirmLoading(false)
     setConfirmDone(true)
     setOrder(null)
+  }
+
+  const handleSaveAddress = async () => {
+    if (!addrStreet.trim() || !addrPostcode.trim() || !addrCity.trim()) return
+    setAddrSaving(true)
+    await supabase.from('profiles').upsert(
+      { user_id: currentUser.id, address_street: addrStreet.trim(), address_postcode: addrPostcode.trim(), address_city: addrCity.trim(), ...(addrPhone.trim() ? { phone: addrPhone.trim() } : {}) },
+      { onConflict: 'user_id' }
+    )
+    setAddrSaving(false)
+    setAddrSaved(true)
+    setSellerProfile((prev: any) => ({ ...prev, address_street: addrStreet.trim() }))
   }
 
   const handleToggleSold = async () => {
@@ -375,7 +394,7 @@ export default function ListingPage() {
                   </div>
                 </div>
                 {!isRental && listing.shipping_enabled !== false && (
-                  <span style={{ fontSize: '13px', color: '#7a7060', display: 'inline-flex', alignItems: 'center', gap: '5px', paddingLeft: '20px' }}>Shipping from €8.90</span>
+                  <span style={{ fontSize: '13px', color: '#7a7060', display: 'inline-flex', alignItems: 'center', gap: '5px', paddingLeft: '20px' }}>Shipping from 8.90 €</span>
                 )}
               </div>
             </div>
@@ -631,6 +650,32 @@ export default function ListingPage() {
               pickupHoursFrom={listing.pickup_hours_from || '09:00'}
               pickupHoursTo={listing.pickup_hours_to || '20:00'}
             />
+          )}
+
+          {/* Address prompt — first-time seller without address */}
+          {currentUser?.id === listing.user_id && sellerProfile && !sellerProfile.address_street && !addrSaved && (
+            <>
+              <div style={{ height: '1px', background: 'rgba(26,20,8,0.08)' }} />
+              <div style={{ padding: '16px 24px' }}>
+                <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '6px' }}>Add your shipping address</p>
+                <p style={{ fontSize: '12px', color: '#7a7060', marginBottom: '12px', lineHeight: 1.5 }}>Needed to generate Matkahuolto labels automatically when you sell.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <input className="form-input" placeholder="Street address" value={addrStreet} onChange={e => setAddrStreet(e.target.value)} style={{ marginBottom: 0, fontSize: '13px', padding: '9px 12px' }} />
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input className="form-input" placeholder="Postal code" value={addrPostcode} onChange={e => setAddrPostcode(e.target.value)} style={{ marginBottom: 0, fontSize: '13px', padding: '9px 12px', width: '38%' }} />
+                    <input className="form-input" placeholder="City" value={addrCity} onChange={e => setAddrCity(e.target.value)} style={{ marginBottom: 0, fontSize: '13px', padding: '9px 12px', flex: 1 }} />
+                  </div>
+                  <input className="form-input" placeholder="Phone number" value={addrPhone} onChange={e => setAddrPhone(e.target.value)} style={{ marginBottom: 0, fontSize: '13px', padding: '9px 12px' }} />
+                  <button
+                    onClick={handleSaveAddress}
+                    disabled={addrSaving || !addrStreet.trim() || !addrPostcode.trim() || !addrCity.trim()}
+                    style={{ background: '#FC7038', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px 16px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: (!addrStreet.trim() || !addrPostcode.trim() || !addrCity.trim()) ? 0.45 : 1 }}
+                  >
+                    {addrSaving ? 'Saving...' : 'Save address'}
+                  </button>
+                </div>
+              </div>
+            </>
           )}
 
           {/* Owner / Admin actions */}
