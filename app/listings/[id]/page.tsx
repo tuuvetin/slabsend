@@ -42,6 +42,7 @@ export default function ListingPage() {
   const [addrPhone, setAddrPhone] = useState('')
   const [addrSaving, setAddrSaving] = useState(false)
   const [addrSaved, setAddrSaved] = useState(false)
+  const [rentalBooking, setRentalBooking] = useState<any>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -68,19 +69,38 @@ export default function ListingPage() {
         return
       }
 
-      if (data.sold && user) {
-        const isAdmin = ADMINS.includes(user.email || '')
-        const isSellerOfThis = data.user_id === user.id
-        const { data: orderData } = await supabase
-          .from('orders')
-          .select('buyer_id')
-          .eq('listing_id', data.id)
-          .single()
-        const isBuyerOfThis = orderData?.buyer_id === user.id
-        if (!isBuyerOfThis && !isSellerOfThis && !isAdmin) {
+      if (data.sold && !data.listing_type || (data.sold && data.listing_type !== 'rent')) {
+        if (user) {
+          const isAdmin = ADMINS.includes(user.email || '')
+          const isSellerOfThis = data.user_id === user.id
+          const { data: orderData } = await supabase
+            .from('orders')
+            .select('buyer_id')
+            .eq('listing_id', data.id)
+            .single()
+          const isBuyerOfThis = orderData?.buyer_id === user.id
+          if (!isBuyerOfThis && !isSellerOfThis && !isAdmin) {
+            window.location.href = '/listings'
+            return
+          }
+        } else {
           window.location.href = '/listings'
           return
         }
+      }
+
+      // Load confirmed rental booking for current user (for rentals already booked)
+      if (data.listing_type === 'rent' && user) {
+        const { data: rb } = await supabase
+          .from('rental_bookings')
+          .select('*')
+          .eq('listing_id', data.id)
+          .eq('renter_id', user.id)
+          .eq('status', 'confirmed')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        if (rb) setRentalBooking(rb)
       }
 
       setListing(data)
@@ -108,6 +128,19 @@ export default function ListingPage() {
             setOrder(orderData)
             setBuyerOrderId(orderData.id)
             localStorage.setItem(`order_${params.id}`, JSON.stringify(orderData))
+            // Load rental booking details if this is a rental
+            if (data.listing_type === 'rent') {
+              const { data: rb } = await supabase
+                .from('rental_bookings')
+                .select('*')
+                .eq('listing_id', data.id)
+                .eq('renter_id', user.id)
+                .eq('status', 'confirmed')
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle()
+              if (rb) setRentalBooking(rb)
+            }
           }
         }
       }
@@ -517,8 +550,55 @@ export default function ListingPage() {
           {/* ── ACTIONS SECTION ── */}
           <div style={{ padding: '20px 24px' }}>
 
-            {/* Payment confirmed banner */}
-            {order && !confirmDone && (
+            {/* Rental booking confirmation card */}
+            {isRental && rentalBooking && (
+              <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '16px', marginBottom: '14px' }}>
+                <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '12px' }}>Rental confirmed</p>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '12px' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ fontSize: '12px', color: '#7a7060', padding: '4px 0', width: '40%' }}>From</td>
+                      <td style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408', padding: '4px 0' }}>{rentalBooking.start_date}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontSize: '12px', color: '#7a7060', padding: '4px 0' }}>To</td>
+                      <td style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408', padding: '4px 0' }}>{rentalBooking.end_date}</td>
+                    </tr>
+                    {rentalBooking.pickup_time && (
+                      <tr>
+                        <td style={{ fontSize: '12px', color: '#7a7060', padding: '4px 0' }}>Pickup time</td>
+                        <td style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408', padding: '4px 0' }}>{rentalBooking.pickup_time}</td>
+                      </tr>
+                    )}
+                    {rentalBooking.return_time && (
+                      <tr>
+                        <td style={{ fontSize: '12px', color: '#7a7060', padding: '4px 0' }}>Return time</td>
+                        <td style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408', padding: '4px 0' }}>{rentalBooking.return_time}</td>
+                      </tr>
+                    )}
+                    {listing.pickup_location && (
+                      <tr>
+                        <td style={{ fontSize: '12px', color: '#7a7060', padding: '4px 0' }}>Pickup location</td>
+                        <td style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408', padding: '4px 0' }}>{listing.pickup_location}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+                <a
+                  href={`/messages/${listing.id}/${listing.user_id}`}
+                  className="form-submit"
+                  style={{ display: 'block', textAlign: 'center', background: '#1a1408', marginBottom: '8px' }}
+                >
+                  Message the owner
+                </a>
+                <p style={{ fontSize: '11px', color: '#7a7060', textAlign: 'center', margin: 0 }}>
+                  Questions? <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a>
+                </p>
+              </div>
+            )}
+
+            {/* Payment confirmed banner — for purchases (not rentals) */}
+            {!isRental && order && !confirmDone && (
               <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
                 <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '6px' }}>Payment confirmed</p>
                 <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: 1.5, marginBottom: '12px' }}>
@@ -532,7 +612,7 @@ export default function ListingPage() {
                 </p>
               </div>
             )}
-            {confirmDone && (
+            {!isRental && confirmDone && (
               <div style={{ background: '#F0F7F0', border: '1px solid rgba(42,106,42,0.2)', borderRadius: '10px', padding: '14px', marginBottom: '14px' }}>
                 <p style={{ fontSize: '13px', fontWeight: 700, color: '#2a6a2a', marginBottom: '4px' }}>Receipt confirmed — thank you!</p>
                 <p style={{ fontSize: '13px', color: '#3a3428', margin: 0 }}>The seller will receive their payment shortly.</p>
@@ -540,7 +620,7 @@ export default function ListingPage() {
             )}
 
             {/* Buy now + offer + ask seller — buyer only, pre-purchase */}
-            {!listing.sold && !order && currentUser && currentUser.id !== listing.user_id && (
+            {!listing.sold && !(order && !isRental) && !rentalBooking && currentUser && currentUser.id !== listing.user_id && (
               <>
                 {/* Buy now — sell */}
                 {!isRental && !isService && (
@@ -617,8 +697,8 @@ export default function ListingPage() {
               </>
             )}
 
-            {/* Message after purchase */}
-            {order && currentUser && currentUser.id !== listing.user_id && (
+            {/* Message after purchase — for non-rentals only */}
+            {!isRental && order && currentUser && currentUser.id !== listing.user_id && (
               <div>
                 {messageSent && <p className={`form-message ${messageSent.startsWith('Error') ? 'error' : 'success'}`} style={{ marginBottom: '8px' }}>{messageSent}</p>}
                 <textarea className="form-input form-textarea" placeholder="Write a message to the seller..." value={message} onChange={e => setMessage(e.target.value)} style={{ marginBottom: '8px' }} />
