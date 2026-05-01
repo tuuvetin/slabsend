@@ -3,7 +3,6 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
-import { SUPPORTED_COUNTRIES } from '@/app/lib/countries'
 
 const categories: Record<string, string[]> = {
   'Clothing': ['T-Shirts', 'Hoodies', 'Pants', 'Shorts', 'Jackets', 'Other clothing'],
@@ -34,8 +33,6 @@ const ALL_TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
   const m = i % 2 === 0 ? '00' : '30'
   return `${h}:${m}`
 })
-
-const europeanCountries = SUPPORTED_COUNTRIES
 
 const citiesByCountry: Record<string, string[]> = {
   'Austria': ['Vienna','Graz','Linz','Salzburg','Innsbruck','Klagenfurt','Villach','Wels','St. Pölten','Dornbirn'],
@@ -71,6 +68,9 @@ const citiesByCountry: Record<string, string[]> = {
   'Switzerland': ['Zurich','Geneva','Basel','Bern','Lausanne','Winterthur','Lucerne','St. Gallen','Lugano','Biel'],
   'United Kingdom': ['London','Birmingham','Leeds','Glasgow','Sheffield','Bradford','Edinburgh','Liverpool','Manchester','Bristol','Wakefield','Cardiff','Coventry','Nottingham','Leicester','Aberdeen','Belfast','Newcastle','Brighton','Plymouth'],
 }
+
+// All EU/EEA countries — used for rent listings (pickup only, no shipping restriction)
+const EU_COUNTRIES = Object.keys(citiesByCountry).sort()
 
 const packageSizes = [
     { value: 'S', label: 'Small', desc: 'Fits in a large envelope' },
@@ -433,7 +433,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
             style={{ marginBottom: 0 }}
           >
             <option value="">Select country</option>
-            {europeanCountries.map(c => <option key={c} value={c}>{c}</option>)}
+            {EU_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         ) : (
           <div className="form-input" style={{ marginBottom: 0, background: '#f0ede3', color: '#7a7060', display: 'flex', alignItems: 'center', cursor: 'not-allowed' }}>
