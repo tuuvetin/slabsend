@@ -12,6 +12,7 @@ interface Props {
   monthlyDiscountPct?: number
   pickupHoursFrom?: string
   pickupHoursTo?: string
+  securityDeposit?: number
 }
 
 function getTimeSlots(from: string, to: string): string[] {
@@ -45,7 +46,7 @@ function dateStr(year: number, month: number, day: number) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, isOwner, currentUserId, weeklyDiscountPct = 0, monthlyDiscountPct = 0, pickupHoursFrom = '09:00', pickupHoursTo = '20:00' }: Props) {
+export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, isOwner, currentUserId, weeklyDiscountPct = 0, monthlyDiscountPct = 0, pickupHoursFrom = '09:00', pickupHoursTo = '20:00', securityDeposit = 0 }: Props) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
@@ -341,6 +342,16 @@ export default function RentalCalendar({ listingId, pricePerDay, rentalPeriod, i
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 700, color: '#1a1408', borderTop: '1px solid rgba(26,20,8,0.08)', paddingTop: '8px', marginTop: '4px' }}>
                     <span>Total</span><span>{(total * 1.10).toFixed(2)} €</span>
                   </div>
+                  {securityDeposit > 0 && (
+                    <div style={{ marginTop: '10px', padding: '10px 12px', background: '#fff8f0', border: '1px solid rgba(180,100,0,0.15)', borderRadius: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 700, color: '#9a6030' }}>
+                        <span>Security deposit</span><span>{securityDeposit} €</span>
+                      </div>
+                      <p style={{ fontSize: '11px', color: '#7a7060', margin: '4px 0 0', lineHeight: 1.5 }}>
+                        Paid directly to owner at pickup — returned when item is returned in good condition.
+                      </p>
+                    </div>
+                  )}
                   <button
                     className="form-submit"
                     onClick={handleBooking}

@@ -122,6 +122,7 @@ export default function NewListingPage() {
   const [pickupHoursTo, setPickupHoursTo] = useState('20:00')
   const [weeklyDiscountPct, setWeeklyDiscountPct] = useState(0)
   const [monthlyDiscountPct, setMonthlyDiscountPct] = useState(0)
+  const [securityDeposit, setSecurityDeposit] = useState('')
 
   // Crop state
   const [cropQueue, setCropQueue] = useState<{ file: File; src: string }[]>([])
@@ -281,6 +282,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       pickup_hours_to: listingType === 'rent' ? pickupHoursTo : null,
       weekly_discount_pct: listingType === 'rent' ? weeklyDiscountPct : null,
       monthly_discount_pct: listingType === 'rent' ? monthlyDiscountPct : null,
+      security_deposit: listingType === 'rent' && securityDeposit ? parseFloat(securityDeposit) : null,
     }).select('id').single()
 
     setLoading(false)
@@ -296,6 +298,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       setPickupLocation('')
       setWeeklyDiscountPct(0)
       setMonthlyDiscountPct(0)
+      setSecurityDeposit('')
     }
   }
 
@@ -396,6 +399,24 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
               {monthlyDiscountPct > 0 && `30+ days: ${monthlyDiscountPct}% off`}
             </p>
           )}
+
+          <div style={{ marginTop: '16px' }}>
+            <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '6px' }}>Security deposit (optional)</p>
+            <p style={{ fontSize: '12px', color: '#7a7060', marginBottom: '8px', lineHeight: 1.5 }}>
+              Renter pays this directly to you at pickup. Returned when item is returned in good condition.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input
+                type="number"
+                min="0"
+                placeholder="0"
+                value={securityDeposit}
+                onChange={e => setSecurityDeposit(e.target.value)}
+                style={{ fontSize: '14px', width: '100px', padding: '7px 10px', background: '#fff', border: '1px solid rgba(26,20,8,0.18)', borderRadius: '6px', color: '#1a1408', textAlign: 'right' }}
+              />
+              <span style={{ fontSize: '14px', color: '#7a7060' }}>€</span>
+            </div>
+          </div>
         </div>
       )}
 

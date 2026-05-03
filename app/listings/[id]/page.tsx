@@ -496,11 +496,17 @@ export default function ListingPage() {
             </div>
           )}
 
-          {/* Rental pickup info */}
-          {isRental && (listing.pickup_location || listing.pickup_hours_from) && (
+          {/* Rental pickup info + deposit */}
+          {isRental && (listing.pickup_location || listing.pickup_hours_from || listing.security_deposit) && (
             <div style={{ padding: '0 24px 16px', fontSize: '13px', color: '#3a3020', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {listing.pickup_location && <span>Pickup: <strong>{listing.pickup_location}</strong></span>}
               {listing.pickup_hours_from && listing.pickup_hours_to && <span>Hours: <strong>{listing.pickup_hours_from} – {listing.pickup_hours_to}</strong></span>}
+              {listing.security_deposit > 0 && (
+                <span style={{ marginTop: '2px' }}>
+                  Security deposit: <strong>{listing.security_deposit} €</strong>
+                  <span style={{ color: '#7a7060', fontSize: '12px' }}> — paid directly at pickup, returned on return</span>
+                </span>
+              )}
             </div>
           )}
 
@@ -577,6 +583,19 @@ export default function ListingPage() {
                       <tr>
                         <td style={{ fontSize: '12px', color: '#7a7060', padding: '4px 0' }}>Pickup location</td>
                         <td style={{ fontSize: '13px', fontWeight: 600, color: '#1a1408', padding: '4px 0' }}>{listing.pickup_location}</td>
+                      </tr>
+                    )}
+                    {listing.security_deposit > 0 && (
+                      <tr style={{ borderTop: '1px solid rgba(26,20,8,0.08)', marginTop: '4px' }}>
+                        <td style={{ fontSize: '12px', color: '#9a6030', padding: '8px 0 4px', fontWeight: 600 }}>Security deposit</td>
+                        <td style={{ fontSize: '13px', fontWeight: 700, color: '#9a6030', padding: '8px 0 4px' }}>{listing.security_deposit} €</td>
+                      </tr>
+                    )}
+                    {listing.security_deposit > 0 && (
+                      <tr>
+                        <td colSpan={2} style={{ fontSize: '11px', color: '#7a7060', padding: '0 0 6px', lineHeight: 1.5 }}>
+                          Pay this directly to the owner at pickup. Returned when the item is returned in good condition.
+                        </td>
                       </tr>
                     )}
                   </tbody>
@@ -726,6 +745,7 @@ export default function ListingPage() {
               monthlyDiscountPct={listing.monthly_discount_pct || 0}
               pickupHoursFrom={listing.pickup_hours_from || '09:00'}
               pickupHoursTo={listing.pickup_hours_to || '20:00'}
+              securityDeposit={listing.security_deposit || 0}
             />
           )}
 
