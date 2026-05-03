@@ -11,7 +11,7 @@ export default function PrivacyPage() {
         Privacy &amp; Terms
       </h1>
       <p style={{ fontSize: '13px', color: '#9a9080', marginBottom: '40px' }}>
-        Effective date: 1 January 2026 &nbsp;·&nbsp; slabsend.com
+        Effective date: 1 May 2026 &nbsp;·&nbsp; slabsend.com
       </p>
 
       <Section title="1. Terms of Service">
