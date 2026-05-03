@@ -398,11 +398,11 @@ export default function ListingPage() {
           <div style={{ padding: '24px 24px 20px' }}>
 
           {/* Title + status badges */}
-          {(isRental || isService || listing.sold) && (
+          {(isRental || isService || (listing.sold && !isRental)) && (
             <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', flexWrap: 'wrap' }}>
               {isRental && <span className="listing-rental-badge">For rent</span>}
               {isService && <span className="listing-rental-badge" style={{ background: '#1a1408', color: '#FC7038' }}>Service</span>}
-              {listing.sold && <span className="listing-rental-badge" style={{ background: '#aa2200', color: '#fff' }}>Sold</span>}
+              {listing.sold && !isRental && <span className="listing-rental-badge" style={{ background: '#aa2200', color: '#fff' }}>Sold</span>}
             </div>
           )}
           <h1 className="listing-detail-title" style={{ marginBottom: '16px' }}>{listing.title}</h1>

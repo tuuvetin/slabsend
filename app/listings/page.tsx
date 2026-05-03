@@ -91,7 +91,7 @@ export default async function ListingsPage({
           return (
             <div key={listing.id} style={{ position: 'relative' }}>
               <a href={`/listings/${listing.id}`} className="listing-card-link">
-              <div className="listing-card" style={listing.sold ? { opacity: 0.6 } : undefined}>
+              <div className="listing-card" style={listing.sold && listing.listing_type !== 'rent' ? { opacity: 0.6 } : undefined}>
                 <div style={{ position: 'relative' }}>
                   {listing.images && listing.images.length > 0 ? (
                     <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
@@ -101,10 +101,10 @@ export default async function ListingsPage({
                   <FavoriteButton listingId={listing.id} initialFavorited={favoriteIds.has(String(listing.id))} />
                 </div>
                 <div className="listing-card-body">
-                  {listing.sold && (
+                  {listing.sold && listing.listing_type !== 'rent' && (
                     <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#fff', background: '#aa2200', display: 'inline-block', padding: '2px 8px', borderRadius: 4, marginBottom: 6 }}>Sold</p>
                   )}
-                  {!listing.sold && listing.listing_type === 'rent' && (
+                  {listing.listing_type === 'rent' && (
                     <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#F5F3E6', background: '#5a7a84', display: 'inline-block', padding: '2px 8px', borderRadius: 4, marginBottom: 6 }}>Rent</p>
                   )}
                   <h3 className="listing-card-title">{listing.title}</h3>
@@ -116,7 +116,9 @@ export default async function ListingsPage({
                   <p className="listing-card-price">
                     {listing.listing_type === 'service'
                       ? (listing.price ? `from ${listing.price} €` : '')
-                      : `${listing.price} €${listing.listing_type === 'rent' && listing.rental_period ? `/${listing.rental_period}` : ''}`
+                      : listing.price
+                        ? `${listing.price} €${listing.listing_type === 'rent' && listing.rental_period ? `/${listing.rental_period}` : ''}`
+                        : ''
                     }
                   </p>
                   {listing.listing_type !== 'rent' && listing.listing_type !== 'service' && listing.price && (
