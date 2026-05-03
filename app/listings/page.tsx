@@ -23,7 +23,9 @@ export default async function ListingsPage({
   const isAdmin = ADMIN_EMAILS.includes(user?.email || '')
 
   let query = supabase.from('listings').select('*').order('created_at', { ascending: false })
-  if (!isAdmin) query = query.neq('sold', true)
+  // Rentals are never truly "sold" — show them regardless of sold flag
+  // Regular sell/service listings are hidden when sold (unless admin)
+  if (!isAdmin) query = query.or('sold.neq.true,listing_type.eq.rent')
 
   const { data: listings } = await query
 
