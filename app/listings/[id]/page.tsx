@@ -64,28 +64,25 @@ export default function ListingPage() {
 
       const { data } = await supabase.from('listings').select('*').eq('id', params.id).single()
 
-      if (!data || (data.sold && !user)) {
+      if (!data) {
         window.location.href = '/listings'
         return
       }
 
-      if (data.sold && !data.listing_type || (data.sold && data.listing_type !== 'rent')) {
-        if (user) {
-          const isAdmin = ADMINS.includes(user.email || '')
-          const isSellerOfThis = data.user_id === user.id
-          const { data: orderData } = await supabase
-            .from('orders')
-            .select('buyer_id')
-            .eq('listing_id', data.id)
-            .single()
-          const isBuyerOfThis = orderData?.buyer_id === user.id
-          if (!isBuyerOfThis && !isSellerOfThis && !isAdmin) {
+      // Rental listings are always accessible — only calendar dates get blocked
+      // For sold sell/service listings: only buyer, seller or admin can view
+      if (data.sold && data.listing_type !== 'rent') {
+        const isAdmin = user && ADMINS.includes(user.email || '')
+        const isSellerOfThis = user && data.user_id === user.id
+        if (!isAdmin && !isSellerOfThis) {
+          const { data: orderData } = user
+            ? await supabase.from('orders').select('buyer_id').eq('listing_id', data.id).single()
+            : { data: null }
+          const isBuyerOfThis = orderData?.buyer_id === user?.id
+          if (!isBuyerOfThis) {
             window.location.href = '/listings'
             return
           }
-        } else {
-          window.location.href = '/listings'
-          return
         }
       }
 
