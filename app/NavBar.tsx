@@ -86,7 +86,7 @@ export default function NavBar() {
           <a href={user ? '/listings/new' : '/login?returnTo=/listings/new'} className="sb-btn-sell">+ Sell / Rent</a>
           {user
             ? <a href="/profile" className="sb-btn-login">Profile</a>
-            : <a href="/login" className="sb-btn-login">Sign in</a>
+            : <a href={`/login?returnTo=${typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : ''}`} className="sb-btn-login">Sign in</a>
           }
           <button className="sb-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
             <span /><span /><span />
@@ -132,7 +132,7 @@ export default function NavBar() {
         <a href={user ? '/listings/new' : '/login?returnTo=/listings/new'} onClick={() => setMenuOpen(false)} style={{ color: '#FC7038' }}>+ Sell / Rent</a>
         {user
           ? <a href="/profile" onClick={() => setMenuOpen(false)}>Profile</a>
-          : <a href="/login" onClick={() => setMenuOpen(false)}>Sign in</a>
+          : <a href={`/login?returnTo=${typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : ''}`} onClick={() => setMenuOpen(false)}>Sign in</a>
         }
       </div>
     </>

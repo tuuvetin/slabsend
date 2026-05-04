@@ -17,7 +17,7 @@ function LoginContent() {
   const [logoReady, setLogoReady] = useState(false)
   const supabase = createClient()
   const searchParams = useSearchParams()
-  const returnTo = searchParams.get('returnTo') || '/profile'
+  const returnTo = searchParams.get('returnTo') || '/listings'
 
   useEffect(() => {
     const tryLogo = async () => {
@@ -73,7 +73,7 @@ function LoginContent() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`,
       },
     })
     if (error) setMessage(error.message)
