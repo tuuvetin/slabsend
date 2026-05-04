@@ -447,7 +447,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
           <div style={{ marginTop: '16px' }}>
             <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '6px' }}>Security deposit (optional)</p>
             <p style={{ fontSize: '12px', color: '#7a7060', marginBottom: '8px', lineHeight: 1.5 }}>
-              Renter pays this directly to you at pickup. Returned when item is returned in good condition.
+              Renter pays this directly to you at pickup. Return it to the renter when the item is returned in good condition.
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <input
