@@ -281,7 +281,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
     const serviceItems = Object.entries(servicePrices).map(([name, p]) => ({ name, price: parseFloat(p) || 0 }))
     if (listingType === 'service' && serviceItems.length === 0) { setMessage('Please select at least one service type.'); return }
     if (listingType !== 'service' && shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
-    if (listingType === 'sell' && !packageWeight) { setMessage('Please enter the package weight (kg).'); return }
+    if (listingType === 'sell' && subcategory !== 'Crash pads' && !packageWeight) { setMessage('Please enter the package weight (kg).'); return }
     if (listingType !== 'service' && croppedFiles.length === 0) { setMessage('Please add at least one photo of your item.'); return }
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
@@ -588,6 +588,12 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
             Delivery options
           </p>
 
+          {subcategory === 'Crash pads' && (
+            <div style={{ background: '#fff8f0', border: '1px solid rgba(252,112,56,0.3)', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px', fontSize: '13px', color: '#7a4020' }}>
+              🎒 Crash pads are pickup only — too large to ship.
+            </div>
+          )}
+
           {/* PICKUP */}
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '12px' }}>
             <input
@@ -601,11 +607,12 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
             </span>
           </label>
 
-          {/* SHIPPING */}
-          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+          {/* SHIPPING — hidden for crash pads */}
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: subcategory === 'Crash pads' ? 'not-allowed' : 'pointer', opacity: subcategory === 'Crash pads' ? 0.35 : 1 }}>
             <input
               type="checkbox"
-              checked={shippingEnabled}
+              checked={subcategory === 'Crash pads' ? false : shippingEnabled}
+              disabled={subcategory === 'Crash pads'}
               onChange={e => setShippingEnabled(e.target.checked)}
               style={{ width: '18px', height: '18px', accentColor: '#FC7038' }}
             />
