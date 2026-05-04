@@ -170,17 +170,26 @@ export default function ListingPage() {
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this listing?')) return
     setDeleting(true)
-    if (listing.images && listing.images.length > 0) {
-      const paths = listing.images.map((url: string) => {
-        const parts = url.split('/listing-images/')
-        return parts[1] || ''
-      }).filter(Boolean)
-      if (paths.length > 0) await supabase.storage.from('listing-images').remove(paths)
+    if (isAdmin) {
+      // Admin: use server-side API route that bypasses RLS
+      const res = await fetch('/api/admin/delete-listing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingId: listing.id, imageUrls: listing.images || [] }),
+      })
+      const data = await res.json()
+      if (!res.ok) { alert('Error deleting listing: ' + data.error); setDeleting(false); return }
+    } else {
+      if (listing.images && listing.images.length > 0) {
+        const paths = listing.images.map((url: string) => {
+          const parts = url.split('/listing-images/')
+          return parts[1] || ''
+        }).filter(Boolean)
+        if (paths.length > 0) await supabase.storage.from('listing-images').remove(paths)
+      }
+      const { error } = await supabase.from('listings').delete().eq('id', listing.id).eq('user_id', currentUser.id)
+      if (error) { alert('Error deleting listing: ' + error.message); setDeleting(false); return }
     }
-    const isAdmin = ADMINS.includes(currentUser.email || '')
-    const deleteQuery = supabase.from('listings').delete().eq('id', listing.id)
-    const { error } = isAdmin ? await deleteQuery : await deleteQuery.eq('user_id', currentUser.id)
-    if (error) { alert('Error deleting listing: ' + error.message); setDeleting(false); return }
     window.location.href = '/listings'
   }
 
