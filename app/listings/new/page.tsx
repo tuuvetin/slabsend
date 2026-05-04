@@ -179,7 +179,9 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
 
   const handleImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
-    const files = Array.from(e.target.files).slice(0, 5)
+    const remaining = 5 - croppedFiles.length
+    if (remaining <= 0) return
+    const files = Array.from(e.target.files).slice(0, remaining)
     const converted: { file: File; src: string }[] = []
     for (const file of files) {
       let f = file
@@ -195,9 +197,10 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
     }
     setCropQueue(converted)
     setCropIndex(0)
-    setCroppedFiles([])
+    // Don't reset croppedFiles — append to existing ones
     setShowCropper(true)
     setCrop(undefined)
+    if (e.target) e.target.value = ''
   }
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -721,14 +724,25 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       )}
 
       <div className="form-images">
-        <label className="form-label">Photos (max 5)</label>
-        <input type="file" accept="image/*" multiple onChange={handleImages} className="form-file" />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+          <label className="form-label" style={{ margin: 0 }}>Photos</label>
+          <span style={{ fontSize: '12px', color: '#9a9080' }}>{croppedFiles.length}/5</span>
+        </div>
         {croppedFiles.length > 0 && (
-          <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '10px', flexWrap: 'wrap' }}>
             {croppedFiles.map((f, i) => (
-              <img key={i} src={URL.createObjectURL(f)} style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)' }} alt="" />
+              <div key={i} style={{ position: 'relative' }}>
+                <img src={URL.createObjectURL(f)} style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '6px', border: '1px solid rgba(26,20,8,0.15)', display: 'block' }} alt="" />
+                <button
+                  onClick={() => setCroppedFiles(prev => prev.filter((_, idx) => idx !== i))}
+                  style={{ position: 'absolute', top: '-6px', right: '-6px', width: '18px', height: '18px', borderRadius: '50%', background: '#1a1408', color: '#F5F3E6', border: 'none', fontSize: '11px', lineHeight: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}
+                >×</button>
+              </div>
             ))}
           </div>
+        )}
+        {croppedFiles.length < 5 && (
+          <input type="file" accept="image/*" multiple onChange={handleImages} className="form-file" />
         )}
       </div>
 
