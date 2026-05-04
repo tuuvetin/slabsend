@@ -76,7 +76,7 @@ export default function ConversationPage() {
         .select('*')
         .eq('listing_id', listingId)
         .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
-        .in('status', ['paid', 'confirmed'])
+        .in('status', ['paid', 'confirmed', 'label_created'])
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
@@ -306,6 +306,13 @@ export default function ConversationPage() {
             <p style={{ fontSize: '13px', color: '#3a3428', lineHeight: '1.5' }}>
               The buyer has paid. You will receive <strong>{order.amount} €</strong> to your bank account once the buyer confirms receipt or automatically after 48 hours.
             </p>
+            {order.activation_code && (
+              <div style={{ marginTop: '12px', background: '#fff', border: '1px solid rgba(42,106,42,0.25)', borderRadius: '8px', padding: '10px 14px' }}>
+                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#2a6a2a', marginBottom: '4px' }}>Matkahuolto activation code</p>
+                <p style={{ fontSize: '18px', fontWeight: 700, letterSpacing: '0.12em', color: '#3a3428', fontFamily: 'monospace' }}>{order.activation_code}</p>
+                <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '4px' }}>Enter this code at the Matkahuolto parcel machine to send the package.</p>
+              </div>
+            )}
             <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '8px' }}>
               Order #{order.order_number || order.id} · Questions? <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a>
             </p>
