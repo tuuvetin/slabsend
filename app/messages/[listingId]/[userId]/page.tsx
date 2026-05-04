@@ -74,14 +74,25 @@ export default function ConversationPage() {
       const { data: orderData } = await supabase
         .from('orders')
         .select('*')
-        .eq('listing_id', parseInt(listingId as string))
+        .eq('listing_id', listingId)
         .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
         .in('status', ['paid', 'confirmed'])
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
 
-      if (orderData) setOrder(orderData)
+      if (orderData) {
+        setOrder(orderData)
+      } else {
+        // Fallback: check localStorage (set by listing page after payment redirect)
+        const cached = localStorage.getItem(`order_${listingId}`)
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached)
+            if (parsed.status === 'paid') setOrder(parsed)
+          } catch {}
+        }
+      }
       setLoading(false)
 
       const channel = supabase
@@ -209,6 +220,7 @@ export default function ConversationPage() {
       .from('orders')
       .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
       .eq('id', order.id)
+    localStorage.removeItem(`order_${listingId}`)
     fetch('/api/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
