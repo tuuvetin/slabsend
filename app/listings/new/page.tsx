@@ -131,7 +131,6 @@ export default function NewListingPage() {
   const [addrCity, setAddrCity] = useState('')
   const [addrPhone, setAddrPhone] = useState('')
   const [addrSaving, setAddrSaving] = useState(false)
-  const addrRef = useRef<HTMLDivElement>(null)
 
   // Crop state
   const [cropQueue, setCropQueue] = useState<{ file: File; src: string }[]>([])
@@ -296,7 +295,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       if (!profile?.address_street || !profile?.address_postcode || !profile?.address_city || !profile?.phone) {
         // Show inline address form instead of redirecting
         setShowAddrPrompt(true)
-        setTimeout(() => addrRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
         return
       }
     }
@@ -315,6 +314,45 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
   return (
     <div className="new-listing-page">
       <h1 className="new-listing-title">New listing</h1>
+
+      {/* INLINE ADDRESS PROMPT — shown when seller hasn't set address */}
+      {showAddrPrompt && (
+        <div style={{ background: '#FFF8F0', border: '2px solid #FC7038', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
+          <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '6px' }}>
+            Add your shipping address
+          </p>
+          <p style={{ fontSize: '13px', color: '#7a7060', marginBottom: '14px', lineHeight: 1.5 }}>
+            Needed to generate Matkahuolto labels automatically. Fill this in once — your listing will publish immediately after.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <input className="form-input" placeholder="Street address" value={addrStreet} onChange={e => setAddrStreet(e.target.value)} style={{ marginBottom: 0 }} />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input className="form-input" placeholder="Postal code" value={addrPostcode} onChange={e => setAddrPostcode(e.target.value)} style={{ marginBottom: 0, width: '38%' }} />
+              <input className="form-input" placeholder="City" value={addrCity} onChange={e => setAddrCity(e.target.value)} style={{ marginBottom: 0, flex: 1 }} />
+            </div>
+            <input className="form-input" placeholder="Phone number" value={addrPhone} onChange={e => setAddrPhone(e.target.value)} style={{ marginBottom: 0 }} />
+            <button
+              className="form-submit"
+              disabled={addrSaving || !addrStreet.trim() || !addrPostcode.trim() || !addrCity.trim() || !addrPhone.trim()}
+              style={{ marginTop: '4px', opacity: (!addrStreet.trim() || !addrPostcode.trim() || !addrCity.trim() || !addrPhone.trim()) ? 0.45 : 1 }}
+              onClick={async () => {
+                setAddrSaving(true)
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) { window.location.href = '/login'; return }
+                await supabase.from('profiles').upsert(
+                  { user_id: user.id, address_street: addrStreet.trim(), address_postcode: addrPostcode.trim(), address_city: addrCity.trim(), phone: addrPhone.trim() },
+                  { onConflict: 'user_id' }
+                )
+                setAddrSaving(false)
+                setShowAddrPrompt(false)
+                await publishListing(user)
+              }}
+            >
+              {addrSaving ? 'Saving...' : 'Save & publish listing'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* STRIPE SUCCESS BANNER */}
       {stripeSuccess && (
@@ -693,48 +731,11 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
         )}
       </div>
 
-      {/* Inline address prompt — shown when address is missing on publish */}
-      {showAddrPrompt && (
-        <div ref={addrRef} style={{ background: '#FFF8F0', border: '2px solid #FC7038', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
-          <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '6px' }}>
-            Add your shipping address
-          </p>
-          <p style={{ fontSize: '13px', color: '#7a7060', marginBottom: '14px', lineHeight: 1.5 }}>
-            Needed to generate Matkahuolto labels automatically when you sell. Fill this in once and you're done.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <input className="form-input" placeholder="Street address" value={addrStreet} onChange={e => setAddrStreet(e.target.value)} style={{ marginBottom: 0 }} />
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input className="form-input" placeholder="Postal code" value={addrPostcode} onChange={e => setAddrPostcode(e.target.value)} style={{ marginBottom: 0, width: '38%' }} />
-              <input className="form-input" placeholder="City" value={addrCity} onChange={e => setAddrCity(e.target.value)} style={{ marginBottom: 0, flex: 1 }} />
-            </div>
-            <input className="form-input" placeholder="Phone number" value={addrPhone} onChange={e => setAddrPhone(e.target.value)} style={{ marginBottom: 0 }} />
-          </div>
-        </div>
+      {!showAddrPrompt && (
+        <button className="form-submit" onClick={handleSubmit} disabled={loading}>
+          {loading ? 'Publishing...' : 'Publish listing'}
+        </button>
       )}
-
-      <button className="form-submit" onClick={async () => {
-        if (showAddrPrompt) {
-          if (!addrStreet.trim() || !addrPostcode.trim() || !addrCity.trim() || !addrPhone.trim()) {
-            setMessage('Please fill in all address fields.')
-            return
-          }
-          setAddrSaving(true)
-          const { data: { user } } = await supabase.auth.getUser()
-          if (!user) { window.location.href = '/login'; return }
-          await supabase.from('profiles').upsert(
-            { user_id: user.id, address_street: addrStreet.trim(), address_postcode: addrPostcode.trim(), address_city: addrCity.trim(), phone: addrPhone.trim() },
-            { onConflict: 'user_id' }
-          )
-          setAddrSaving(false)
-          setShowAddrPrompt(false)
-          await publishListing(user)
-        } else {
-          handleSubmit()
-        }
-      }} disabled={loading || addrSaving}>
-        {loading || addrSaving ? 'Publishing...' : showAddrPrompt ? 'Save & publish' : 'Publish listing'}
-      </button>
 
       {message && (
         <p className={`form-message ${message.startsWith('Error') || message.startsWith('Please') || message.startsWith('Täytä') || message.startsWith('Syötä') ? 'error' : 'success'}`}>
