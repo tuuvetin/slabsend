@@ -408,7 +408,7 @@ export default function ProfilePage() {
                 <p style={{ fontSize: '13px', color: '#7a7060', lineHeight: '1.5', marginBottom: '16px' }}>
                   Connect your Stripe account to receive payments when you sell items. This is a one-time setup — you only need to do it once.
                 </p>
-                <button className="form-submit" onClick={handleConnectStripe} disabled={stripeLoading}>
+                <button onClick={handleConnectStripe} disabled={stripeLoading} style={{ width: '100%', background: '#635BFF', color: '#fff', border: 'none', borderRadius: '8px', padding: '13px', fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', opacity: stripeLoading ? 0.7 : 1, transition: 'opacity 0.15s' }}>
                   {stripeLoading ? 'Redirecting...' : 'Connect Stripe →'}
                 </button>
               </>
