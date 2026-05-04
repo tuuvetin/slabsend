@@ -124,6 +124,15 @@ export default function NewListingPage() {
   const [monthlyDiscountPct, setMonthlyDiscountPct] = useState(0)
   const [securityDeposit, setSecurityDeposit] = useState('')
 
+  // Inline address prompt
+  const [showAddrPrompt, setShowAddrPrompt] = useState(false)
+  const [addrStreet, setAddrStreet] = useState('')
+  const [addrPostcode, setAddrPostcode] = useState('')
+  const [addrCity, setAddrCity] = useState('')
+  const [addrPhone, setAddrPhone] = useState('')
+  const [addrSaving, setAddrSaving] = useState(false)
+  const addrRef = useRef<HTMLDivElement>(null)
+
   // Crop state
   const [cropQueue, setCropQueue] = useState<{ file: File; src: string }[]>([])
   const [cropIndex, setCropIndex] = useState(0)
@@ -224,32 +233,9 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
     }
   }
 
-  const handleSubmit = async () => {
-    if (!city.trim()) { setMessage('Please enter a city.'); return }
-    const serviceItems = Object.entries(servicePrices).map(([name, p]) => ({ name, price: parseFloat(p) || 0 }))
-    if (listingType === 'service' && serviceItems.length === 0) { setMessage('Please select at least one service type.'); return }
-    if (listingType !== 'service' && shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
-    if (listingType === 'sell' && !packageWeight) { setMessage('Please enter the package weight (kg).'); return }
-    if (listingType !== 'service' && croppedFiles.length === 0) { setMessage('Please add at least one photo of your item.'); return }
+  const publishListing = async (user: any) => {
     setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { window.location.href = '/login'; return }
-
-    if (listingType !== 'rent') {
-      // Check seller has address and is in a supported country
-      const { data: profile } = await supabase.from('profiles').select('address_street, address_postcode, address_city, phone, country').eq('user_id', user.id).single()
-      if (!profile?.address_street || !profile?.address_postcode || !profile?.address_city || !profile?.phone) {
-        setMessage('Please fill in your home address on your profile page before publishing a listing.')
-        setLoading(false)
-        return
-      }
-      if (profile?.country && profile.country !== 'Finland') {
-        setMessage('Slabsend shipping is currently only available from Finland. Sellers must be based in Finland.')
-        setLoading(false)
-        return
-      }
-    }
-
+    const serviceItems = Object.entries(servicePrices).map(([name, p]) => ({ name, price: parseFloat(p) || 0 }))
     const imageUrls: string[] = []
     for (const image of croppedFiles) {
       const filename = `${user.id}/${Date.now()}-${image.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
@@ -259,7 +245,6 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
         imageUrls.push(data.publicUrl)
       }
     }
-
     const { data: newListing, error } = await supabase.from('listings').insert({
       user_id: user.id, title, description,
       price: listingType === 'service' ? null : (price ? parseInt(price) : null),
@@ -284,22 +269,39 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       monthly_discount_pct: listingType === 'rent' ? monthlyDiscountPct : null,
       ...(listingType === 'rent' ? { security_deposit: securityDeposit ? parseFloat(securityDeposit) : null } : {}),
     }).select('id').single()
-
     setLoading(false)
     if (error) setMessage('Error: ' + error.message)
-    else {
-      window.location.href = `/listings/${newListing.id}?published=true`
-      setTitle(''); setDescription(''); setPrice('')
-      setCountry(''); setCity('')
-      setCategory(''); setSubcategory(''); setCondition('')
-      setServicePrices({})
-      setCroppedFiles([]); setCropQueue([])
-      setShippingEnabled(false); setPickupEnabled(false); setPackageSize(''); setPackageWeight('')
-      setPickupLocation('')
-      setWeeklyDiscountPct(0)
-      setMonthlyDiscountPct(0)
-      setSecurityDeposit('')
+    else window.location.href = `/listings/${newListing.id}?published=true`
+  }
+
+  const handleSubmit = async () => {
+    if (!city.trim()) { setMessage('Please enter a city.'); return }
+    const serviceItems = Object.entries(servicePrices).map(([name, p]) => ({ name, price: parseFloat(p) || 0 }))
+    if (listingType === 'service' && serviceItems.length === 0) { setMessage('Please select at least one service type.'); return }
+    if (listingType !== 'service' && shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
+    if (listingType === 'sell' && !packageWeight) { setMessage('Please enter the package weight (kg).'); return }
+    if (listingType !== 'service' && croppedFiles.length === 0) { setMessage('Please add at least one photo of your item.'); return }
+    setLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { window.location.href = '/login'; return }
+    setLoading(false)
+
+    if (listingType !== 'rent') {
+      // Check seller has address and is in a supported country
+      const { data: profile } = await supabase.from('profiles').select('address_street, address_postcode, address_city, phone, country').eq('user_id', user.id).single()
+      if (profile?.country && profile.country !== 'Finland') {
+        setMessage('Slabsend shipping is currently only available from Finland. Sellers must be based in Finland.')
+        return
+      }
+      if (!profile?.address_street || !profile?.address_postcode || !profile?.address_city || !profile?.phone) {
+        // Show inline address form instead of redirecting
+        setShowAddrPrompt(true)
+        setTimeout(() => addrRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50)
+        return
+      }
     }
+
+    await publishListing(user)
   }
 
   const priceLabel = listingType === 'rent'
@@ -691,8 +693,47 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
         )}
       </div>
 
-      <button className="form-submit" onClick={handleSubmit} disabled={loading}>
-        {loading ? 'Publishing...' : 'Publish listing'}
+      {/* Inline address prompt — shown when address is missing on publish */}
+      {showAddrPrompt && (
+        <div ref={addrRef} style={{ background: '#FFF8F0', border: '2px solid #FC7038', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
+          <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408', marginBottom: '6px' }}>
+            Add your shipping address
+          </p>
+          <p style={{ fontSize: '13px', color: '#7a7060', marginBottom: '14px', lineHeight: 1.5 }}>
+            Needed to generate Matkahuolto labels automatically when you sell. Fill this in once and you're done.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <input className="form-input" placeholder="Street address" value={addrStreet} onChange={e => setAddrStreet(e.target.value)} style={{ marginBottom: 0 }} />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input className="form-input" placeholder="Postal code" value={addrPostcode} onChange={e => setAddrPostcode(e.target.value)} style={{ marginBottom: 0, width: '38%' }} />
+              <input className="form-input" placeholder="City" value={addrCity} onChange={e => setAddrCity(e.target.value)} style={{ marginBottom: 0, flex: 1 }} />
+            </div>
+            <input className="form-input" placeholder="Phone number" value={addrPhone} onChange={e => setAddrPhone(e.target.value)} style={{ marginBottom: 0 }} />
+          </div>
+        </div>
+      )}
+
+      <button className="form-submit" onClick={async () => {
+        if (showAddrPrompt) {
+          if (!addrStreet.trim() || !addrPostcode.trim() || !addrCity.trim() || !addrPhone.trim()) {
+            setMessage('Please fill in all address fields.')
+            return
+          }
+          setAddrSaving(true)
+          const { data: { user } } = await supabase.auth.getUser()
+          if (!user) { window.location.href = '/login'; return }
+          await supabase.from('profiles').upsert(
+            { user_id: user.id, address_street: addrStreet.trim(), address_postcode: addrPostcode.trim(), address_city: addrCity.trim(), phone: addrPhone.trim() },
+            { onConflict: 'user_id' }
+          )
+          setAddrSaving(false)
+          setShowAddrPrompt(false)
+          await publishListing(user)
+        } else {
+          handleSubmit()
+        }
+      }} disabled={loading || addrSaving}>
+        {loading || addrSaving ? 'Publishing...' : showAddrPrompt ? 'Save & publish' : 'Publish listing'}
       </button>
 
       {message && (
