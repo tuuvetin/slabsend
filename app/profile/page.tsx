@@ -61,8 +61,10 @@ export default function ProfilePage() {
           }
         }
         if (data) {
-          setUsername(data.username || metaUsername)
-          setUsernameSet(!!(data.username || metaUsername))
+          const resolvedUsername = data.username || metaUsername
+          setUsername(resolvedUsername)
+          // If username looks like an email, treat as not set so user can fix it
+          setUsernameSet(!!(resolvedUsername) && !resolvedUsername.includes('@'))
           setFullName(data.full_name || '')
           setLocation(data.location || '')
           setCountry(data.country || '')
@@ -301,12 +303,17 @@ export default function ProfilePage() {
           <h2 className="profile-section-title">Account settings</h2>
 
           {/* USERNAME — lukittu jos jo asetettu */}
+          {username.includes('@') && (
+            <div style={{ background: '#fff8f0', border: '1px solid rgba(252,112,56,0.4)', borderRadius: '8px', padding: '10px 14px', marginBottom: '8px', fontSize: '13px', color: '#7a4020' }}>
+              ⚠️ Your username is currently your email address. Please set a proper username below.
+            </div>
+          )}
           <div style={{ position: 'relative' }}>
             <input
               className="form-input"
               placeholder="Username"
               value={username}
-              onChange={e => !usernameSet && setUsername(e.target.value)}
+              onChange={e => !usernameSet && setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
               readOnly={usernameSet}
               style={{ opacity: usernameSet ? 0.6 : 1, cursor: usernameSet ? 'not-allowed' : 'text' }}
             />
