@@ -282,7 +282,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       pickup_hours_to: listingType === 'rent' ? pickupHoursTo : null,
       weekly_discount_pct: listingType === 'rent' ? weeklyDiscountPct : null,
       monthly_discount_pct: listingType === 'rent' ? monthlyDiscountPct : null,
-      security_deposit: listingType === 'rent' && securityDeposit ? parseFloat(securityDeposit) : null,
+      ...(listingType === 'rent' ? { security_deposit: securityDeposit ? parseFloat(securityDeposit) : null } : {}),
     }).select('id').single()
 
     setLoading(false)
