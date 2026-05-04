@@ -83,7 +83,7 @@ export default function NavBar() {
 
         {/* DESKTOP RIGHT */}
         <div className="sb-nav-right">
-          <a href="/listings/new" className="sb-btn-sell">+ Sell / Rent</a>
+          <a href={user ? '/listings/new' : '/login?returnTo=/listings/new'} className="sb-btn-sell">+ Sell / Rent</a>
           {user
             ? <a href="/profile" className="sb-btn-login">Profile</a>
             : <a href="/login" className="sb-btn-login">Sign in</a>
@@ -106,7 +106,7 @@ export default function NavBar() {
               }} />
             )}
           </a>
-          <a href="/listings/new" style={{ fontWeight: 400, fontSize: '18px', color: '#F5F3E6', background: '#FC7038', textDecoration: 'none', width: '26px', height: '26px', borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>+</a>
+          <a href={user ? '/listings/new' : '/login?returnTo=/listings/new'} style={{ fontWeight: 400, fontSize: '18px', color: '#F5F3E6', background: '#FC7038', textDecoration: 'none', width: '26px', height: '26px', borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>+</a>
           <button className="sb-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
             <span /><span /><span />
           </button>
@@ -129,7 +129,7 @@ export default function NavBar() {
           )}
         </a>
         {isAdmin && <a href="/admin" onClick={() => setMenuOpen(false)}>Admin</a>}
-        <a href="/listings/new" onClick={() => setMenuOpen(false)} style={{ color: '#FC7038' }}>+ Sell / Rent</a>
+        <a href={user ? '/listings/new' : '/login?returnTo=/listings/new'} onClick={() => setMenuOpen(false)} style={{ color: '#FC7038' }}>+ Sell / Rent</a>
         {user
           ? <a href="/profile" onClick={() => setMenuOpen(false)}>Profile</a>
           : <a href="/login" onClick={() => setMenuOpen(false)}>Sign in</a>

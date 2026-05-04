@@ -75,7 +75,7 @@ export default async function ListingsPage({
               : 'No listings yet. Be the first to add one!'}
           </p>
           <a
-            href="/listings/new"
+            href={user ? '/listings/new' : '/login?returnTo=/listings/new'}
             style={{ display: 'inline-block', background: '#FC7038', color: '#fff', fontWeight: 700, fontSize: '13px', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '11px 22px', borderRadius: '8px', textDecoration: 'none' }}
           >
             Add listing
