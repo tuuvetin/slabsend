@@ -575,8 +575,9 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
   .search-field-sub { order: 4; flex: 1 1 50% !important; }
   .search-field-loc { order: 5; flex: 1 1 50% !important; border-right: none !important; }
   .search-field-label { display: none !important; }
-  .listing-detail-grid { grid-template-columns: 1fr; gap: 24px; }
-  .listing-detail-page { padding: 20px 16px 40px; }
+  .listing-detail-grid { grid-template-columns: 1fr; gap: 24px; min-width: 0; }
+  .listing-detail-grid > * { min-width: 0; }
+  .listing-detail-page { padding: 20px 16px 40px; overflow-x: hidden; }
   .listing-detail-info { position: static; }
   .profile-grid { grid-template-columns: 1fr; gap: 32px; }
   .profile-page { padding: 24px 16px 40px; }

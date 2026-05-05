@@ -10,6 +10,10 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
 
+  const returnTo = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('returnTo') || '/listings'
+    : '/listings'
+
   useEffect(() => {
     // Redirect to login if not authenticated
     supabase.auth.getUser().then(({ data }) => {
@@ -49,7 +53,7 @@ export default function OnboardingPage() {
       return
     }
 
-    window.location.href = '/profile'
+    window.location.href = returnTo
   }
 
   const isError = message.toLowerCase().includes('required') ||

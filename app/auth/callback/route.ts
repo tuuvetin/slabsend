@@ -20,7 +20,11 @@ export async function GET(request: Request) {
 
       if (!profile?.username) {
         // New OAuth user — needs to set up username + country
-        return NextResponse.redirect(`${origin}/onboarding`)
+        // Pass returnTo so onboarding can redirect there after completion
+        const onboardingUrl = returnTo !== '/listings'
+          ? `${origin}/onboarding?returnTo=${encodeURIComponent(returnTo)}`
+          : `${origin}/onboarding`
+        return NextResponse.redirect(onboardingUrl)
       }
 
       return NextResponse.redirect(`${origin}${returnTo}`)
