@@ -278,6 +278,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
 
   const handleSubmit = async () => {
     if (!city.trim()) { setMessage('Please enter a city.'); return }
+    if (listingType !== 'service' && (!price || parseFloat(price) < 1)) { setMessage('Minimum price is 1 €.'); return }
     const serviceItems = Object.entries(servicePrices).map(([name, p]) => ({ name, price: parseFloat(p) || 0 }))
     if (listingType === 'service' && serviceItems.length === 0) { setMessage('Please select at least one service type.'); return }
     if (listingType !== 'service' && shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
