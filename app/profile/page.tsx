@@ -20,6 +20,7 @@ export default function ProfilePage() {
   const [message, setMessage] = useState('')
   const [listings, setListings] = useState<any[]>([])
   const [favorites, setFavorites] = useState<any[]>([])
+  const [purchases, setPurchases] = useState<any[]>([])
   const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null)
   const [stripeLoading, setStripeLoading] = useState(false)
   const [newPassword, setNewPassword] = useState('')
@@ -86,6 +87,20 @@ export default function ProfilePage() {
       supabase.from('listings').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).then(({ data }) => {
         setListings(data || [])
       })
+
+      // Ostohistoria — näytetään 6 kuukauden ajalta
+      const sixMonthsAgo = new Date()
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
+      supabase
+        .from('orders')
+        .select('*, listings(id, title, images, price, listing_type, location)')
+        .eq('buyer_id', user.id)
+        .in('status', ['paid', 'confirmed', 'label_created'])
+        .gte('created_at', sixMonthsAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .then(({ data }) => {
+          setPurchases(data || [])
+        })
 
       supabase.from('favorites').select('listing_id').eq('user_id', user.id).order('created_at', { ascending: false }).then(async ({ data: favData }) => {
         const ids = (favData || []).map((f: any) => f.listing_id)
@@ -508,6 +523,48 @@ export default function ProfilePage() {
               ))}
             </div>
           </div>
+
+          {purchases.length > 0 && (
+            <div className="profile-section">
+              <h2 className="profile-section-title">My purchases</h2>
+              <div className="profile-listings">
+                {purchases.map((order: any) => {
+                  const listing = order.listings
+                  if (!listing) return null
+                  return (
+                    <a key={order.id} href={`/messages/${listing.id}/${order.seller_id}`} className="profile-listing-link">
+                      <div className="profile-listing-card">
+                        {listing.images && listing.images.length > 0 ? (
+                          <img src={listing.images[0]} alt={listing.title} className="profile-listing-img" />
+                        ) : (
+                          <div className="profile-listing-no-img" />
+                        )}
+                        <div className="profile-listing-info">
+                          <p className="profile-listing-title">{listing.title}</p>
+                          <p className="profile-listing-meta">
+                            {order.amount} € · {new Date(order.created_at).toLocaleDateString('fi-FI')}
+                          </p>
+                          <span style={{
+                            fontSize: '10px',
+                            padding: '2px 8px',
+                            borderRadius: '99px',
+                            background: order.status === 'confirmed' ? '#e6f4ea' : '#fff8f0',
+                            color: order.status === 'confirmed' ? '#2a6a2a' : '#7a4020',
+                            fontWeight: 600,
+                            display: 'inline-block',
+                            marginTop: '4px',
+                          }}>
+                            {order.status === 'confirmed' ? 'Completed' : 'In progress'}
+                          </span>
+                        </div>
+                      </div>
+                    </a>
+                  )
+                })}
+              </div>
+              <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '10px' }}>Purchases from the last 6 months.</p>
+            </div>
+          )}
 
         </div>
 
