@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const [listings, setListings] = useState<any[]>([])
   const [favorites, setFavorites] = useState<any[]>([])
   const [purchases, setPurchases] = useState<any[]>([])
+  const [sales, setSales] = useState<any[]>([])
   const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null)
   const [stripeLoading, setStripeLoading] = useState(false)
   const [newPassword, setNewPassword] = useState('')
@@ -101,6 +102,16 @@ export default function ProfilePage() {
         .then(({ data }) => {
           setPurchases(data || [])
         })
+
+      // Myyntihistoria — 6 kuukauden ajalta
+      supabase
+        .from('orders')
+        .select('id, amount, created_at, status, listing_id, listings(title, images)')
+        .eq('seller_id', user.id)
+        .in('status', ['paid', 'confirmed', 'label_created'])
+        .gte('created_at', sixMonthsAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .then(({ data }) => setSales(data || []))
 
       supabase.from('favorites').select('listing_id').eq('user_id', user.id).order('created_at', { ascending: false }).then(async ({ data: favData }) => {
         const ids = (favData || []).map((f: any) => f.listing_id)
@@ -563,6 +574,47 @@ export default function ProfilePage() {
                 })}
               </div>
               <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '10px' }}>Purchases from the last 6 months.</p>
+            </div>
+          )}
+
+          {sales.length > 0 && (
+            <div className="profile-section">
+              <h2 className="profile-section-title">Sales</h2>
+              {/* Stats row */}
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '16px' }}>
+                <div style={{ background: '#fff', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '10px 16px', flex: 1, textAlign: 'center' }}>
+                  <p style={{ fontSize: '20px', fontWeight: 800, color: '#3a3428', margin: 0 }}>{sales.length}</p>
+                  <p style={{ fontSize: '11px', color: '#7a7060', margin: 0 }}>items sold</p>
+                </div>
+                <div style={{ background: '#fff', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '10px 16px', flex: 1, textAlign: 'center' }}>
+                  <p style={{ fontSize: '20px', fontWeight: 800, color: '#3a3428', margin: 0 }}>
+                    {sales.reduce((sum: number, o: any) => sum + (o.amount || 0), 0).toFixed(0)} €
+                  </p>
+                  <p style={{ fontSize: '11px', color: '#7a7060', margin: 0 }}>earned</p>
+                </div>
+              </div>
+              {/* Compact list */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                {sales.map((order: any) => {
+                  const listing = order.listings
+                  return (
+                    <a key={order.id} href={`/listings/${order.listing_id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 4px', borderBottom: '1px solid rgba(26,20,8,0.07)' }}>
+                      {listing?.images?.[0] ? (
+                        <img src={listing.images[0]} alt="" style={{ width: '36px', height: '36px', borderRadius: '6px', objectFit: 'cover', flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: '36px', height: '36px', borderRadius: '6px', background: '#e8e4d8', flexShrink: 0 }} />
+                      )}
+                      <p style={{ flex: 1, fontSize: '13px', fontWeight: 600, color: '#3a3428', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {listing?.title || '—'}
+                      </p>
+                      <p style={{ fontSize: '13px', color: '#7a7060', margin: 0, flexShrink: 0 }}>
+                        {order.amount} € · {new Date(order.created_at).toLocaleDateString('fi-FI')}
+                      </p>
+                    </a>
+                  )
+                })}
+              </div>
+              <p style={{ fontSize: '11px', color: '#7a7060', marginTop: '10px' }}>Sales from the last 6 months.</p>
             </div>
           )}
 
