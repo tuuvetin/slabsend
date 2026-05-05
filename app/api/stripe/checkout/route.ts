@@ -127,7 +127,7 @@ export async function POST(req: Request) {
     shipping_address_collection: { allowed_countries: allowedCountries },
     shipping_options: shippingOptions,
     phone_number_collection: { enabled: true },
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listingId}?payment=success`,
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment-success?listing=${listingId}`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/listings/${listingId}?payment=cancelled`,
     metadata: {
       listing_id: listingId,
