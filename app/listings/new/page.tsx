@@ -479,7 +479,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
 
       {listingType !== 'service' && (
         <div className="price-input-row">
-          <input className="form-input" placeholder={priceLabel} value={price} onChange={e => setPrice(e.target.value)} type="number" style={{ marginBottom: 0 }} />
+          <input className="form-input" placeholder={priceLabel} value={price} onChange={e => setPrice(e.target.value)} type="number" step="0.01" min="0" style={{ marginBottom: 0 }} />
           {listingType === 'rent' && (
             <span className="price-period-label">€ / day</span>
           )}
