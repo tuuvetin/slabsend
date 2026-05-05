@@ -48,7 +48,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
       {/* HERO */}
       <div className="seller-hero-wrap">
         <div className="seller-hero">
-          {profile?.hero_url && <img src={profile.hero_url} alt="" className="seller-hero-img" />}
+          {profile?.hero_url && <img src={profile.hero_url} alt="" className="seller-hero-img" style={{ objectPosition: `center ${profile.hero_position_y ?? 30}%` }} />}
           <div className="seller-hero-gradient" />
         </div>
         <div className="seller-hero-av-wrap">

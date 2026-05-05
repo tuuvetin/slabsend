@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 import { createClient } from '@/utils/supabase/client'
@@ -31,8 +31,11 @@ export default function ProfilePage() {
   // Profile page customization
   const [bio, setBio] = useState('')
   const [heroUrl, setHeroUrl] = useState('')
+  const [heroPositionY, setHeroPositionY] = useState(30)
   const [heroUploading, setHeroUploading] = useState(false)
   const heroInputRef = useRef<HTMLInputElement>(null)
+  const heroDragRef = useRef<{ dragging: boolean; startY: number; startPos: number }>({ dragging: false, startY: 0, startPos: 30 })
+  const heroPreviewRef = useRef<HTMLDivElement>(null)
 
   // Crop
   const [cropSrc, setCropSrc] = useState<string | null>(null)
@@ -73,6 +76,7 @@ export default function ProfilePage() {
           setAvatarUrl(data.avatar_url || '')
           setBio(data.bio || '')
           setHeroUrl(data.hero_url || '')
+          setHeroPositionY(data.hero_position_y ?? 30)
           setAddressStreet(data.address_street || '')
           setAddressPostcode(data.address_postcode || '')
           setAddressCity(data.address_city || '')
@@ -153,6 +157,7 @@ export default function ProfilePage() {
         address_city: addressCity.trim() || null,
         address_country: 'FI',
         phone: phone.trim() || null,
+        hero_position_y: heroPositionY,
       },
       { onConflict: 'user_id' }
     )
@@ -266,7 +271,7 @@ export default function ProfilePage() {
     if (!error) {
       const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
       const url = `${publicUrl}?t=${Date.now()}`
-      await supabase.from('profiles').upsert({ user_id: user.id, hero_url: url }, { onConflict: 'user_id' })
+      await supabase.from('profiles').upsert({ user_id: user.id, hero_url: url, hero_position_y: heroPositionY }, { onConflict: 'user_id' })
       setHeroUrl(url)
     }
     setHeroUploading(false)
@@ -279,7 +284,7 @@ export default function ProfilePage() {
       {/* HERO */}
       <div className="seller-hero-wrap">
         <div className="seller-hero">
-          {heroUrl && <img src={heroUrl} alt="Cover" className="seller-hero-img" />}
+          {heroUrl && <img src={heroUrl} alt="Cover" className="seller-hero-img" style={{ objectPosition: `center ${heroPositionY}%` }} />}
           <div className="seller-hero-gradient" />
         </div>
         <div className="seller-hero-av-wrap">
@@ -374,25 +379,73 @@ export default function ProfilePage() {
               <p style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', margin: 0 }}>Cover image</p>
               <p style={{ fontSize: '11px', color: '#b0a898', margin: 0 }}>Recommended: 1920 × 400 px</p>
             </div>
-            <div
-              onClick={() => heroInputRef.current?.click()}
-              style={{ width: '100%', height: '110px', borderRadius: '10px', overflow: 'hidden', background: heroUrl ? 'transparent' : '#e8e0d0', border: '2px dashed rgba(26,20,8,0.15)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px', position: 'relative' }}
-            >
-              {heroUrl ? (
-                <>
-                  <img src={heroUrl} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff' }}>
-                      {heroUploading ? 'Uploading...' : 'Change cover'}
-                    </span>
+
+            {heroUrl ? (
+              <>
+                {/* Drag-to-reposition preview — same aspect ratio as actual hero */}
+                <div
+                  ref={heroPreviewRef}
+                  style={{ width: '100%', height: '140px', borderRadius: '10px', overflow: 'hidden', position: 'relative', cursor: 'ns-resize', userSelect: 'none', marginBottom: '4px', border: '2px solid rgba(26,20,8,0.15)' }}
+                  onMouseDown={e => {
+                    heroDragRef.current = { dragging: true, startY: e.clientY, startPos: heroPositionY }
+                  }}
+                  onMouseMove={e => {
+                    if (!heroDragRef.current.dragging || !heroPreviewRef.current) return
+                    const h = heroPreviewRef.current.clientHeight
+                    const delta = e.clientY - heroDragRef.current.startY
+                    const newPos = Math.max(0, Math.min(100, heroDragRef.current.startPos + (delta / h) * -100))
+                    setHeroPositionY(Math.round(newPos))
+                  }}
+                  onMouseUp={() => { heroDragRef.current.dragging = false }}
+                  onMouseLeave={() => { heroDragRef.current.dragging = false }}
+                  onTouchStart={e => {
+                    heroDragRef.current = { dragging: true, startY: e.touches[0].clientY, startPos: heroPositionY }
+                  }}
+                  onTouchMove={e => {
+                    if (!heroDragRef.current.dragging || !heroPreviewRef.current) return
+                    const h = heroPreviewRef.current.clientHeight
+                    const delta = e.touches[0].clientY - heroDragRef.current.startY
+                    const newPos = Math.max(0, Math.min(100, heroDragRef.current.startPos + (delta / h) * -100))
+                    setHeroPositionY(Math.round(newPos))
+                  }}
+                  onTouchEnd={() => { heroDragRef.current.dragging = false }}
+                >
+                  <img src={heroUrl} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: `center ${heroPositionY}%`, pointerEvents: 'none', display: 'block' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.28)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '18px' }}>↕</span>
+                    <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fff' }}>Drag to reposition</span>
                   </div>
-                </>
-              ) : (
+                </div>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '4px' }}>
+                  <button
+                    type="button"
+                    onClick={() => heroInputRef.current?.click()}
+                    style={{ flex: 1, padding: '8px', fontSize: '12px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', background: 'transparent', border: '1px solid rgba(26,20,8,0.2)', borderRadius: '7px', cursor: 'pointer', color: '#3a3428' }}
+                  >
+                    {heroUploading ? 'Uploading...' : 'Change image'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await supabase.from('profiles').upsert({ user_id: user.id, hero_position_y: heroPositionY }, { onConflict: 'user_id' })
+                      setMessage('Cover position saved!')
+                    }}
+                    style={{ flex: 1, padding: '8px', fontSize: '12px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', background: '#3a3428', border: 'none', borderRadius: '7px', cursor: 'pointer', color: '#F5F3E6' }}
+                  >
+                    Save position
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div
+                onClick={() => heroInputRef.current?.click()}
+                style={{ width: '100%', height: '110px', borderRadius: '10px', overflow: 'hidden', background: '#e8e0d0', border: '2px dashed rgba(26,20,8,0.15)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}
+              >
                 <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9a9080' }}>
                   {heroUploading ? 'Uploading...' : '+ Add cover image'}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
             <input ref={heroInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleHeroUpload} />
 
             <textarea
