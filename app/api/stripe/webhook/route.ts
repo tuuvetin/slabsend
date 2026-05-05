@@ -41,7 +41,18 @@ export async function POST(req: Request) {
     const listingId = session.metadata?.listing_id
     const sellerUserId = session.metadata?.seller_user_id
     const buyerId = session.metadata?.buyer_id
-    const buyerEmail = session.customer_details?.email || ''
+    const stripeEmail = session.customer_details?.email || ''
+
+    // Use the buyer's registered Slabsend email, not the Apple Pay / payment email
+    let buyerEmail = stripeEmail
+    if (buyerId) {
+      try {
+        const { data: { user: buyerUser } } = await supabaseAdmin.auth.admin.getUserById(buyerId)
+        if (buyerUser?.email) buyerEmail = buyerUser.email
+      } catch (e) {
+        console.error('Error fetching buyer email:', e)
+      }
+    }
 
     if (!listingId) return NextResponse.json({ received: true })
 
