@@ -146,8 +146,7 @@ export async function createMatkahuoltoShipment(
   // Käytetään testikredentiaaleja jos MATKAHUOLTO_TEST_MODE=true
   // tai jos tuotanto-URL puuttuu
   const testMode =
-    process.env.MATKAHUOLTO_TEST_MODE === 'true' ||
-    !process.env.MATKAHUOLTO_API_URL
+    process.env.MATKAHUOLTO_TEST_MODE === 'true'
 
   const endpoint = testMode
     ? TEST_ENDPOINT
