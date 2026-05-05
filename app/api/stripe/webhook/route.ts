@@ -97,14 +97,14 @@ export async function POST(req: Request) {
     // Shipping zone: derive from buyer's country (covers both shipping_details and customer_details fallback)
     const shippingZone: string = shippingCostCents === 0 ? 'pickup' : (buyerCountry || '')
 
-    // Haetaan ostajan profiiliosoite jos ei tule Stripestä
+    // Haetaan ostajan profiiliosoite — aina, koska Apple Pay ei välttämättä palauta puhelinnumeroa
     let buyerAddressStreet = buyerAddress.line1 || ''
     let buyerAddressPostcode = buyerAddress.postal_code || ''
     let buyerAddressCity = buyerAddress.city || ''
     let buyerPhoneFinal = buyerPhone
     let buyerName = session.customer_details?.name || ''
 
-    if (buyerId && (!buyerAddressStreet || !buyerPhoneFinal)) {
+    if (buyerId) {
       const { data: buyerProfile } = await supabaseAdmin
         .from('profiles')
         .select('address_street, address_postcode, address_city, phone, full_name, username')
@@ -193,7 +193,8 @@ export async function POST(req: Request) {
       const buyerReady =
         buyerAddressStreet &&
         buyerAddressPostcode &&
-        buyerAddressCity
+        buyerAddressCity &&
+        buyerPhoneFinal
 
       console.log('Matkahuolto buyer fields:', {
         street: buyerAddressStreet || '(missing)',
