@@ -193,8 +193,7 @@ export async function POST(req: Request) {
       const buyerReady =
         buyerAddressStreet &&
         buyerAddressPostcode &&
-        buyerAddressCity &&
-        buyerPhoneFinal
+        buyerAddressCity
 
       console.log('Matkahuolto buyer fields:', {
         street: buyerAddressStreet || '(missing)',
