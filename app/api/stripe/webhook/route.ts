@@ -82,9 +82,17 @@ export async function POST(req: Request) {
     // Ostajan osoite Stripe-sessiosta
     // shipping_details is populated when buyer fills in shipping address at checkout
     // fall back to customer_details.address (billing address) if shipping_details is missing
-    const buyerAddress = sessionAny.shipping_details?.address || session.customer_details?.address || {}
+    const shippingAddr = sessionAny.shipping_details?.address
+    const billingAddr = session.customer_details?.address
+    const buyerAddress = shippingAddr || billingAddr || {}
     const buyerPhone = session.customer_details?.phone || ''
     const buyerCountry = buyerAddress.country || ''
+
+    console.log('Stripe session address debug:', {
+      shipping_details: sessionAny.shipping_details,
+      customer_details_address: billingAddr,
+      phone: buyerPhone,
+    })
 
     // Shipping zone: derive from buyer's country (covers both shipping_details and customer_details fallback)
     const shippingZone: string = shippingCostCents === 0 ? 'pickup' : (buyerCountry || '')
@@ -185,8 +193,14 @@ export async function POST(req: Request) {
       const buyerReady =
         buyerAddressStreet &&
         buyerAddressPostcode &&
-        buyerAddressCity &&
-        buyerPhoneFinal
+        buyerAddressCity
+
+      console.log('Matkahuolto buyer fields:', {
+        street: buyerAddressStreet || '(missing)',
+        postcode: buyerAddressPostcode || '(missing)',
+        city: buyerAddressCity || '(missing)',
+        phone: buyerPhoneFinal || '(missing)',
+      })
 
       if (sellerReady && buyerReady) {
         try {
