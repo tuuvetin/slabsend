@@ -249,7 +249,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
     }
     const { data: newListing, error } = await supabase.from('listings').insert({
       user_id: user.id, title, description,
-      price: listingType === 'service' ? null : (price ? parseInt(price) : null),
+      price: listingType === 'service' ? null : (price ? parseFloat(price) : null),
       location: `${city}, ${country}`,
       country, city,
       category: listingType === 'service' ? JSON.stringify(serviceItems) : category,
