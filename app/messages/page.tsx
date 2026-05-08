@@ -100,7 +100,7 @@ export default function MessagesPage() {
 
           return (
             <a key={msg.id} href={`/messages/${msg.listing_id}/${msg.otherUserId}`} className="conversation-link">
-              <div className="conversation-card" style={{ background: hasOrder ? '#f0f7f0' : undefined, borderColor: hasOrder ? 'rgba(42,106,42,0.2)' : undefined }}>
+              <div className="conversation-card" style={{ background: hasOrder ? '#fef3ed' : undefined, borderColor: hasOrder ? 'rgba(252,112,56,0.2)' : undefined }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   {avatarUrl ? (
                     <img src={avatarUrl} alt={displayName} style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(26,20,8,0.1)' }} />

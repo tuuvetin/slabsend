@@ -137,10 +137,12 @@ export default function ConversationPage() {
       listing_id: listingId,
       content,
     })
+    const senderProfile = profiles[currentUser.id]
+    const senderName = senderProfile?.username || senderProfile?.full_name || 'Someone'
     fetch('/api/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'message', recipientId: otherUserId, listingId, preview: content }),
+      body: JSON.stringify({ type: 'message', receiverId: otherUserId, senderId: currentUser.id, senderName, listingTitle: listing?.title || '', listingId, messagePreview: content }),
     })
   }
 
@@ -160,10 +162,12 @@ export default function ConversationPage() {
         content: 'Photo',
         image_url: publicUrl,
       })
+      const senderProfile2 = profiles[currentUser.id]
+      const senderName2 = senderProfile2?.username || senderProfile2?.full_name || 'Someone'
       fetch('/api/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'message', recipientId: otherUserId, listingId, preview: 'Photo' }),
+        body: JSON.stringify({ type: 'message', receiverId: otherUserId, senderId: currentUser.id, senderName: senderName2, listingTitle: listing?.title || '', listingId, messagePreview: '📷 Photo' }),
       })
     } finally {
       setImageUploading(false)
