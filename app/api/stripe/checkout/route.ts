@@ -82,13 +82,8 @@ export async function POST(req: Request) {
       },
     })
   } else {
-    // Default based on profile country, but always show both options
-    // so buyer can change (e.g. Finnish buyer ordering to Sweden)
-    if (isFinland) {
-      shippingOptions.push(FINLAND_OPTION, NORDIC_OPTION)
-    } else {
-      shippingOptions.push(NORDIC_OPTION, FINLAND_OPTION)
-    }
+    // Show only the option matching buyer's profile country
+    shippingOptions.push(isFinland ? FINLAND_OPTION : NORDIC_OPTION)
   }
 
   // Allowed countries: show address collection for all supported countries
