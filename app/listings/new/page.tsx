@@ -258,11 +258,11 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       images: imageUrls,
       listing_type: listingType,
       rental_period: listingType === 'rent' ? 'day' : null,
-      shipping_enabled: listingType === 'sell' ? shippingEnabled : false,
-      pickup_enabled: listingType === 'rent' ? true : (listingType !== 'service' ? pickupEnabled : false),
-      package_size: listingType !== 'service' && shippingEnabled ? packageSize : null,
-      package_weight: listingType !== 'service' && shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
-      weight_kg: listingType !== 'service' && shippingEnabled && packageWeight ? parseFloat(packageWeight) : null,
+      shipping_enabled: listingType === 'sell' ? true : false,
+      pickup_enabled: listingType === 'rent' ? true : false,
+      package_size: listingType === 'sell' ? packageSize : null,
+      package_weight: listingType === 'sell' && packageWeight ? parseFloat(packageWeight) : null,
+      weight_kg: listingType === 'sell' && packageWeight ? parseFloat(packageWeight) : null,
       shipping_from_country: listingType === 'sell' ? 'FI' : null,
       pickup_location: listingType === 'rent' ? pickupLocation : null,
       pickup_hours_from: listingType === 'rent' ? pickupHoursFrom : null,
@@ -281,7 +281,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
     if (listingType !== 'service' && (!price || parseFloat(price) < 1)) { setMessage('Minimum price is 1 €.'); return }
     const serviceItems = Object.entries(servicePrices).map(([name, p]) => ({ name, price: parseFloat(p) || 0 }))
     if (listingType === 'service' && serviceItems.length === 0) { setMessage('Please select at least one service type.'); return }
-    if (listingType !== 'service' && shippingEnabled && !packageSize) { setMessage('Please select a package size.'); return }
+    if (listingType === 'sell' && !packageSize) { setMessage('Please select a package size.'); return }
     if (listingType === 'sell' && subcategory !== 'Crash pads' && !packageWeight) { setMessage('Please enter the package weight (kg).'); return }
     if (listingType !== 'service' && croppedFiles.length === 0) { setMessage('Please add at least one photo of your item.'); return }
     setLoading(true)
@@ -585,73 +585,36 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       {/* DELIVERY OPTIONS */}
       {listingType === 'sell' && (
         <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '12px' }}>
-            Delivery options
+          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '4px' }}>
+            Shipping
+          </p>
+          <p style={{ fontSize: '12px', color: '#7a7060', marginBottom: '14px' }}>
+            All sales ship via Matkahuolto. You'll receive an activation code by email after purchase.
           </p>
 
-          {subcategory === 'Crash pads' && (
-            <div style={{ background: '#fff8f0', border: '1px solid rgba(252,112,56,0.3)', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px', fontSize: '13px', color: '#7a4020' }}>
-              🎒 Crash pads are pickup only — too large to ship.
-            </div>
-          )}
-
-          {/* PICKUP */}
-          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '12px' }}>
-            <input
-              type="checkbox"
-              checked={pickupEnabled}
-              onChange={e => setPickupEnabled(e.target.checked)}
-              style={{ width: '18px', height: '18px', accentColor: '#FC7038' }}
-            />
-            <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
-              Pickup
-            </span>
-          </label>
-
-          {/* SHIPPING — hidden for crash pads */}
-          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: subcategory === 'Crash pads' ? 'not-allowed' : 'pointer', opacity: subcategory === 'Crash pads' ? 0.35 : 1 }}>
-            <input
-              type="checkbox"
-              checked={subcategory === 'Crash pads' ? false : shippingEnabled}
-              disabled={subcategory === 'Crash pads'}
-              onChange={e => setShippingEnabled(e.target.checked)}
-              style={{ width: '18px', height: '18px', accentColor: '#FC7038' }}
-            />
-            <span style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a1408' }}>
-              Shipping
-            </span>
-          </label>
-          <p style={{ fontSize: '12px', color: '#7a7060', marginTop: '6px', marginLeft: '28px' }}>
-            Buyers can choose shipping at checkout. You'll receive a shipping label by email.
+          <p style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
+            Package size
           </p>
-
-          {shippingEnabled && (
-            <div style={{ marginTop: '14px', marginLeft: '28px' }}>
-              <p style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
-                Package size
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                {packageSizes.map(size => (
-                  <button
-                    key={size.value}
-                    onClick={() => setPackageSize(size.value)}
-                    style={{
-                      fontSize: '14px', fontWeight: 700,
-                      letterSpacing: '0.08em', textTransform: 'uppercase',
-                      padding: '14px 10px', borderRadius: '8px', cursor: 'pointer',
-                      border: packageSize === size.value ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)',
-                      background: packageSize === size.value ? '#FC7038' : '#fff',
-                      color: packageSize === size.value ? '#F5F3E6' : '#1a1408',
-                      textAlign: 'center'
-                    }}
-                  >
-                    <div>{size.label}</div>
-                    <div style={{ fontSize: '10px', fontWeight: 400, marginTop: '2px', opacity: 0.8 }}>{size.desc}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+            {packageSizes.map(size => (
+              <button
+                key={size.value}
+                onClick={() => setPackageSize(size.value)}
+                style={{
+                  fontSize: '14px', fontWeight: 700,
+                  letterSpacing: '0.08em', textTransform: 'uppercase',
+                  padding: '14px 10px', borderRadius: '8px', cursor: 'pointer',
+                  border: packageSize === size.value ? '2px solid #FC7038' : '1px solid rgba(26,20,8,0.15)',
+                  background: packageSize === size.value ? '#FC7038' : '#fff',
+                  color: packageSize === size.value ? '#F5F3E6' : '#1a1408',
+                  textAlign: 'center'
+                }}
+              >
+                <div>{size.label}</div>
+                <div style={{ fontSize: '10px', fontWeight: 400, marginTop: '2px', opacity: 0.8 }}>{size.desc}</div>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

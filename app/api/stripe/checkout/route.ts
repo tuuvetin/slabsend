@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   const buyerISO = COUNTRY_NAME_TO_ISO[rawCountry] || (SUPPORTED_COUNTRY_CODES.includes(rawCountry.toUpperCase()) ? rawCountry.toUpperCase() : '')
 
   // Rentals are pickup-only — no country restriction
-  const isPickupOnly = listing.listing_type === 'rent' || (listing.pickup_enabled && listing.shipping_enabled === false)
+  const isPickupOnly = listing.listing_type === 'rent'
 
   // Block buyers from unsupported countries for shipped goods
   if (!isPickupOnly && rawCountry && !buyerISO) {
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
   const shippingOptions: Stripe.Checkout.SessionCreateParams.ShippingOption[] = []
 
-  if (listing.pickup_enabled) {
+  if (listing.listing_type === 'rent') {
     shippingOptions.push({
       shipping_rate_data: {
         type: 'fixed_amount',
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
     })
   }
 
-  if (listing.shipping_enabled !== false) {
+  if (listing.listing_type !== 'rent') {
     // Show Finland option only to Finnish buyers (or unknown as fallback)
     if (isFinland || unknownCountry) {
       shippingOptions.push({
