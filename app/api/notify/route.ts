@@ -13,7 +13,17 @@ export async function POST(req: Request) {
   const { type } = body
 
   if (type === 'message') {
-    const { receiverId, senderName, listingTitle, listingId, messagePreview } = body
+    const { receiverId, senderId, senderName, listingTitle, listingId, messagePreview } = body
+
+    // Lähetetään vain ensimmäisestä viestistä — jos aiempia viestejä on jo, ei lähetetä
+    const { count } = await supabaseAdmin
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('listing_id', listingId)
+      .eq('sender_id', senderId)
+      .eq('receiver_id', receiverId)
+
+    if ((count ?? 0) > 1) return NextResponse.json({ ok: true, skipped: 'not first message' })
 
     // Haetaan vastaanottajan sähköposti
     let receiverEmail = ''
