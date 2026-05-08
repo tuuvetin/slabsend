@@ -186,6 +186,8 @@ export async function createMatkahuoltoShipment(
     }
   }
 
+  console.log('Matkahuolto raw response:', responseText.slice(0, 500))
+
   // Virhevastaus
   const errorNbr = parseXmlTag(responseText, 'ErrorNbr')
   const errorMsg = parseXmlTag(responseText, 'ErrorMsg')
