@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 import FavoriteButton from '@/app/components/FavoriteButton'
 import { parseSearchIntent } from '@/app/lib/searchIntent'
@@ -104,7 +105,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
       {/* HERO */}
       <div className="home-hero-full" style={{height: '640px', minHeight: '640px'}}>
         {!heroError && (
-          <img src={heroImageUrl} alt="Hero" className="home-hero-bg-img" onError={() => setHeroError(true)} fetchPriority="high" loading="eager" />
+          <Image src={heroImageUrl} alt="Hero" className="home-hero-bg-img" fill priority onError={() => setHeroError(true)} style={{ objectFit: 'cover' }} />
         )}
         <svg className="home-topo" viewBox="0 0 1400 640" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
           <rect width="1400" height="640" fill="#3a5460"/>
@@ -208,10 +209,13 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               <a key={cat.key} href={cat.href} className="home-cat-card" style={{ scrollSnapAlign: 'start' }}>
                 <div className="home-cat-img-wrap">
                   {!catErrors[cat.key] ? (
-                    <img
+                    <Image
                       src={catImageUrls[cat.key]}
                       alt={cat.label}
                       className="home-cat-img"
+                      fill
+                      sizes="160px"
+                      style={{ objectFit: 'cover' }}
                       onError={() => setCatErrors(prev => ({ ...prev, [cat.key]: true }))}
                     />
                   ) : (
@@ -310,7 +314,9 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
               <div className="listing-card">
                 <div style={{ position: 'relative' }}>
                   {listing.images && listing.images.length > 0 ? (
-                    <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
+                    <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden' }}>
+                      <Image src={listing.images[0]} alt={listing.title} className="listing-card-img" fill sizes="(max-width: 600px) 50vw, 300px" style={{ objectFit: 'cover' }} />
+                    </div>
                   ) : (
                     <div className="listing-card-no-img">No image</div>
                   )}

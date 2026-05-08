@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import Image from 'next/image'
 import PriceTooltipIcon from '@/app/components/PriceTooltipIcon'
 
 const conditionLabels: Record<string, string> = {
@@ -48,7 +49,7 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
       {/* HERO */}
       <div className="seller-hero-wrap">
         <div className="seller-hero">
-          {profile?.hero_url && <img src={profile.hero_url} alt="" className="seller-hero-img" style={{ objectPosition: `center ${profile.hero_position_y ?? 30}%` }} />}
+          {profile?.hero_url && <Image src={profile.hero_url} alt="" className="seller-hero-img" fill priority style={{ objectFit: 'cover', objectPosition: `center ${profile.hero_position_y ?? 30}%` }} />}
           <div className="seller-hero-gradient" />
         </div>
         <div className="seller-hero-av-wrap">
@@ -105,7 +106,9 @@ export default async function SellerPage({ params }: { params: Promise<{ id: str
             <a key={listing.id} href={`/listings/${listing.id}`} className="listing-card-link">
               <div className="listing-card">
                 {listing.images && listing.images.length > 0 ? (
-                  <img src={listing.images[0]} alt={listing.title} className="listing-card-img" />
+                  <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden' }}>
+                    <Image src={listing.images[0]} alt={listing.title} className="listing-card-img" fill sizes="(max-width: 600px) 50vw, 300px" style={{ objectFit: 'cover' }} />
+                  </div>
                 ) : (
                   <div className="listing-card-no-img">No image</div>
                 )}
