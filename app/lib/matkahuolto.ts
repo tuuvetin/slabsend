@@ -160,6 +160,13 @@ export async function createMatkahuoltoShipment(
     ? (process.env.MATKAHUOLTO_TEST_PASSWORD || '456')
     : (process.env.MATKAHUOLTO_PASSWORD || '')
 
+  console.log('Matkahuolto config:', {
+    testMode,
+    endpoint,
+    userId,
+    passwordSet: !!password,
+  })
+
   const xml = buildShipmentXml(params, userId, password, testMode)
 
   let responseText = ''
