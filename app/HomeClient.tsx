@@ -297,7 +297,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
           {/* Stripe trust line */}
           <p style={{ textAlign: 'center', fontSize: '12px', color: '#9a9080', marginTop: '20px', lineHeight: 1.6 }}>
             Powered by Stripe — buyers are protected until delivery is confirmed.<br />
-            Selling? <a href="/profile" style={{ color: '#FC7038', textDecoration: 'none', fontWeight: 600 }}>Connect Stripe on your profile page</a> to receive payouts directly to your bank.
+            Selling? <a href="/profile" style={{ color: '#FC7038', textDecoration: 'none', fontWeight: 600 }}>Connect Stripe on your profile page</a> to safely receive payouts directly to your bank.
           </p>
         </div>
       </div>
