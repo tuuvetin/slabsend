@@ -365,7 +365,7 @@ function stripeSetupBlock(appUrl: string): string {
   return `
     <div style="background: #fff8f0; border: 1px solid #FC7038; border-radius: 10px; padding: 20px 24px; margin: 24px 0;">
       <p style="font-weight: 700; color: #1a1408; margin: 0 0 8px;">⚡ Set up payments to receive your money</p>
-      <p style="font-size: 14px; color: #3a3020; margin: 0 0 16px;">You haven't connected a bank account yet. It takes 2 minutes — your payment will be held until you complete this.</p>
+      <p style="font-size: 14px; color: #3a3020; margin: 0 0 16px;">You haven't connected a bank account yet. It takes 2 minutes — your payment will be held until you complete this. <strong>You only need to do this once.</strong></p>
       <a href="${appUrl}/profile" style="display: inline-block; background: #FC7038; color: #fff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 10px 22px; border-radius: 8px;">Set up payments →</a>
     </div>
   `
