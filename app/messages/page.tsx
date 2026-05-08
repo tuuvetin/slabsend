@@ -13,10 +13,11 @@ export default function MessagesPage() {
       if (!user) { window.location.href = '/login'; return }
       setCurrentUser(user)
 
+      // Fetch messages + unread in parallel
       const [{ data: messages }, { data: unreadRows }] = await Promise.all([
         supabase
           .from('messages')
-          .select('*')
+          .select('id, sender_id, receiver_id, listing_id, content, image_url, created_at')
           .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
           .order('created_at', { ascending: false }),
         supabase
@@ -26,13 +27,14 @@ export default function MessagesPage() {
           .eq('is_read', false),
       ])
 
-      // Build unread count map: "listingId-senderId" → count
+      // Build unread count map
       const unreadMap: Record<string, number> = {}
       for (const row of unreadRows || []) {
         const key = `${row.listing_id}-${row.sender_id}`
         unreadMap[key] = (unreadMap[key] || 0) + 1
       }
 
+      // Deduplicate to one message per conversation
       const seen = new Set()
       const unique = (messages || []).filter(msg => {
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
@@ -42,25 +44,46 @@ export default function MessagesPage() {
         return true
       })
 
-      const enriched = await Promise.all(unique.map(async msg => {
+      if (unique.length === 0) { setConversations([]); setLoading(false); return }
+
+      // Collect all IDs for batch fetching
+      const listingIds = [...new Set(unique.map(m => m.listing_id))]
+      const otherUserIds = [...new Set(unique.map(m => m.sender_id === user.id ? m.receiver_id : m.sender_id))]
+
+      // Batch fetch listings, profiles, orders in 3 queries total
+      const [{ data: listings }, { data: profiles }, { data: orders }] = await Promise.all([
+        supabase.from('listings').select('id, title, images').in('id', listingIds),
+        supabase.from('profiles').select('user_id, username, full_name, avatar_url').in('user_id', otherUserIds),
+        supabase.from('orders').select('listing_id, buyer_id, seller_id, status')
+          .in('listing_id', listingIds)
+          .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+          .in('status', ['paid', 'confirmed']),
+      ])
+
+      const listingMap: Record<string, any> = {}
+      for (const l of listings || []) listingMap[l.id] = l
+
+      const profileMap: Record<string, any> = {}
+      for (const p of profiles || []) profileMap[p.user_id] = p
+
+      const enriched = unique.map(msg => {
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
+        const order = (orders || []).find(o =>
+          o.listing_id === msg.listing_id &&
+          ((o.buyer_id === user.id && o.seller_id === otherUserId) ||
+           (o.buyer_id === otherUserId && o.seller_id === user.id))
+        ) || null
+        return {
+          ...msg,
+          listing: listingMap[msg.listing_id] || null,
+          profile: profileMap[otherUserId] || null,
+          otherUserId,
+          order,
+          unreadCount: unreadMap[`${msg.listing_id}-${otherUserId}`] || 0,
+        }
+      })
 
-        const [{ data: listing }, { data: profile }, { data: order }] = await Promise.all([
-          supabase.from('listings').select('title, images').eq('id', msg.listing_id).single(),
-          supabase.from('profiles').select('username, full_name, avatar_url').eq('user_id', otherUserId).single(),
-          supabase.from('orders').select('status')
-            .eq('listing_id', msg.listing_id)
-            .or(`and(buyer_id.eq.${user.id},seller_id.eq.${otherUserId}),and(buyer_id.eq.${otherUserId},seller_id.eq.${user.id})`)
-            .in('status', ['paid', 'confirmed'])
-            .maybeSingle(),
-        ])
-
-        const unreadCount = unreadMap[`${msg.listing_id}-${otherUserId}`] || 0
-
-        return { ...msg, listing, profile, otherUserId, order, unreadCount }
-      }))
-
-      // Sort: unread conversations first, then by date
+      // Sort: unread first, then by date
       enriched.sort((a, b) => {
         if (a.unreadCount > 0 && b.unreadCount === 0) return -1
         if (a.unreadCount === 0 && b.unreadCount > 0) return 1
