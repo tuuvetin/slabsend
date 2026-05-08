@@ -1,12 +1,33 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@/utils/supabase/server'
-import { SUPPORTED_COUNTRY_CODES, COUNTRY_NAME_TO_ISO } from '@/app/lib/countries'
+import { COUNTRY_NAME_TO_ISO, SUPPORTED_COUNTRY_CODES } from '@/app/lib/countries'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
-const FINLAND = ['FI']
-const NORDIC_BALTIC = ['EE', 'LV', 'LT', 'SE']
+const FINLAND_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
+  shipping_rate_data: {
+    type: 'fixed_amount',
+    fixed_amount: { amount: 890, currency: 'eur' },
+    display_name: 'Standard shipping — Finland (Matkahuolto)',
+    delivery_estimate: {
+      minimum: { unit: 'business_day', value: 1 },
+      maximum: { unit: 'business_day', value: 3 },
+    },
+  },
+}
+
+const NORDIC_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
+  shipping_rate_data: {
+    type: 'fixed_amount',
+    fixed_amount: { amount: 1490, currency: 'eur' },
+    display_name: 'Standard shipping — Nordic & Baltic',
+    delivery_estimate: {
+      minimum: { unit: 'business_day', value: 3 },
+      maximum: { unit: 'business_day', value: 7 },
+    },
+  },
+}
 
 export async function POST(req: Request) {
   const supabase = await createClient()
@@ -22,23 +43,10 @@ export async function POST(req: Request) {
 
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
 
-  // Resolve buyer's country to ISO-2 code
+  // Resolve buyer's profile country to ISO-2
   const rawCountry = buyerProfile?.address_country || buyerProfile?.country || ''
-  const buyerISO = COUNTRY_NAME_TO_ISO[rawCountry] || (SUPPORTED_COUNTRY_CODES.includes(rawCountry.toUpperCase()) ? rawCountry.toUpperCase() : '')
-
-  // Rentals are pickup-only — no country restriction
-  const isPickupOnly = listing.listing_type === 'rent'
-
-  // Block buyers from unsupported countries for shipped goods
-  if (!isPickupOnly && rawCountry && !buyerISO) {
-    return NextResponse.json({
-      error: 'Slabsend currently ships only to Finland, Sweden, Estonia, Latvia and Lithuania. Your profile country is not supported.',
-    }, { status: 400 })
-  }
-
-  const isFinland = FINLAND.includes(buyerISO)
-  const isNordic = NORDIC_BALTIC.includes(buyerISO)
-  const unknownCountry = !isFinland && !isNordic
+  const buyerISO = COUNTRY_NAME_TO_ISO[rawCountry] || (SUPPORTED_COUNTRY_CODES.includes(rawCountry.toUpperCase()) ? rawCountry.toUpperCase() : 'FI')
+  const isFinland = buyerISO === 'FI'
 
   const commissionRate = 0.10
   const baseAmount = Math.round(amount * 100)
@@ -73,48 +81,14 @@ export async function POST(req: Request) {
         display_name: 'Pickup / Nouto',
       },
     })
-  }
-
-  if (listing.listing_type !== 'rent') {
-    // Show Finland option only to Finnish buyers (or unknown as fallback)
-    if (isFinland || unknownCountry) {
-      shippingOptions.push({
-        shipping_rate_data: {
-          type: 'fixed_amount',
-          fixed_amount: { amount: 890, currency: 'eur' },
-          display_name: 'Standard shipping — Finland (Matkahuolto)',
-          delivery_estimate: {
-            minimum: { unit: 'business_day' as const, value: 1 },
-            maximum: { unit: 'business_day' as const, value: 3 },
-          },
-        },
-      })
+  } else {
+    // Default based on profile country, but always show both options
+    // so buyer can change (e.g. Finnish buyer ordering to Sweden)
+    if (isFinland) {
+      shippingOptions.push(FINLAND_OPTION, NORDIC_OPTION)
+    } else {
+      shippingOptions.push(NORDIC_OPTION, FINLAND_OPTION)
     }
-    // Show Nordic option to non-Finnish buyers (or unknown as fallback)
-    if (isNordic || unknownCountry) {
-      shippingOptions.push({
-        shipping_rate_data: {
-          type: 'fixed_amount',
-          fixed_amount: { amount: 1490, currency: 'eur' },
-          display_name: 'Standard shipping — Nordic & Baltic',
-          delivery_estimate: {
-            minimum: { unit: 'business_day' as const, value: 3 },
-            maximum: { unit: 'business_day' as const, value: 7 },
-          },
-        },
-      })
-    }
-  }
-
-  // Fallback: if nothing resolved, show basic shipping
-  if (shippingOptions.length === 0) {
-    shippingOptions.push({
-      shipping_rate_data: {
-        type: 'fixed_amount',
-        fixed_amount: { amount: 890, currency: 'eur' },
-        display_name: 'Standard shipping (Matkahuolto)',
-      },
-    })
   }
 
   // Allowed countries: show address collection for all supported countries
