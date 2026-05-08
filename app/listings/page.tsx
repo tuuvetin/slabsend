@@ -95,8 +95,8 @@ export default async function ListingsPage({
               <div className="listing-card" style={listing.sold && listing.listing_type !== 'rent' ? { opacity: 0.6 } : undefined}>
                 <div style={{ position: 'relative' }}>
                   {listing.images && listing.images.length > 0 ? (
-                    <div style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden' }}>
-                      <Image src={listing.images[0]} alt={listing.title} className="listing-card-img" fill sizes="(max-width: 600px) 50vw, 300px" style={{ objectFit: 'cover' }} />
+                    <div style={{ position: 'relative', height: '300px', overflow: 'hidden', borderRadius: '10px 10px 0 0' }}>
+                      <Image src={listing.images[0]} alt={listing.title} fill sizes="(max-width: 600px) 50vw, 300px" style={{ objectFit: 'cover', objectPosition: 'top' }} />
                     </div>
                   ) : (
                     <div className="listing-card-no-img">No image</div>
