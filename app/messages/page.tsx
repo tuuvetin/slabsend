@@ -123,7 +123,7 @@ export default function MessagesPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <p className="conversation-listing" style={{ fontWeight: unread > 0 ? 700 : 600, margin: 0, color: unread > 0 ? '#1a1408' : undefined }}>{displayName}</p>
                     {hasOrder && (
-                      <span style={{ background: msg.order.status === 'confirmed' ? '#2a6a2a' : '#FC7038', color: '#fff', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
+                      <span style={{ background: msg.order.status === 'confirmed' ? '#2a6a2a' : '#fde8da', color: msg.order.status === 'confirmed' ? '#fff' : '#c04a10', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
                         {msg.order.status === 'confirmed' ? 'Completed' : 'Awaiting confirmation'}
                       </span>
                     )}
