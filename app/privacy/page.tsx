@@ -126,6 +126,7 @@ export default function PrivacyPage() {
             <li>Subjective dissatisfaction with condition where condition was accurately described</li>
             <li>Damage caused by the buyer after receipt</li>
             <li>Disputes raised more than 21 days after confirmed delivery</li>
+            <li>Shipping fees — the shipping cost is non-refundable in all cases</li>
           </ul>
         </SubSection>
 
