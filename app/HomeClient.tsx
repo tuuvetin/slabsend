@@ -252,7 +252,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', alignItems: 'stretch' }}>
             {/* SELLING */}
-            <div style={{ background: '#F5F4E6', border: '2px solid #FC7038', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#1a1408', border: '2px solid #FC7038', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#FC7038', marginBottom: '18px' }}>For sellers</div>
               <div style={{ flex: 1 }}>
                 {[
@@ -263,8 +263,8 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
                   <div key={s.n} style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
                     <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#FC7038', color: '#fff', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>{s.n}</div>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1408', marginBottom: '2px', letterSpacing: '0.02em' }}>{s.title}</div>
-                      <div style={{ fontSize: '12px', color: '#7a7060', lineHeight: 1.5 }}>{s.desc}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#F5F3E6', marginBottom: '2px', letterSpacing: '0.02em' }}>{s.title}</div>
+                      <div style={{ fontSize: '12px', color: 'rgba(245,243,230,0.55)', lineHeight: 1.5 }}>{s.desc}</div>
                     </div>
                   </div>
                 ))}
@@ -273,7 +273,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             </div>
 
             {/* BUYING */}
-            <div style={{ background: '#F5F4E6', border: '2px solid #FC7038', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#1a1408', border: '2px solid #FC7038', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#FC7038', marginBottom: '18px' }}>For buyers</div>
               <div style={{ flex: 1 }}>
                 {[
@@ -284,8 +284,8 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
                   <div key={s.n} style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
                     <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#FC7038', color: '#fff', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>{s.n}</div>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1408', marginBottom: '2px', letterSpacing: '0.02em' }}>{s.title}</div>
-                      <div style={{ fontSize: '12px', color: '#7a7060', lineHeight: 1.5 }}>{s.desc}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#F5F3E6', marginBottom: '2px', letterSpacing: '0.02em' }}>{s.title}</div>
+                      <div style={{ fontSize: '12px', color: 'rgba(245,243,230,0.55)', lineHeight: 1.5 }}>{s.desc}</div>
                     </div>
                   </div>
                 ))}
