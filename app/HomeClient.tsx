@@ -252,7 +252,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', alignItems: 'stretch' }}>
             {/* SELLING */}
-            <div style={{ background: '#1a1408', border: '2px solid #FC7038', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#1a1408', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#FC7038', marginBottom: '18px' }}>For sellers</div>
               <div style={{ flex: 1 }}>
                 {[
@@ -273,7 +273,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
             </div>
 
             {/* BUYING */}
-            <div style={{ background: '#1a1408', border: '2px solid #FC7038', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#1a1408', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#FC7038', marginBottom: '18px' }}>For buyers</div>
               <div style={{ flex: 1 }}>
                 {[
