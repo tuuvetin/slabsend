@@ -114,7 +114,7 @@ export default function PrivacyPage() {
 
         <SubSection title="3.1 What Is Covered">
           <ul>
-            <li>Item not received within the agreed shipping window</li>
+            <li>Item not received (delivery confirmed lost by the carrier)</li>
             <li>Item significantly not as described (wrong size, undisclosed damage, wrong model)</li>
             <li>Item arrives damaged due to inadequate packaging by the seller</li>
           </ul>
