@@ -609,15 +609,8 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       {/* DELIVERY OPTIONS */}
       {listingType === 'sell' && (
         <div style={{ background: '#F5F3E6', border: '1px solid rgba(26,20,8,0.1)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '4px' }}>
-            Shipping
-          </p>
-          <p style={{ fontSize: '12px', color: '#7a7060', marginBottom: '14px' }}>
-            All sales ship via Matkahuolto. You'll receive an activation code by email after purchase.
-          </p>
-
-          <p style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
-            Package size
+          <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a7060', marginBottom: '10px' }}>
+            Package size <span style={{ color: '#FC7038' }}>*</span>
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
             {packageSizes.map(size => (
