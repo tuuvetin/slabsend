@@ -72,6 +72,23 @@ const citiesByCountry: Record<string, string[]> = {
 // All EU/EEA countries — used for rent listings (pickup only, no shipping restriction)
 const EU_COUNTRIES = Object.keys(citiesByCountry).sort()
 
+// Countries where sellers can list items for sale (shipping supported)
+const SUPPORTED_SELLER_COUNTRIES = ['Finland', 'Estonia', 'Latvia', 'Lithuania']
+
+const COUNTRY_TO_ISO: Record<string, string> = {
+  'Finland': 'FI',
+  'Estonia': 'EE',
+  'Latvia': 'LV',
+  'Lithuania': 'LT',
+}
+
+const COUNTRY_FLAG: Record<string, string> = {
+  'Finland': '🇫🇮',
+  'Estonia': '🇪🇪',
+  'Latvia': '🇱🇻',
+  'Lithuania': '🇱🇹',
+}
+
 const packageSizes = [
     { value: 'S', label: 'Small', desc: 'Fits in a large envelope' },
     { value: 'M', label: 'Medium', desc: 'Fits in a shoe box' },
@@ -263,7 +280,7 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
       package_size: listingType === 'sell' ? packageSize : null,
       package_weight: listingType === 'sell' && packageWeight ? parseFloat(packageWeight) : null,
       weight_kg: listingType === 'sell' && packageWeight ? parseFloat(packageWeight) : null,
-      shipping_from_country: listingType === 'sell' ? 'FI' : null,
+      shipping_from_country: listingType === 'sell' ? (COUNTRY_TO_ISO[country] || 'FI') : null,
       pickup_location: listingType === 'rent' ? pickupLocation : null,
       pickup_hours_from: listingType === 'rent' ? pickupHoursFrom : null,
       pickup_hours_to: listingType === 'rent' ? pickupHoursTo : null,
@@ -292,8 +309,8 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
     if (listingType !== 'rent') {
       // Check seller has address and is in a supported country
       const { data: profile } = await supabase.from('profiles').select('address_street, address_postcode, address_city, phone, country').eq('user_id', user.id).single()
-      if (profile?.country && profile.country !== 'Finland') {
-        setMessage('Slabsend shipping is currently only available from Finland. Sellers must be based in Finland.')
+      if (profile?.country && !SUPPORTED_SELLER_COUNTRIES.includes(profile.country)) {
+        setMessage('Slabsend shipping is currently only available from Finland, Estonia, Latvia, and Lithuania.')
         return
       }
       if (!profile?.address_street || !profile?.address_postcode || !profile?.address_city || !profile?.phone) {
@@ -502,9 +519,16 @@ const handleTypeChange = (type: 'sell' | 'rent' | 'service') => {
             {EU_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         ) : (
-          <div className="form-input" style={{ marginBottom: 0, background: '#f0ede3', color: '#7a7060', display: 'flex', alignItems: 'center', cursor: 'not-allowed' }}>
-            🇫🇮 Finland
-          </div>
+          <select
+            className="form-input"
+            value={country}
+            onChange={e => { setCountry(e.target.value); setCity('') }}
+            style={{ marginBottom: 0 }}
+          >
+            {SUPPORTED_SELLER_COUNTRIES.map(c => (
+              <option key={c} value={c}>{COUNTRY_FLAG[c]} {c}</option>
+            ))}
+          </select>
         )}
         <div style={{ position: 'relative', flex: 1, marginBottom: 0 }}>
           <input

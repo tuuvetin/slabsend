@@ -26,7 +26,7 @@ export default function PrivacyPage() {
           <ul>
             <li>Be at least 18 years of age</li>
             <li>Have a valid payment method</li>
-            <li>Sellers must be resident in Finland</li>
+            <li>Sellers must be resident in Finland, Estonia, Latvia, or Lithuania</li>
             <li>Buyers must be resident in Finland, Estonia, Latvia, Lithuania, Sweden, or any other EU/EEA country for rental transactions</li>
           </ul>
         </SubSection>
@@ -140,7 +140,7 @@ export default function PrivacyPage() {
       </Section>
 
       <Section title="4. Seller Terms">
-        <p>These Seller Terms apply to all users who list items for sale on Slabsend. Sellers must be resident in Finland and have a verified Stripe Connect account.</p>
+        <p>These Seller Terms apply to all users who list items for sale on Slabsend. Sellers must be resident in Finland, Estonia, Latvia, or Lithuania and have a verified Stripe Connect account.</p>
 
         <SubSection title="4.1 Listing Requirements">
           <ul>
