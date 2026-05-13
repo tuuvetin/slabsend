@@ -24,6 +24,8 @@ export default function ProfilePage() {
   const [sales, setSales] = useState<any[]>([])
   const [stripeOnboarded, setStripeOnboarded] = useState<boolean | null>(null)
   const [stripeLoading, setStripeLoading] = useState(false)
+  const [stripeSuccess, setStripeSuccess] = useState(false)
+  const [expressDashboardUrl, setExpressDashboardUrl] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [passwordMessage, setPasswordMessage] = useState('')
   const [passwordSaving, setPasswordSaving] = useState(false)
@@ -86,7 +88,18 @@ export default function ProfilePage() {
         // Check Stripe status
         fetch('/api/stripe/status')
           .then(r => r.json())
-          .then(({ verified }) => setStripeOnboarded(verified))
+          .then(({ verified }) => {
+            setStripeOnboarded(verified)
+            if (verified) {
+              fetch('/api/stripe/express-dashboard', { method: 'POST' })
+                .then(r => r.json())
+                .then(({ url }) => { if (url) setExpressDashboardUrl(url) })
+            }
+          })
+
+        // Check if returning from Stripe onboarding
+        const params = new URLSearchParams(window.location.search)
+        if (params.get('stripe') === 'success') setStripeSuccess(true)
       })
 
       supabase.from('listings').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).then(({ data }) => {
@@ -480,14 +493,30 @@ export default function ProfilePage() {
 
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
             <h2 className="profile-section-title">Payments</h2>
+            {stripeSuccess && (
+              <div style={{ background: '#e6f4ea', border: '1px solid #a8d5b0', borderRadius: '10px', padding: '16px 20px', marginBottom: '16px' }}>
+                <p style={{ fontSize: '14px', fontWeight: 700, color: '#1a4a2a', margin: '0 0 6px' }}>🎉 Stripe verified!</p>
+                <p style={{ fontSize: '13px', color: '#3a7a4a', margin: '0 0 12px', lineHeight: 1.5 }}>
+                  Your payment account is now active. When Slabsend transfers your earnings, you can withdraw them to your bank account from your Stripe dashboard.
+                </p>
+                {expressDashboardUrl && (
+                  <a href={expressDashboardUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', background: '#635BFF', color: '#fff', textDecoration: 'none', fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '10px 20px', borderRadius: '8px' }}>
+                    Go to my Stripe dashboard →
+                  </a>
+                )}
+              </div>
+            )}
             {stripeOnboarded === null ? (
               <p style={{ fontSize: '13px', color: '#9a9080' }}>Checking payment status...</p>
             ) : stripeOnboarded ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#e6f4ea', border: '1px solid #a8d5b0', borderRadius: '8px', padding: '12px 16px', marginBottom: '12px' }}>
-                <div>
-                  <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a4a2a', margin: 0 }}>Stripe verified</p>
-                  <p style={{ fontSize: '12px', color: '#3a7a4a', margin: '2px 0 0' }}>Your account is set up to receive payments.</p>
-                </div>
+              <div style={{ background: '#e6f4ea', border: '1px solid #a8d5b0', borderRadius: '8px', padding: '12px 16px', marginBottom: '12px' }}>
+                <p style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1a4a2a', margin: '0 0 4px' }}>Stripe verified ✓</p>
+                <p style={{ fontSize: '12px', color: '#3a7a4a', margin: '0 0 10px' }}>Your account is set up to receive payments.</p>
+                {expressDashboardUrl && (
+                  <a href={expressDashboardUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', background: '#635BFF', color: '#fff', textDecoration: 'none', fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 16px', borderRadius: '6px' }}>
+                    My Stripe dashboard →
+                  </a>
+                )}
               </div>
             ) : (
               <>
@@ -498,15 +527,6 @@ export default function ProfilePage() {
                   {stripeLoading ? 'Redirecting...' : 'Connect Stripe →'}
                 </button>
               </>
-            )}
-            {stripeOnboarded && (
-              <button
-                onClick={handleConnectStripe}
-                disabled={stripeLoading}
-                style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'transparent', color: '#9a9080', border: '1px solid rgba(26,20,8,0.15)', borderRadius: '8px', padding: '10px 20px', cursor: 'pointer', marginTop: '8px' }}
-              >
-                {stripeLoading ? 'Redirecting...' : 'Manage Stripe account'}
-              </button>
             )}
           </div>
 
