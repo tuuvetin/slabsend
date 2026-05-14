@@ -493,7 +493,7 @@ export default function ProfilePage() {
 
           <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(26,20,8,0.1)' }}>
             <h2 className="profile-section-title">Payments</h2>
-            {stripeSuccess && (
+            {stripeSuccess && stripeOnboarded && (
               <div style={{ background: '#e6f4ea', border: '1px solid #a8d5b0', borderRadius: '10px', padding: '16px 20px', marginBottom: '16px' }}>
                 <p style={{ fontSize: '14px', fontWeight: 700, color: '#1a4a2a', margin: '0 0 6px' }}>🎉 Stripe verified!</p>
                 <p style={{ fontSize: '13px', color: '#3a7a4a', margin: '0 0 12px', lineHeight: 1.5 }}>
