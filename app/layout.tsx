@@ -14,7 +14,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={GeistSans.className}>
       <body>
-        <div className="site-root">
         <NavBar />
         {children}
         <footer className="site-footer">
@@ -42,7 +41,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <a href="/privacy" className="site-footer-privacy">Privacy & Terms</a>
           </div>
         </footer>
-        </div>
         <Analytics />
         <SpeedInsights />
       </body>
