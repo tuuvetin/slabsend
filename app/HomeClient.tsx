@@ -24,9 +24,9 @@ interface Props {
 // ─── How It Works ────────────────────────────────────────────────────────────
 
 const SELLER_STEPS = [
-  { title: 'List your gear',  desc: 'Add photos and set your price. Free to list, always.' },
-  { title: 'Ship it',         desc: 'Once sold, you receive a shipping code by email. Write it on the package and drop it off at your nearest pickup point.' },
-  { title: 'Get paid',        desc: 'You get paid once the buyer confirms the item matches the listing — or automatically 48h after delivery.' },
+  { title: 'List your gear', desc: 'Add photos and set your price. Free to list, always.' },
+  { title: 'Ship it',        desc: 'Once sold, you receive a shipping code by email. Write it on the package and drop it off at your nearest pickup point.' },
+  { title: 'Get paid',       desc: 'You get paid once the buyer confirms the item matches the listing — or automatically 48h after delivery.' },
 ]
 
 const BUYER_STEPS = [
@@ -35,101 +35,76 @@ const BUYER_STEPS = [
   { title: 'Confirm & done',      desc: "Mark the item as accepted within 48h of receiving it. If it doesn't match the listing, contact us and get your money back." },
 ]
 
-function HowItWorksCard({
-  label, accent, steps, cta, ctaHref,
-}: {
-  label: string
-  accent: string
-  steps: { title: string; desc: string }[]
-  cta: string
-  ctaHref: string
-}) {
-  return (
-    <div style={{ background: '#1a1408', borderRadius: '16px', padding: '28px 28px 24px', display: 'flex', flexDirection: 'column' }}>
-
-      {/* Label + divider */}
-      <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: accent, margin: '0 0 14px' }}>
-        {label}
-      </p>
-      <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.1)', margin: '0 0 24px' }} />
-
-      {/* Steps */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 }}>
-        {steps.map((step, i) => (
-          <div key={i} style={{ display: 'flex', gap: '16px' }}>
-
-            {/* Number + connecting line */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-              <div style={{
-                width: '40px', height: '40px', borderRadius: '50%',
-                border: `2px solid ${accent}`, color: accent,
-                fontSize: '16px', fontWeight: 700,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                {i + 1}
-              </div>
-              {i < steps.length - 1 && (
-                <div style={{ width: '2px', flex: 1, minHeight: '20px', background: 'rgba(255,255,255,0.08)', margin: '4px 0' }} />
-              )}
-            </div>
-
-            {/* Text */}
-            <div style={{ paddingTop: '8px', paddingBottom: i < steps.length - 1 ? '24px' : '0' }}>
-              <p style={{ fontSize: '15px', fontWeight: 600, color: '#F5F3E6', margin: '0 0 4px', letterSpacing: '0.01em' }}>
-                {step.title}
-              </p>
-              <p style={{ fontSize: '13px', fontWeight: 400, color: 'rgba(245,243,230,0.5)', lineHeight: 1.6, margin: 0 }}>
-                {step.desc}
-              </p>
-            </div>
-
-          </div>
-        ))}
-      </div>
-
-      {/* CTA */}
-      <a
-        href={ctaHref}
-        style={{
-          display: 'block', textAlign: 'center', marginTop: '28px',
-          fontSize: '13px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase',
-          padding: '14px 24px', borderRadius: '10px',
-          background: accent, color: accent === '#FC7038' ? '#fff' : '#F5F3E6',
-          textDecoration: 'none',
-        }}
-      >
-        {cta} →
-      </a>
-
-    </div>
-  )
-}
-
 function HowItWorks() {
   return (
-    <div style={{ background: '#F5F3E6', padding: '56px 24px' }}>
-      <div style={{ maxWidth: 960, margin: '0 auto' }}>
+    <section className="sb-how" id="how-it-works">
+      <div className="sb-how__inner">
 
-        <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#1a1408', textAlign: 'center', margin: '0 0 6px' }}>
-          How it works
-        </h2>
-        <p style={{ textAlign: 'center', color: '#9a9080', fontSize: '13px', margin: '0 0 32px' }}>
-          Buy and sell climbing gear — safe, simple, shipped.
-        </p>
+        <header className="sb-how__header">
+          <h2 className="sb-how__title">How it <em>works.</em></h2>
+          <p className="sb-how__lede">Buy and sell climbing gear across Europe — safe, simple, shipped.</p>
+        </header>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
-          <HowItWorksCard label="For sellers" accent="#FC7038" steps={SELLER_STEPS} cta="Start selling" ctaHref="/listings/new" />
-          <HowItWorksCard label="For buyers"  accent="#3a6b4a" steps={BUYER_STEPS}  cta="Browse listings" ctaHref="/listings" />
+        <div className="sb-how__grid">
+
+          <article className="sb-card sb-card--sellers">
+            <div className="sb-card__head">
+              <span className="sb-card__role">For Sellers</span>
+            </div>
+            <ol className="sb-steps">
+              {SELLER_STEPS.map((s, i) => (
+                <li key={i} className="sb-step">
+                  <span className="sb-step__num">{i + 1}</span>
+                  <div className="sb-step__body">
+                    <h3 className="sb-step__title">{s.title}</h3>
+                    <p className="sb-step__desc">{s.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <div className="sb-card__footer">
+              <a className="sb-cta" href="/listings/new">
+                Start Selling <span className="sb-cta__arrow">→</span>
+              </a>
+            </div>
+          </article>
+
+          <article className="sb-card sb-card--buyers">
+            <div className="sb-card__head">
+              <span className="sb-card__role">For Buyers</span>
+            </div>
+            <ol className="sb-steps">
+              {BUYER_STEPS.map((s, i) => (
+                <li key={i} className="sb-step">
+                  <span className="sb-step__num">{i + 1}</span>
+                  <div className="sb-step__body">
+                    <h3 className="sb-step__title">{s.title}</h3>
+                    <p className="sb-step__desc">{s.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <div className="sb-card__footer">
+              <a className="sb-cta" href="/listings">
+                Browse Listings <span className="sb-cta__arrow">→</span>
+              </a>
+            </div>
+          </article>
+
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: '12px', color: '#9a9080', marginTop: '20px', lineHeight: 1.6 }}>
-          Powered by Stripe — buyers are protected until delivery is confirmed.<br />
-          Selling? <a href="/profile" style={{ color: '#FC7038', textDecoration: 'none', fontWeight: 600 }}>Connect Stripe on your profile page</a> to safely receive payouts directly to your bank.
-        </p>
+        <div className="sb-trust">
+          <svg className="sb-trust__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+            <path d="m8.5 12 2.5 2.5L15.5 10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span><strong>Powered by Stripe</strong> — buyers are protected until delivery is confirmed.</span>
+          <span className="sb-trust__sep" aria-hidden="true" />
+          <span>Selling? <a href="/profile">Connect Stripe on your profile page</a> to safely receive payouts directly to your bank.</span>
+        </div>
 
       </div>
-    </div>
+    </section>
   )
 }
 
