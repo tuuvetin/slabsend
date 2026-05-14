@@ -358,9 +358,6 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
         </div>
       </div>
 
-      {/* HOW IT WORKS */}
-      <HowItWorks />
-
       {/* LATEST LISTINGS */}
       <div className="home-section" style={{ paddingTop: 0 }}>
         <div className="home-section-header">
@@ -403,6 +400,9 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
           ))}
         </div>
       </div>
+
+      {/* HOW IT WORKS */}
+      <HowItWorks />
     </main>
   )
 }
