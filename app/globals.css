@@ -15,7 +15,7 @@ body {
   background: #F5F3E6;
   padding: clamp(48px,6vw,80px) clamp(20px,5vw,64px);
 }
-.sb-how__inner { max-width: 1240px; margin: 0 auto; }
+.sb-how__inner { max-width: 760px; margin: 0 auto; }
 .sb-how__header { text-align: center; margin-bottom: clamp(32px,4vw,52px); }
 .sb-how__title {
   font-weight: 800;
