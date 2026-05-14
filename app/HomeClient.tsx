@@ -76,10 +76,10 @@ function HowItWorksCard({
 
             {/* Text */}
             <div style={{ paddingTop: '8px', paddingBottom: i < steps.length - 1 ? '24px' : '0' }}>
-              <p style={{ fontSize: '16px', fontWeight: 700, color: '#F5F3E6', margin: '0 0 4px', letterSpacing: '0.01em' }}>
+              <p style={{ fontSize: '15px', fontWeight: 600, color: '#F5F3E6', margin: '0 0 4px', letterSpacing: '0.01em' }}>
                 {step.title}
               </p>
-              <p style={{ fontSize: '13px', color: 'rgba(245,243,230,0.55)', lineHeight: 1.6, margin: 0 }}>
+              <p style={{ fontSize: '13px', fontWeight: 400, color: 'rgba(245,243,230,0.5)', lineHeight: 1.6, margin: 0 }}>
                 {step.desc}
               </p>
             </div>
@@ -93,7 +93,7 @@ function HowItWorksCard({
         href={ctaHref}
         style={{
           display: 'block', textAlign: 'center', marginTop: '28px',
-          fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+          fontSize: '13px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase',
           padding: '14px 24px', borderRadius: '10px',
           background: accent, color: accent === '#FC7038' ? '#fff' : '#F5F3E6',
           textDecoration: 'none',
@@ -120,7 +120,7 @@ function HowItWorks() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
           <HowItWorksCard label="For sellers" accent="#FC7038" steps={SELLER_STEPS} cta="Start selling" ctaHref="/listings/new" />
-          <HowItWorksCard label="For buyers"  accent="#5a9e6f" steps={BUYER_STEPS}  cta="Browse listings" ctaHref="/listings" />
+          <HowItWorksCard label="For buyers"  accent="#3a6b4a" steps={BUYER_STEPS}  cta="Browse listings" ctaHref="/listings" />
         </div>
 
         <p style={{ textAlign: 'center', fontSize: '12px', color: '#9a9080', marginTop: '20px', lineHeight: 1.6 }}>
