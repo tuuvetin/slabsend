@@ -31,10 +31,10 @@ body {
   letter-spacing: -0.02em;
 }
 .sb-how__lede {
-  font-size: clamp(15px,1.4vw,18px);
+  font-size: 13px;
   line-height: 1.55;
   color: #14110a;
-  opacity: .65;
+  opacity: .55;
   max-width: 44ch;
   margin: 0 auto;
 }
