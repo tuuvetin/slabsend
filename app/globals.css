@@ -633,16 +633,14 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .info-tooltip {
   display: none;
   position: absolute;
-  bottom: calc(100% + 8px);
-  right: 0;
-  left: auto;
-  transform: none;
+  top: calc(100% + 8px);
+  left: 0;
+  right: auto;
   background: #F5F3E6;
   color: #1a1408;
   border: 1px solid rgba(252,112,56,0.3);
   box-shadow: 0 4px 16px rgba(26,20,8,0.12);
   font-size: 12px;
-  
   line-height: 1.5;
   padding: 10px 14px;
   border-radius: 8px;
@@ -653,12 +651,11 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
 .info-tooltip::after {
   content: '';
   position: absolute;
-  top: 100%;
-  right: 10px;
-  left: auto;
-  transform: none;
+  bottom: 100%;
+  left: 14px;
+  right: auto;
   border: 6px solid transparent;
-  border-top-color: #F5F3E6;
+  border-bottom-color: #F5F3E6;
 }
 .info-tooltip-wrap:hover .info-tooltip,
 .info-tooltip-wrap:focus-within .info-tooltip,
