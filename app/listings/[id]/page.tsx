@@ -22,6 +22,7 @@ export default function ListingPage() {
   const [messageSent, setMessageSent] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [activeImage, setActiveImage] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
   const [offerAmount, setOfferAmount] = useState('')
   const [showOffer, setShowOffer] = useState(false)
   const [showMessage, setShowMessage] = useState(false)
@@ -159,6 +160,7 @@ export default function ListingPage() {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') prevImage()
       else if (e.key === 'ArrowRight') nextImage()
+      else if (e.key === 'Escape') setLightboxOpen(false)
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -330,12 +332,30 @@ export default function ListingPage() {
         <div className="listing-detail-images">
           {images.length > 0 ? (
             <>
+              {/* Lightbox */}
+              {lightboxOpen && (
+                <div onClick={() => setLightboxOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {images.length > 1 && (
+                    <button onClick={e => { e.stopPropagation(); prevImage() }} style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(245,243,230,0.15)', border: '1px solid rgba(245,243,230,0.25)', color: '#F5F3E6', width: '44px', height: '44px', borderRadius: '50%', fontSize: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
+                  )}
+                  <img src={images[activeImage]} onClick={e => e.stopPropagation()} style={{ maxWidth: '92vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: '6px' }} alt="" />
+                  {images.length > 1 && (
+                    <button onClick={e => { e.stopPropagation(); nextImage() }} style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(245,243,230,0.15)', border: '1px solid rgba(245,243,230,0.25)', color: '#F5F3E6', width: '44px', height: '44px', borderRadius: '50%', fontSize: '20px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
+                  )}
+                  <button onClick={() => setLightboxOpen(false)} style={{ position: 'absolute', top: '16px', right: '20px', background: 'transparent', border: 'none', color: '#F5F3E6', fontSize: '28px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+                  {images.length > 1 && (
+                    <p style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', color: 'rgba(245,243,230,0.55)', fontSize: '13px', letterSpacing: '0.1em', margin: 0 }}>{activeImage + 1} / {images.length}</p>
+                  )}
+                </div>
+              )}
+
               {/* Main swiper */}
-              <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: '#e8e4d8' }}>
+              <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden' }}>
                 <img
                   src={images[activeImage]}
                   alt={listing.title}
-                  style={{ width: '100%', aspectRatio: '4/3', objectFit: 'contain', display: 'block', background: '#e8e4d8' }}
+                  onClick={() => setLightboxOpen(true)}
+                  style={{ width: '100%', display: 'block', cursor: 'zoom-in', objectFit: 'cover' }}
                 />
                 <FavoriteButton listingId={listing.id} />
                 {images.length > 1 && (<>
