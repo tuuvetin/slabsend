@@ -355,7 +355,7 @@ export default function ListingPage() {
                   src={images[activeImage]}
                   alt={listing.title}
                   onClick={() => setLightboxOpen(true)}
-                  style={{ width: '100%', display: 'block', cursor: 'zoom-in', objectFit: 'cover' }}
+                  style={{ width: '100%', height: '480px', display: 'block', cursor: 'zoom-in', objectFit: 'cover', objectPosition: 'center' }}
                 />
                 <FavoriteButton listingId={listing.id} />
                 {images.length > 1 && (<>
