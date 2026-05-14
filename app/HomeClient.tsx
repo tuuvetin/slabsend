@@ -21,6 +21,120 @@ interface Props {
   catImageUrls: Record<string, string>
 }
 
+// ─── How It Works ────────────────────────────────────────────────────────────
+
+const SELLER_STEPS = [
+  { title: 'List your gear',  desc: 'Add photos and set your price. Free to list, always.' },
+  { title: 'Ship it',         desc: 'Once sold, you receive a shipping code by email. Write it on the package and drop it off at your nearest pickup point.' },
+  { title: 'Get paid',        desc: 'You get paid once the buyer confirms the item matches the listing — or automatically 48h after delivery.' },
+]
+
+const BUYER_STEPS = [
+  { title: 'Find your gear',      desc: 'Browse climbing gear from sellers across Europe.' },
+  { title: 'Buy with protection', desc: 'Pay securely. Your money is held until you confirm the item arrived as described.' },
+  { title: 'Confirm & done',      desc: "Mark the item as accepted within 48h of receiving it. If it doesn't match the listing, contact us and get your money back." },
+]
+
+function HowItWorksCard({
+  label, accent, steps, cta, ctaHref,
+}: {
+  label: string
+  accent: string
+  steps: { title: string; desc: string }[]
+  cta: string
+  ctaHref: string
+}) {
+  return (
+    <div style={{ background: '#1a1408', borderRadius: '16px', padding: '28px 28px 24px', display: 'flex', flexDirection: 'column' }}>
+
+      {/* Label + divider */}
+      <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: accent, margin: '0 0 14px' }}>
+        {label}
+      </p>
+      <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.1)', margin: '0 0 24px' }} />
+
+      {/* Steps */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 }}>
+        {steps.map((step, i) => (
+          <div key={i} style={{ display: 'flex', gap: '16px' }}>
+
+            {/* Number + connecting line */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+              <div style={{
+                width: '40px', height: '40px', borderRadius: '50%',
+                border: `2px solid ${accent}`, color: accent,
+                fontSize: '16px', fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                {i + 1}
+              </div>
+              {i < steps.length - 1 && (
+                <div style={{ width: '2px', flex: 1, minHeight: '20px', background: 'rgba(255,255,255,0.08)', margin: '4px 0' }} />
+              )}
+            </div>
+
+            {/* Text */}
+            <div style={{ paddingTop: '8px', paddingBottom: i < steps.length - 1 ? '24px' : '0' }}>
+              <p style={{ fontSize: '16px', fontWeight: 700, color: '#F5F3E6', margin: '0 0 4px', letterSpacing: '0.01em' }}>
+                {step.title}
+              </p>
+              <p style={{ fontSize: '13px', color: 'rgba(245,243,230,0.55)', lineHeight: 1.6, margin: 0 }}>
+                {step.desc}
+              </p>
+            </div>
+
+          </div>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <a
+        href={ctaHref}
+        style={{
+          display: 'block', textAlign: 'center', marginTop: '28px',
+          fontSize: '13px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+          padding: '14px 24px', borderRadius: '10px',
+          background: accent, color: accent === '#FC7038' ? '#fff' : '#F5F3E6',
+          textDecoration: 'none',
+        }}
+      >
+        {cta} →
+      </a>
+
+    </div>
+  )
+}
+
+function HowItWorks() {
+  return (
+    <div style={{ background: '#F5F3E6', padding: '56px 24px' }}>
+      <div style={{ maxWidth: 960, margin: '0 auto' }}>
+
+        <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#1a1408', textAlign: 'center', margin: '0 0 6px' }}>
+          How it works
+        </h2>
+        <p style={{ textAlign: 'center', color: '#9a9080', fontSize: '13px', margin: '0 0 32px' }}>
+          Buy and sell climbing gear — safe, simple, shipped.
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+          <HowItWorksCard label="For sellers" accent="#FC7038" steps={SELLER_STEPS} cta="Start selling" ctaHref="/listings/new" />
+          <HowItWorksCard label="For buyers"  accent="#5a9e6f" steps={BUYER_STEPS}  cta="Browse listings" ctaHref="/listings" />
+        </div>
+
+        <p style={{ textAlign: 'center', fontSize: '12px', color: '#9a9080', marginTop: '20px', lineHeight: 1.6 }}>
+          Powered by Stripe — buyers are protected until delivery is confirmed.<br />
+          Selling? <a href="/profile" style={{ color: '#FC7038', textDecoration: 'none', fontWeight: 600 }}>Connect Stripe on your profile page</a> to safely receive payouts directly to your bank.
+        </p>
+
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function HomeClient({ listings, categories, heroImageUrl, catImageUrls }: Props) {
   const [heroError, setHeroError] = useState(false)
   const [catErrors, setCatErrors] = useState<Record<string, boolean>>({})
@@ -245,62 +359,7 @@ export default function HomeClient({ listings, categories, heroImageUrl, catImag
       </div>
 
       {/* HOW IT WORKS */}
-      <div style={{ background: '#F5F3E6', padding: '52px 24px' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <h2 style={{ fontSize: 'clamp(22px, 3vw, 30px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#1a1408', textAlign: 'center', marginBottom: '6px' }}>How it works</h2>
-          <p style={{ textAlign: 'center', color: '#9a9080', fontSize: '13px', marginBottom: '32px' }}>Buy and sell climbing gear — safe, simple, shipped.</p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', alignItems: 'stretch' }}>
-            {/* SELLING */}
-            <div style={{ background: '#1a1408', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#FC7038', marginBottom: '18px' }}>For sellers</div>
-              <div style={{ flex: 1 }}>
-                {[
-                  { n: '1', title: 'List your gear', desc: 'Add photos and set your price. Free to list, always.' },
-                  { n: '2', title: 'Ship it', desc: 'Once sold, you receive a shipping code by email. Write it on the package and drop it off at your nearest pickup point.' },
-                  { n: '3', title: 'Get paid', desc: 'You get paid once the buyer confirms the item matches the listing — or automatically 48h after delivery.' },
-                ].map(s => (
-                  <div key={s.n} style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#FC7038', color: '#fff', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>{s.n}</div>
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#F5F3E6', marginBottom: '2px', letterSpacing: '0.02em' }}>{s.title}</div>
-                      <div style={{ fontSize: '12px', color: 'rgba(245,243,230,0.55)', lineHeight: 1.5 }}>{s.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <a href="/listings/new" style={{ display: 'inline-block', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '9px 18px', background: '#FC7038', color: '#fff', borderRadius: '7px', textDecoration: 'none', marginTop: '8px', alignSelf: 'flex-start' }}>Start selling →</a>
-            </div>
-
-            {/* BUYING */}
-            <div style={{ background: '#1a1408', borderRadius: '14px', padding: '24px 22px', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#7abf7a', marginBottom: '18px' }}>For buyers</div>
-              <div style={{ flex: 1 }}>
-                {[
-                  { n: '1', title: 'Find your gear', desc: 'Browse climbing gear from sellers across Europe.' },
-                  { n: '2', title: 'Buy with protection', desc: 'Pay securely. Your money is held until you confirm the item arrived as described.' },
-                  { n: '3', title: 'Confirm & done', desc: "Mark the item as accepted within 48h of receiving it. If it doesn't match the listing, contact us and get your money back." },
-                ].map(s => (
-                  <div key={s.n} style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#3a6a3a', color: '#fff', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>{s.n}</div>
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#F5F3E6', marginBottom: '2px', letterSpacing: '0.02em' }}>{s.title}</div>
-                      <div style={{ fontSize: '12px', color: 'rgba(245,243,230,0.55)', lineHeight: 1.5 }}>{s.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <a href="/listings" style={{ display: 'inline-block', fontSize: '12px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '9px 18px', background: '#3a6a3a', color: '#fff', borderRadius: '7px', textDecoration: 'none', marginTop: '8px', alignSelf: 'flex-start' }}>Browse listings →</a>
-            </div>
-          </div>
-
-          {/* Stripe trust line */}
-          <p style={{ textAlign: 'center', fontSize: '12px', color: '#9a9080', marginTop: '20px', lineHeight: 1.6 }}>
-            Powered by Stripe — buyers are protected until delivery is confirmed.<br />
-            Selling? <a href="/profile" style={{ color: '#FC7038', textDecoration: 'none', fontWeight: 600 }}>Connect Stripe on your profile page</a> to safely receive payouts directly to your bank.
-          </p>
-        </div>
-      </div>
+      <HowItWorks />
 
       {/* LATEST LISTINGS */}
       <div className="home-section" style={{ paddingTop: 0 }}>
