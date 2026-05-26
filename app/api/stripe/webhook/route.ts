@@ -197,15 +197,20 @@ export async function POST(req: Request) {
     let labelCarrier: 'matkahuolto' | 'posti' | undefined
     let postiLabelPdfBase64: string | undefined
 
-    if (shippingZone === 'FI' && orderId) {
-      const weightKg = (listing as any)?.weight_kg || 1
+    // Posti contract covers: Baltic sender → any of FI/EE/LV/LT
+    // Matkahuolto covers: FI seller → FI buyer
+    // Not covered: FI seller → EE/LV/LT buyer (no FI→Baltic route in contract)
+    const POSTI_BUYER_ZONES = ['FI', 'EE', 'LV', 'LT']
 
-      // Determine which carrier to use based on seller's country
-      // listing.shipping_from_country is ISO-2 (FI/EE/LV/LT)
-      const sellerCountryISO: string =
-        (listing as any)?.shipping_from_country ||
-        countryToISO(sellerProfile?.country || 'FI')
-      const isBalticSeller = sellerCountryISO !== 'FI' && sellerCountryISO !== ''
+    const sellerCountryISO: string =
+      (listing as any)?.shipping_from_country ||
+      countryToISO(sellerProfile?.country || 'FI')
+    const isBalticSeller = ['EE', 'LV', 'LT'].includes(sellerCountryISO)
+    const usesPosti = isBalticSeller && POSTI_BUYER_ZONES.includes(shippingZone)
+    const usesMatkahuolto = !isBalticSeller && shippingZone === 'FI'
+
+    if (orderId && (usesPosti || usesMatkahuolto)) {
+      const weightKg = (listing as any)?.weight_kg || 1
 
       const sellerReady =
         sellerProfile?.address_street &&
@@ -222,6 +227,9 @@ export async function POST(req: Request) {
       console.log('Shipping label debug:', {
         sellerCountryISO,
         isBalticSeller,
+        usesPosti,
+        usesMatkahuolto,
+        shippingZone,
         sellerReady: !!sellerReady,
         buyerReady: !!buyerReady,
         buyerStreet: buyerAddressStreet || '(missing)',
@@ -230,8 +238,8 @@ export async function POST(req: Request) {
         buyerPhone: buyerPhoneFinal || '(missing)',
       })
 
-      if (isBalticSeller) {
-        // ── Posti SmartShip for Baltic sellers → FI buyers ───────────────────
+      if (usesPosti) {
+        // ── Posti SmartShip: Baltic seller → FI/EE/LV/LT buyer ──────────────
         if (sellerReady && buyerReady) {
           try {
             const postiResult = await createPostiShipment({
@@ -246,7 +254,7 @@ export async function POST(req: Request) {
               receiverAddress: buyerAddressStreet,
               receiverPostal: buyerAddressPostcode,
               receiverCity: buyerAddressCity,
-              receiverCountry: 'FI',
+              receiverCountry: shippingZone,  // actual buyer country (FI/EE/LV/LT)
               receiverPhone: buyerPhoneFinal,
               receiverEmail: buyerEmail,
               weightKg,
@@ -281,8 +289,8 @@ export async function POST(req: Request) {
           matkahuoltoError = `Posti skipped — seller ready: ${!!sellerReady}, buyer ready: ${!!buyerReady}`
           console.warn('Posti skipped:', matkahuoltoError)
         }
-      } else {
-        // ── Matkahuolto for FI sellers → FI buyers ───────────────────────────
+      } else if (usesMatkahuolto) {
+        // ── Matkahuolto: FI seller → FI buyer ────────────────────────────────
         if (sellerReady && buyerReady) {
           try {
             const mhResult = await createMatkahuoltoShipment({
