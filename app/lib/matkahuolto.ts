@@ -29,6 +29,8 @@ export interface MatkahuoltoShipmentParams {
   receiverCity: string
   receiverPhone: string
   receiverEmail: string
+  /** ISO-2 — defaults to 'FI'; set to 'SE' for Nordic/international */
+  receiverCountry?: string
   // Paketti
   weightKg: number
   // Viite (valinnainen, esim. tilausnumero)
@@ -96,6 +98,11 @@ function buildShipmentXml(
 ): string {
   const weight = Math.max(1, Math.ceil(params.weightKg))
   const ref = escapeXml(params.senderReference || '')
+  const receiverCountry = (params.receiverCountry || 'FI').toUpperCase()
+  // Product code: 80 domestic FI (test: 84), 82 Nordic/SE (test: 86)
+  const productCode = receiverCountry === 'FI'
+    ? (testMode ? '84' : '80')
+    : (testMode ? '86' : '82')
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <MHShipmentRequest>
@@ -121,9 +128,10 @@ function buildShipmentXml(
     <ReceiverCity>${escapeXml(params.receiverCity)}</ReceiverCity>
     <ReceiverContactNumber>${normalizePhone(params.receiverPhone)}</ReceiverContactNumber>
     <ReceiverEmail>${params.receiverEmail}</ReceiverEmail>
+    ${receiverCountry !== 'FI' ? `<ReceiverCountry>${receiverCountry}</ReceiverCountry>` : ''}
     <PayerCode>O</PayerCode>
     <PayerId>${userId}</PayerId>
-    <ProductCode>${testMode ? '84' : '80'}</ProductCode>
+    <ProductCode>${productCode}</ProductCode>
     <VAKDescription/>
     <DocumentType>NO</DocumentType>
     <ShipmentRow>
