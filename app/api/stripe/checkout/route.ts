@@ -5,14 +5,43 @@ import { COUNTRY_NAME_TO_ISO, SUPPORTED_COUNTRY_CODES } from '@/app/lib/countrie
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
-const FINLAND_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
+// FI buyer + FI seller: buyer picks carrier
+const FINLAND_POSTI_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
   shipping_rate_data: {
     type: 'fixed_amount',
     fixed_amount: { amount: 890, currency: 'eur' },
-    display_name: 'Standard shipping — Finland (Matkahuolto)',
+    display_name: 'Posti — pickup from Posti point',
+    metadata: { carrier: 'posti' },
     delivery_estimate: {
       minimum: { unit: 'business_day', value: 1 },
       maximum: { unit: 'business_day', value: 3 },
+    },
+  },
+}
+
+const FINLAND_MATKAHUOLTO_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
+  shipping_rate_data: {
+    type: 'fixed_amount',
+    fixed_amount: { amount: 890, currency: 'eur' },
+    display_name: 'Matkahuolto — pickup from Matkahuolto point',
+    metadata: { carrier: 'matkahuolto' },
+    delivery_estimate: {
+      minimum: { unit: 'business_day', value: 1 },
+      maximum: { unit: 'business_day', value: 3 },
+    },
+  },
+}
+
+// FI buyer + Baltic seller, or Baltic buyer: only Posti
+const FINLAND_POSTI_ONLY_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
+  shipping_rate_data: {
+    type: 'fixed_amount',
+    fixed_amount: { amount: 890, currency: 'eur' },
+    display_name: 'Posti — pickup from Posti point',
+    metadata: { carrier: 'posti' },
+    delivery_estimate: {
+      minimum: { unit: 'business_day', value: 2 },
+      maximum: { unit: 'business_day', value: 5 },
     },
   },
 }
@@ -21,7 +50,8 @@ const NORDIC_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
   shipping_rate_data: {
     type: 'fixed_amount',
     fixed_amount: { amount: 1490, currency: 'eur' },
-    display_name: 'Standard shipping — Nordic & Baltic',
+    display_name: 'Posti — pickup from Posti / Omniva point',
+    metadata: { carrier: 'posti' },
     delivery_estimate: {
       minimum: { unit: 'business_day', value: 3 },
       maximum: { unit: 'business_day', value: 7 },
@@ -47,6 +77,10 @@ export async function POST(req: Request) {
   const rawCountry = buyerProfile?.address_country || buyerProfile?.country || ''
   const buyerISO = COUNTRY_NAME_TO_ISO[rawCountry] || (SUPPORTED_COUNTRY_CODES.includes(rawCountry.toUpperCase()) ? rawCountry.toUpperCase() : 'FI')
   const isFinland = buyerISO === 'FI'
+
+  // Seller's country (ISO-2) — determines available carriers
+  const sellerCountryISO: string = listing.shipping_from_country || 'FI'
+  const isBalticSeller = ['EE', 'LV', 'LT'].includes(sellerCountryISO)
 
   const commissionRate = 0.10
   const baseAmount = Math.round(amount * 100)
@@ -81,9 +115,15 @@ export async function POST(req: Request) {
         display_name: 'Pickup / Nouto',
       },
     })
+  } else if (isFinland && !isBalticSeller) {
+    // FI buyer + FI seller: let buyer choose carrier
+    shippingOptions.push(FINLAND_POSTI_OPTION, FINLAND_MATKAHUOLTO_OPTION)
+  } else if (isFinland && isBalticSeller) {
+    // FI buyer + Baltic seller: only Posti (Matkahuolto doesn't serve Baltic)
+    shippingOptions.push(FINLAND_POSTI_ONLY_OPTION)
   } else {
-    // Show only the option matching buyer's profile country
-    shippingOptions.push(isFinland ? FINLAND_OPTION : NORDIC_OPTION)
+    // Baltic/Nordic buyer: Posti only
+    shippingOptions.push(NORDIC_OPTION)
   }
 
   // Allowed countries: show address collection for all supported countries

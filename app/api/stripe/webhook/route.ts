@@ -101,10 +101,15 @@ export async function POST(req: Request) {
     const buyerPhone = session.customer_details?.phone || ''
     const buyerCountry = buyerAddress.country || ''
 
+    // Carrier chosen by buyer at checkout (stored in shipping rate metadata)
+    const chosenCarrier: string =
+      sessionAny.shipping_cost?.shipping_rate?.metadata?.carrier || ''
+
     console.log('Stripe session address debug:', {
       shipping_details: sessionAny.shipping_details,
       customer_details_address: billingAddr,
       phone: buyerPhone,
+      chosenCarrier,
     })
 
     // Shipping zone: derive from buyer's country (covers both shipping_details and customer_details fallback)
@@ -197,17 +202,25 @@ export async function POST(req: Request) {
     let labelCarrier: 'matkahuolto' | 'posti' | undefined
     let postiLabelPdfBase64: string | undefined
 
-    // Posti contract covers: Baltic sender → any of FI/EE/LV/LT
-    // Matkahuolto covers: FI seller → FI buyer
-    // Not covered: FI seller → EE/LV/LT buyer (no FI→Baltic route in contract)
+    // Routing:
+    // - chosenCarrier from Stripe shipping rate metadata is the primary signal
+    // - Posti contract covers Baltic sender → FI/EE/LV/LT, and FI→FI
+    // - Matkahuolto covers FI seller → FI buyer only
+    // - Not covered: FI seller → EE/LV/LT buyer
     const POSTI_BUYER_ZONES = ['FI', 'EE', 'LV', 'LT']
 
     const sellerCountryISO: string =
       (listing as any)?.shipping_from_country ||
       countryToISO(sellerProfile?.country || 'FI')
     const isBalticSeller = ['EE', 'LV', 'LT'].includes(sellerCountryISO)
-    const usesPosti = isBalticSeller && POSTI_BUYER_ZONES.includes(shippingZone)
-    const usesMatkahuolto = !isBalticSeller && shippingZone === 'FI'
+
+    // chosenCarrier is set from Stripe metadata; fall back to seller-country logic
+    const effectiveCarrier: string =
+      chosenCarrier ||
+      (isBalticSeller ? 'posti' : shippingZone === 'FI' ? 'matkahuolto' : '')
+
+    const usesPosti = effectiveCarrier === 'posti' && POSTI_BUYER_ZONES.includes(shippingZone)
+    const usesMatkahuolto = effectiveCarrier === 'matkahuolto' && shippingZone === 'FI'
 
     if (orderId && (usesPosti || usesMatkahuolto)) {
       const weightKg = (listing as any)?.weight_kg || 1
