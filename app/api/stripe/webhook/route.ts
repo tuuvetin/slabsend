@@ -221,6 +221,8 @@ export async function POST(req: Request) {
 
     const usesPosti = effectiveCarrier === 'posti' && POSTI_BUYER_ZONES.includes(shippingZone)
     const usesMatkahuolto = effectiveCarrier === 'matkahuolto' && shippingZone === 'FI'
+    // SE: Matkahuolto international — not yet automated, handled manually via admin email
+    const needsManualLabel = shippingZone === 'SE' && sellerCountryISO === 'FI'
 
     if (orderId && (usesPosti || usesMatkahuolto)) {
       const weightKg = (listing as any)?.weight_kg || 1
@@ -435,7 +437,7 @@ export async function POST(req: Request) {
     await sendEmail({
       from: FROM,
       to: 'info@slabsend.com',
-      subject: `${labelCreated ? '✅' : shippingZone === 'FI' ? '⚠️' : '📦'} New order: ${listing?.title} — ${orderNumber}${emailErrors.length ? ' ⚠️ EMAIL ERRORS' : ''}`,
+      subject: `${labelCreated ? '✅' : needsManualLabel ? '🇸🇪' : shippingZone === 'FI' ? '⚠️' : '📦'} New order: ${listing?.title} — ${orderNumber}${emailErrors.length ? ' ⚠️ EMAIL ERRORS' : ''}`,
       html: adminOrderEmail({
         orderNumber,
         listingTitle: listing?.title || '',
@@ -449,6 +451,7 @@ export async function POST(req: Request) {
         shippingZone,
         labelCreated,
         labelCarrier,
+        needsManualLabel,
         activationCode,
         trackingNumber,
         matkahuoltoError,
@@ -638,6 +641,7 @@ function adminOrderEmail(p: {
   shippingZone: string
   labelCreated: boolean
   labelCarrier?: 'matkahuolto' | 'posti'
+  needsManualLabel?: boolean
   activationCode?: string
   trackingNumber?: string
   matkahuoltoError?: string
@@ -645,6 +649,11 @@ function adminOrderEmail(p: {
   orderId: number | null
   emailErrors?: string[]
 }): string {
+  const seBlock = p.needsManualLabel
+    ? `<tr style="background: #e8f0fe;"><td style="padding: 8px; border-bottom: 1px solid #eee;" colspan="2"><strong>🇸🇪 Sweden order — manual Matkahuolto international label needed</strong></td></tr>
+       <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Action</td><td style="padding: 8px; border-bottom: 1px solid #eee;">Create Matkahuolto international label (Ulkomaan Lähellä-paketti, SE) and email seller</td></tr>`
+    : ''
+
   const mhBlock = p.shippingZone === 'FI'
     ? p.labelCreated
       ? p.labelCarrier === 'posti'
@@ -679,6 +688,7 @@ function adminOrderEmail(p: {
         <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Slabsend fee</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.serviceFee} €</td></tr>
         <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Shipping zone</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.shippingZone || 'N/A'}</td></tr>
         <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Stripe session</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.sessionId}</td></tr>
+        ${seBlock}
         ${mhBlock}
         ${p.emailErrors && p.emailErrors.length > 0 ? `<tr style="background:#fff0f0;"><td style="padding:8px;border-bottom:1px solid #eee;" colspan="2"><strong>⚠️ Email delivery errors:</strong><br/><pre style="font-size:11px;color:#c0392b;white-space:pre-wrap;">${p.emailErrors.join('\n')}</pre></td></tr>` : ''}
       </table>

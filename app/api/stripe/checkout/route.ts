@@ -32,7 +32,21 @@ const FINLAND_MATKAHUOLTO_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOp
   },
 }
 
-// FI buyer + Baltic seller: slightly higher price to cover Baltic→FI Posti costs
+// FI seller → SE buyer
+const SWEDEN_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
+  shipping_rate_data: {
+    type: 'fixed_amount',
+    fixed_amount: { amount: 1090, currency: 'eur' },
+    display_name: 'Matkahuolto — Sweden pickup point',
+    metadata: { carrier: 'matkahuolto', zone: 'SE' },
+    delivery_estimate: {
+      minimum: { unit: 'business_day', value: 3 },
+      maximum: { unit: 'business_day', value: 6 },
+    },
+  },
+}
+
+// Baltic seller → any buyer: slightly higher price to cover Baltic→FI Posti costs
 const FINLAND_POSTI_ONLY_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
   shipping_rate_data: {
     type: 'fixed_amount',
@@ -103,8 +117,8 @@ export async function POST(req: Request) {
     // (covers Baltic→FI costs; buyer can't game price by changing profile)
     shippingOptions.push(FINLAND_POSTI_ONLY_OPTION)
   } else {
-    // FI seller → €8.90, buyer picks Posti or Matkahuolto
-    shippingOptions.push(FINLAND_POSTI_OPTION, FINLAND_MATKAHUOLTO_OPTION)
+    // FI seller → €8.90 FI/Baltic options + €10.90 SE option
+    shippingOptions.push(FINLAND_POSTI_OPTION, FINLAND_MATKAHUOLTO_OPTION, SWEDEN_OPTION)
   }
 
   // Allowed countries: show address collection for all supported countries
