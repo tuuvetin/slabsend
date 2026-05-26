@@ -49,7 +49,7 @@ const FINLAND_POSTI_ONLY_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOpt
 const NORDIC_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
   shipping_rate_data: {
     type: 'fixed_amount',
-    fixed_amount: { amount: 1490, currency: 'eur' },
+    fixed_amount: { amount: 890, currency: 'eur' },
     display_name: 'Posti — pickup from Posti / Omniva point',
     metadata: { carrier: 'posti' },
     delivery_estimate: {
