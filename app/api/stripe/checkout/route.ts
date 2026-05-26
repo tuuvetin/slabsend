@@ -32,11 +32,11 @@ const FINLAND_MATKAHUOLTO_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOp
   },
 }
 
-// FI buyer + Baltic seller, or Baltic buyer: only Posti
+// FI buyer + Baltic seller: slightly higher price to cover Baltic→FI Posti costs
 const FINLAND_POSTI_ONLY_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
   shipping_rate_data: {
     type: 'fixed_amount',
-    fixed_amount: { amount: 890, currency: 'eur' },
+    fixed_amount: { amount: 1190, currency: 'eur' },
     display_name: 'Posti — pickup from Posti point',
     metadata: { carrier: 'posti' },
     delivery_estimate: {
