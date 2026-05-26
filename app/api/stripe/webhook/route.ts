@@ -3,6 +3,8 @@ import Stripe from 'stripe'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { createMatkahuoltoShipment } from '@/app/lib/matkahuolto'
+import { createPostiShipment } from '@/app/lib/posti'
+import { countryToISO } from '@/app/lib/countries'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 const resend = new Resend(process.env.RESEND_API_KEY!)
@@ -164,14 +166,14 @@ export async function POST(req: Request) {
     // Haetaan ilmoituksen tiedot
     const { data: listing } = await supabaseAdmin
       .from('listings')
-      .select('title, user_id, weight_kg')
+      .select('title, user_id, weight_kg, shipping_from_country')
       .eq('id', listingId)
       .single()
 
     // Haetaan myyjän profiili (myös osoitetiedot Matkahuoltoa varten)
     const { data: sellerProfile } = await supabaseAdmin
       .from('profiles')
-      .select('username, full_name, address_street, address_postcode, address_city, phone, stripe_onboarded')
+      .select('username, full_name, address_street, address_postcode, address_city, phone, stripe_onboarded, country')
       .eq('user_id', sellerUserId || '')
       .single()
 
@@ -186,14 +188,25 @@ export async function POST(req: Request) {
       console.error('Error fetching seller email:', e)
     }
 
-    // ── Matkahuolto auto-generation ─────────────────────────────────────────────
+    // ── Shipping label auto-generation ──────────────────────────────────────────
     let activationCode: string | undefined
     let trackingNumber: string | undefined
     let matkahuoltoError: string | undefined
     let matkahuoltoRaw: string | undefined
     let labelCreated = false
+    let labelCarrier: 'matkahuolto' | 'posti' | undefined
+    let postiLabelPdfBase64: string | undefined
 
     if (shippingZone === 'FI' && orderId) {
+      const weightKg = (listing as any)?.weight_kg || 1
+
+      // Determine which carrier to use based on seller's country
+      // listing.shipping_from_country is ISO-2 (FI/EE/LV/LT)
+      const sellerCountryISO: string =
+        (listing as any)?.shipping_from_country ||
+        countryToISO(sellerProfile?.country || 'FI')
+      const isBalticSeller = sellerCountryISO !== 'FI' && sellerCountryISO !== ''
+
       const sellerReady =
         sellerProfile?.address_street &&
         sellerProfile?.address_postcode &&
@@ -206,59 +219,116 @@ export async function POST(req: Request) {
         buyerAddressPostcode &&
         buyerAddressCity
 
-      console.log('Matkahuolto buyer fields:', {
-        street: buyerAddressStreet || '(missing)',
-        postcode: buyerAddressPostcode || '(missing)',
-        city: buyerAddressCity || '(missing)',
-        phone: buyerPhoneFinal || '(missing)',
+      console.log('Shipping label debug:', {
+        sellerCountryISO,
+        isBalticSeller,
+        sellerReady: !!sellerReady,
+        buyerReady: !!buyerReady,
+        buyerStreet: buyerAddressStreet || '(missing)',
+        buyerPostcode: buyerAddressPostcode || '(missing)',
+        buyerCity: buyerAddressCity || '(missing)',
+        buyerPhone: buyerPhoneFinal || '(missing)',
       })
 
-      if (sellerReady && buyerReady) {
-        try {
-          const weightKg = (listing as any)?.weight_kg || 1
-          const mhResult = await createMatkahuoltoShipment({
-            senderName: sellerProfile!.full_name || sellerProfile!.username || sellerName,
-            senderAddress: sellerProfile!.address_street,
-            senderPostal: sellerProfile!.address_postcode,
-            senderCity: sellerProfile!.address_city,
-            senderPhone: sellerProfile!.phone,
-            senderEmail: sellerEmail,
-            receiverName: buyerName || buyerEmail,
-            receiverAddress: buyerAddressStreet,
-            receiverPostal: buyerAddressPostcode,
-            receiverCity: buyerAddressCity,
-            receiverPhone: buyerPhoneFinal,
-            receiverEmail: buyerEmail,
-            weightKg,
-            senderReference: orderNumber,
-          })
+      if (isBalticSeller) {
+        // ── Posti SmartShip for Baltic sellers → FI buyers ───────────────────
+        if (sellerReady && buyerReady) {
+          try {
+            const postiResult = await createPostiShipment({
+              senderName: sellerProfile!.full_name || sellerProfile!.username || sellerName,
+              senderAddress: sellerProfile!.address_street,
+              senderPostal: sellerProfile!.address_postcode,
+              senderCity: sellerProfile!.address_city,
+              senderCountry: sellerCountryISO,
+              senderPhone: sellerProfile!.phone,
+              senderEmail: sellerEmail,
+              receiverName: buyerName || buyerEmail,
+              receiverAddress: buyerAddressStreet,
+              receiverPostal: buyerAddressPostcode,
+              receiverCity: buyerAddressCity,
+              receiverCountry: 'FI',
+              receiverPhone: buyerPhoneFinal,
+              receiverEmail: buyerEmail,
+              weightKg,
+              contents: (listing as any)?.title || 'Climbing gear',
+              senderReference: orderNumber,
+            })
 
-          if (mhResult.success && mhResult.activationCode) {
-            activationCode = mhResult.activationCode
-            trackingNumber = mhResult.trackingNumber
-            labelCreated = true
+            if (postiResult.success) {
+              trackingNumber = postiResult.trackingNumber
+              postiLabelPdfBase64 = postiResult.labelPdfBase64
+              labelCreated = true
+              labelCarrier = 'posti'
 
-            // Päivitetään tilaus aktivointikoodilla
-            await supabaseAdmin
-              .from('orders')
-              .update({
-                status: 'label_created',
-                activation_code: activationCode,
-                tracking_number: trackingNumber || null,
-              })
-              .eq('id', orderId)
-          } else {
-            matkahuoltoError = mhResult.error || 'Unknown error'
-            matkahuoltoRaw = mhResult.rawResponse?.slice(0, 1000) || ''
-            console.error('Matkahuolto API error:', matkahuoltoError, matkahuoltoRaw)
+              await supabaseAdmin
+                .from('orders')
+                .update({
+                  status: 'label_created',
+                  tracking_number: trackingNumber || null,
+                  label_created_at: new Date().toISOString(),
+                })
+                .eq('id', orderId)
+            } else {
+              matkahuoltoError = postiResult.error || 'Posti: unknown error'
+              matkahuoltoRaw = postiResult.rawResponse?.slice(0, 1000) || ''
+              console.error('Posti API error:', matkahuoltoError)
+            }
+          } catch (e) {
+            matkahuoltoError = `Posti exception: ${String(e)}`
+            console.error('Posti exception:', e)
           }
-        } catch (e) {
-          matkahuoltoError = String(e)
-          console.error('Matkahuolto exception:', e)
+        } else {
+          matkahuoltoError = `Posti skipped — seller ready: ${!!sellerReady}, buyer ready: ${!!buyerReady}`
+          console.warn('Posti skipped:', matkahuoltoError)
         }
       } else {
-        matkahuoltoError = `Missing address data — seller ready: ${!!sellerReady}, buyer ready: ${!!buyerReady}`
-        console.warn('Matkahuolto skipped:', matkahuoltoError)
+        // ── Matkahuolto for FI sellers → FI buyers ───────────────────────────
+        if (sellerReady && buyerReady) {
+          try {
+            const mhResult = await createMatkahuoltoShipment({
+              senderName: sellerProfile!.full_name || sellerProfile!.username || sellerName,
+              senderAddress: sellerProfile!.address_street,
+              senderPostal: sellerProfile!.address_postcode,
+              senderCity: sellerProfile!.address_city,
+              senderPhone: sellerProfile!.phone,
+              senderEmail: sellerEmail,
+              receiverName: buyerName || buyerEmail,
+              receiverAddress: buyerAddressStreet,
+              receiverPostal: buyerAddressPostcode,
+              receiverCity: buyerAddressCity,
+              receiverPhone: buyerPhoneFinal,
+              receiverEmail: buyerEmail,
+              weightKg,
+              senderReference: orderNumber,
+            })
+
+            if (mhResult.success && mhResult.activationCode) {
+              activationCode = mhResult.activationCode
+              trackingNumber = mhResult.trackingNumber
+              labelCreated = true
+              labelCarrier = 'matkahuolto'
+
+              await supabaseAdmin
+                .from('orders')
+                .update({
+                  status: 'label_created',
+                  activation_code: activationCode,
+                  tracking_number: trackingNumber || null,
+                })
+                .eq('id', orderId)
+            } else {
+              matkahuoltoError = mhResult.error || 'Unknown error'
+              matkahuoltoRaw = mhResult.rawResponse?.slice(0, 1000) || ''
+              console.error('Matkahuolto API error:', matkahuoltoError, matkahuoltoRaw)
+            }
+          } catch (e) {
+            matkahuoltoError = String(e)
+            console.error('Matkahuolto exception:', e)
+          }
+        } else {
+          matkahuoltoError = `Missing address data — seller ready: ${!!sellerReady}, buyer ready: ${!!buyerReady}`
+          console.warn('Matkahuolto skipped:', matkahuoltoError)
+        }
       }
     }
 
@@ -300,16 +370,34 @@ export async function POST(req: Request) {
     if (sellerEmail) {
       const sellerStripeOnboarded = sellerProfile?.stripe_onboarded === true
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://slabsend.com'
-      await sendEmail({
-        from: FROM,
-        to: sellerEmail,
-        subject: labelCreated
+
+      let sellerSubject: string
+      let sellerHtml: string
+      const sellerEmailOpts: Parameters<typeof resend.emails.send>[0] = { from: FROM, to: sellerEmail, subject: '', html: '' }
+
+      if (labelCreated && labelCarrier === 'posti') {
+        sellerSubject = `Print your shipping label — order "${listing?.title}"`
+        sellerHtml = sellerEmailWithPostiLabel({ sellerName, listingTitle: listing?.title || '', orderNumber, baseAmount, trackingNumber, stripeOnboarded: sellerStripeOnboarded, appUrl })
+        sellerEmailOpts.subject = sellerSubject
+        sellerEmailOpts.html = sellerHtml
+        if (postiLabelPdfBase64) {
+          sellerEmailOpts.attachments = [{
+            filename: `posti-label-${orderNumber}.pdf`,
+            content: postiLabelPdfBase64,
+          }]
+        }
+      } else {
+        sellerSubject = labelCreated
           ? `Ship now — activation code for "${listing?.title}"`
-          : `Your item "${listing?.title}" has been sold!`,
-        html: labelCreated
+          : `Your item "${listing?.title}" has been sold!`
+        sellerHtml = labelCreated
           ? sellerEmailWithCode({ sellerName, listingTitle: listing?.title || '', orderNumber, baseAmount, activationCode: activationCode!, stripeOnboarded: sellerStripeOnboarded, appUrl })
-          : sellerEmailWithoutCode({ sellerName, listingTitle: listing?.title || '', orderNumber, baseAmount, stripeOnboarded: sellerStripeOnboarded, appUrl }),
-      })
+          : sellerEmailWithoutCode({ sellerName, listingTitle: listing?.title || '', orderNumber, baseAmount, stripeOnboarded: sellerStripeOnboarded, appUrl })
+        sellerEmailOpts.subject = sellerSubject
+        sellerEmailOpts.html = sellerHtml
+      }
+
+      await sendEmail(sellerEmailOpts)
     }
 
     // Ostajalle
@@ -318,7 +406,7 @@ export async function POST(req: Request) {
         from: FROM,
         to: buyerEmail,
         subject: `Order confirmed: ${listing?.title}`,
-        html: buyerConfirmationEmail({ listingTitle: listing?.title || '', orderNumber, totalAmount, trackingNumber }),
+        html: buyerConfirmationEmail({ listingTitle: listing?.title || '', orderNumber, totalAmount, trackingNumber, carrier: labelCarrier }),
       })
     }
 
@@ -339,6 +427,7 @@ export async function POST(req: Request) {
         sessionId: session.id,
         shippingZone,
         labelCreated,
+        labelCarrier,
         activationCode,
         trackingNumber,
         matkahuoltoError,
@@ -448,10 +537,18 @@ function buyerConfirmationEmail(p: {
   orderNumber: string
   totalAmount: number
   trackingNumber?: string
+  carrier?: 'matkahuolto' | 'posti'
 }): string {
-  const trackingBlock = p.trackingNumber
-    ? `<p style="margin-top: 16px;">Your parcel tracking number: <strong>${p.trackingNumber}</strong> — track at <a href="https://www.matkahuolto.fi/en/tracking?trackingCode=${p.trackingNumber}" style="color: #FC7038;">Matkahuolto tracking</a></p>`
-    : ''
+  let trackingBlock = ''
+  if (p.trackingNumber) {
+    if (p.carrier === 'posti') {
+      const postiTrackUrl = `https://www.posti.fi/en/tracking?trackingCode=${p.trackingNumber}`
+      trackingBlock = `<p style="margin-top: 16px;">Tracking number: <strong>${p.trackingNumber}</strong> — <a href="${postiTrackUrl}" style="color: #FC7038;">Track with Posti →</a></p>`
+    } else {
+      const mhTrackUrl = `https://www.matkahuolto.fi/en/tracking?trackingCode=${p.trackingNumber}`
+      trackingBlock = `<p style="margin-top: 16px;">Tracking number: <strong>${p.trackingNumber}</strong> — <a href="${mhTrackUrl}" style="color: #FC7038;">Matkahuolto tracking →</a></p>`
+    }
+  }
   return `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
       <h2 style="color: #FC7038;">Order confirmed! ✓</h2>
@@ -463,6 +560,45 @@ function buyerConfirmationEmail(p: {
       </table>
       ${trackingBlock}
       <p>Once you receive the item, please confirm receipt on the listing page. If anything is wrong, contact us within 48 hours at <a href="mailto:info@slabsend.com" style="color: #FC7038;">info@slabsend.com</a></p>
+      <p style="color: #9a9080; font-size: 12px;">Slabsend — Pre-owned climbing gear</p>
+    </div>
+  `
+}
+
+function sellerEmailWithPostiLabel(p: {
+  sellerName: string
+  listingTitle: string
+  orderNumber: string
+  baseAmount: number
+  trackingNumber?: string
+  stripeOnboarded: boolean
+  appUrl: string
+}): string {
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; color: #1a1408;">
+      <h2 style="color: #FC7038;">Your item has been sold! 🎉</h2>
+      <p>Hi ${p.sellerName},</p>
+      <p><strong>${p.listingTitle}</strong> has been purchased. Your Posti shipping label is attached to this email as a PDF.</p>
+
+      ${!p.stripeOnboarded ? stripeSetupBlock(p.appUrl) : ''}
+
+      <div style="background: #1a1408; border-radius: 12px; padding: 28px 24px; margin: 28px 0;">
+        <p style="color: rgba(245,243,230,0.55); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 12px;">How to ship</p>
+        <ol style="color: #F5F3E6; line-height: 1.9; margin: 0; padding-left: 20px; font-size: 15px;">
+          <li>Print the attached PDF label</li>
+          <li>Attach it firmly to your package</li>
+          <li>Drop the package at your nearest Posti / Omniva service point</li>
+        </ol>
+        ${p.trackingNumber ? `<p style="color: rgba(245,243,230,0.6); font-size: 13px; margin: 16px 0 0;">Tracking number: <strong style="color: #F5F3E6;">${p.trackingNumber}</strong></p>` : ''}
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Order number</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.orderNumber}</strong></td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Item</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.listingTitle}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">You'll receive</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>${p.baseAmount} €</strong> after buyer confirms receipt</td></tr>
+      </table>
+
+      <p>Questions? Contact <a href="mailto:info@slabsend.com" style="color: #FC7038;">info@slabsend.com</a></p>
       <p style="color: #9a9080; font-size: 12px;">Slabsend — Pre-owned climbing gear</p>
     </div>
   `
@@ -480,6 +616,7 @@ function adminOrderEmail(p: {
   sessionId: string
   shippingZone: string
   labelCreated: boolean
+  labelCarrier?: 'matkahuolto' | 'posti'
   activationCode?: string
   trackingNumber?: string
   matkahuoltoError?: string
@@ -489,13 +626,19 @@ function adminOrderEmail(p: {
 }): string {
   const mhBlock = p.shippingZone === 'FI'
     ? p.labelCreated
-      ? `
-        <tr style="background: #f0faf0;"><td style="padding: 8px; border-bottom: 1px solid #eee;" colspan="2"><strong>✅ Matkahuolto label auto-generated</strong></td></tr>
-        <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Activation code</td><td style="padding: 8px; border-bottom: 1px solid #eee; font-size: 20px; font-weight: 700; font-family: monospace; color: #FC7038;">${p.activationCode}</td></tr>
-        ${p.trackingNumber ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Tracking number</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.trackingNumber}</td></tr>` : ''}
-      `
+      ? p.labelCarrier === 'posti'
+        ? `
+          <tr style="background: #f0faf0;"><td style="padding: 8px; border-bottom: 1px solid #eee;" colspan="2"><strong>✅ Posti SmartShip label auto-generated</strong></td></tr>
+          ${p.trackingNumber ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Tracking number</td><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: 700;">${p.trackingNumber}</td></tr>` : ''}
+          <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Label</td><td style="padding: 8px; border-bottom: 1px solid #eee;">PDF attached to seller email</td></tr>
+        `
+        : `
+          <tr style="background: #f0faf0;"><td style="padding: 8px; border-bottom: 1px solid #eee;" colspan="2"><strong>✅ Matkahuolto label auto-generated</strong></td></tr>
+          <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Activation code</td><td style="padding: 8px; border-bottom: 1px solid #eee; font-size: 20px; font-weight: 700; font-family: monospace; color: #FC7038;">${p.activationCode}</td></tr>
+          ${p.trackingNumber ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Tracking number</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${p.trackingNumber}</td></tr>` : ''}
+        `
       : `
-        <tr style="background: #fff8f0;"><td style="padding: 8px; border-bottom: 1px solid #eee;" colspan="2"><strong>⚠️ Matkahuolto label FAILED — manual action needed</strong></td></tr>
+        <tr style="background: #fff8f0;"><td style="padding: 8px; border-bottom: 1px solid #eee;" colspan="2"><strong>⚠️ Shipping label FAILED — manual action needed</strong></td></tr>
         <tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Error</td><td style="padding: 8px; border-bottom: 1px solid #eee; color: #c0392b;">${p.matkahuoltoError || 'Unknown error'}</td></tr>
         ${p.orderId ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">Manual entry</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://slabsend.com'}/admin/orders/${p.orderId}">Enter code manually →</a></td></tr>` : ''}
         ${p.matkahuoltoRaw ? `<tr><td style="padding: 8px; border-bottom: 1px solid #eee; vertical-align: top;">API raw response</td><td style="padding: 8px; border-bottom: 1px solid #eee; font-family: monospace; font-size: 11px; color: #555; word-break: break-all;">${p.matkahuoltoRaw.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td></tr>` : ''}
