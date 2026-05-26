@@ -46,18 +46,6 @@ const FINLAND_POSTI_ONLY_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOpt
   },
 }
 
-const NORDIC_OPTION: Stripe.Checkout.SessionCreateParams.ShippingOption = {
-  shipping_rate_data: {
-    type: 'fixed_amount',
-    fixed_amount: { amount: 890, currency: 'eur' },
-    display_name: 'Posti — pickup from Posti / Omniva point',
-    metadata: { carrier: 'posti' },
-    delivery_estimate: {
-      minimum: { unit: 'business_day', value: 3 },
-      maximum: { unit: 'business_day', value: 7 },
-    },
-  },
-}
 
 export async function POST(req: Request) {
   const supabase = await createClient()
@@ -73,12 +61,7 @@ export async function POST(req: Request) {
 
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
 
-  // Resolve buyer's profile country to ISO-2
-  const rawCountry = buyerProfile?.address_country || buyerProfile?.country || ''
-  const buyerISO = COUNTRY_NAME_TO_ISO[rawCountry] || (SUPPORTED_COUNTRY_CODES.includes(rawCountry.toUpperCase()) ? rawCountry.toUpperCase() : 'FI')
-  const isFinland = buyerISO === 'FI'
-
-  // Seller's country (ISO-2) — determines available carriers
+  // Seller's country (ISO-2) — determines available carriers and price
   const sellerCountryISO: string = listing.shipping_from_country || 'FI'
   const isBalticSeller = ['EE', 'LV', 'LT'].includes(sellerCountryISO)
 
@@ -115,15 +98,13 @@ export async function POST(req: Request) {
         display_name: 'Pickup / Nouto',
       },
     })
-  } else if (isFinland && !isBalticSeller) {
-    // FI buyer + FI seller: let buyer choose carrier
-    shippingOptions.push(FINLAND_POSTI_OPTION, FINLAND_MATKAHUOLTO_OPTION)
-  } else if (isFinland && isBalticSeller) {
-    // FI buyer + Baltic seller: only Posti (Matkahuolto doesn't serve Baltic)
+  } else if (isBalticSeller) {
+    // Baltic seller → always €11.90 Posti, regardless of buyer country
+    // (covers Baltic→FI costs; buyer can't game price by changing profile)
     shippingOptions.push(FINLAND_POSTI_ONLY_OPTION)
   } else {
-    // Baltic/Nordic buyer: Posti only
-    shippingOptions.push(NORDIC_OPTION)
+    // FI seller → €8.90, buyer picks Posti or Matkahuolto
+    shippingOptions.push(FINLAND_POSTI_OPTION, FINLAND_MATKAHUOLTO_OPTION)
   }
 
   // Allowed countries: show address collection for all supported countries
