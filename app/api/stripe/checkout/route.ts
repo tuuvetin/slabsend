@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@/utils/supabase/server'
-import { COUNTRY_NAME_TO_ISO, SUPPORTED_COUNTRY_CODES } from '@/app/lib/countries'
+import { countryToISO } from '@/app/lib/countries'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -102,6 +102,14 @@ export async function POST(req: Request) {
     },
   ]
 
+  // Buyer's country ISO — used to show only relevant shipping options
+  const buyerISO: string =
+    buyerProfile?.address_country ||
+    countryToISO(buyerProfile?.country || '') ||
+    'FI'
+  const isSEBuyer = buyerISO === 'SE'
+  const isBalticBuyer = ['EE', 'LV', 'LT'].includes(buyerISO)
+
   const shippingOptions: Stripe.Checkout.SessionCreateParams.ShippingOption[] = []
 
   if (listing.listing_type === 'rent') {
@@ -113,12 +121,17 @@ export async function POST(req: Request) {
       },
     })
   } else if (isBalticSeller) {
-    // Baltic seller → always €11.90 Posti, regardless of buyer country
-    // (covers Baltic→FI costs; buyer can't game price by changing profile)
+    // Baltic seller → always €11.90 Posti regardless of buyer country
     shippingOptions.push(FINLAND_POSTI_ONLY_OPTION)
+  } else if (isSEBuyer) {
+    // FI seller → SE buyer: only Sweden option
+    shippingOptions.push(SWEDEN_OPTION)
+  } else if (isBalticBuyer) {
+    // FI seller → Baltic buyer: Posti only (covers FI→EE/LV/LT via Omniva)
+    shippingOptions.push(FINLAND_POSTI_OPTION)
   } else {
-    // FI seller → €8.90 FI/Baltic options + €10.90 SE option
-    shippingOptions.push(FINLAND_POSTI_OPTION, FINLAND_MATKAHUOLTO_OPTION, SWEDEN_OPTION)
+    // FI seller → FI buyer (default): Posti or Matkahuolto
+    shippingOptions.push(FINLAND_POSTI_OPTION, FINLAND_MATKAHUOLTO_OPTION)
   }
 
   // Allowed countries: show address collection for all supported countries
