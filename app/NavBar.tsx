@@ -1,11 +1,13 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
 const ADMIN_EMAILS = ['samuel.trimarchi@icloud.com', 'nelli.anttila@gmail.com', 'info@slabsend.com']
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 
 export default function NavBar() {
+  const pathname = usePathname()
   const [user, setUser] = useState<any>(null)
   const [logoUrl, setLogoUrl] = useState<string>('')
   const [logoReady, setLogoReady] = useState(false)
@@ -86,7 +88,7 @@ export default function NavBar() {
           <a href={user ? '/listings/new' : '/login?returnTo=/listings/new'} className="sb-btn-sell">+ Sell / Rent</a>
           {user
             ? <a href="/profile" className="sb-btn-login">Profile</a>
-            : <a href={`/login?returnTo=${typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : ''}`} className="sb-btn-login">Sign in</a>
+            : <a href={`/login?returnTo=${encodeURIComponent(pathname)}`} className="sb-btn-login">Sign in</a>
           }
           <button className="sb-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
             <span /><span /><span />
@@ -132,7 +134,7 @@ export default function NavBar() {
         <a href={user ? '/listings/new' : '/login?returnTo=/listings/new'} onClick={() => setMenuOpen(false)} style={{ color: '#FC7038' }}>+ Sell / Rent</a>
         {user
           ? <a href="/profile" onClick={() => setMenuOpen(false)}>Profile</a>
-          : <a href={`/login?returnTo=${typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : ''}`} onClick={() => setMenuOpen(false)}>Sign in</a>
+          : <a href={`/login?returnTo=${encodeURIComponent(pathname)}`} onClick={() => setMenuOpen(false)}>Sign in</a>
         }
       </div>
     </>
