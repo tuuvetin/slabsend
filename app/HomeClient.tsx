@@ -42,7 +42,7 @@ function HowItWorks() {
 
         <header className="sb-how__header">
           <h2 className="sb-how__title">How it <em>works.</em></h2>
-          <p className="sb-how__lede">Buy and sell climbing gear across Europe — safe, simple, shipped.</p>
+          <p className="sb-how__lede">Buy, sell and rent climbing gear across Europe — safe, simple, shipped.</p>
         </header>
 
         <div className="sb-how__grid">
