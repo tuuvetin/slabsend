@@ -109,15 +109,15 @@ export default function NavBar() {
             )}
           </a>
           <a href={user ? '/listings/new' : '/login?returnTo=/listings/new'} style={{ fontWeight: 400, fontSize: '18px', color: '#F5F3E6', background: '#FC7038', textDecoration: 'none', width: '26px', height: '26px', borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, flexShrink: 0 }}>+</a>
-          <button className="sb-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
-            <span /><span /><span />
+          <button className="sb-hamburger" onClick={() => setMenuOpen(v => !v)} aria-label={menuOpen ? 'Close menu' : 'Open menu'}>
+            {menuOpen ? <span style={{ fontSize: '22px', lineHeight: 1 }}>×</span> : <><span /><span /><span /></>}
           </button>
         </div>
       </nav>
 
       {/* MOBILE MENU */}
       <div className={`sb-mobile-menu ${menuOpen ? 'open' : ''}`}>
-        <button className="sb-mobile-close" onClick={() => setMenuOpen(false)}>×</button>
+
         <a href="/listings" onClick={() => setMenuOpen(false)}>Listings</a>
         <a href="/listings?tab=rent" onClick={() => setMenuOpen(false)}>Rent</a>
         <a href="/messages" onClick={() => setMenuOpen(false)} style={{ position: 'relative' }}>

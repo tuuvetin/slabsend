@@ -606,15 +606,7 @@ select.form-input { -webkit-appearance: none; appearance: none; font-size: 14px;
   color: #FC7038;
 }
 .sb-mobile-close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: transparent;
-  border: none;
-  font-size: 32px;
-  cursor: pointer;
-  color: #1a1408;
-  line-height: 1;
+  display: none;
 }
 .sb-nav-mobile-right {
   display: none;
