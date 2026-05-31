@@ -41,7 +41,7 @@ export default function PrivacyPage() {
             <li>Equipment that is damaged, expired, or unsafe for use</li>
             <li>Counterfeit or stolen goods</li>
             <li>Items unrelated to climbing or outdoor sports</li>
-            <li>Items prohibited by Finnish law or EU regulations</li>
+            <li>Items prohibited by EU regulations</li>
           </ul>
         </SubSection>
 
