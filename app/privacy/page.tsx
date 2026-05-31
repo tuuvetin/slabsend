@@ -165,7 +165,7 @@ export default function PrivacyPage() {
         </SubSection>
 
         <SubSection title="4.4 Shipping">
-          <p>Sellers are responsible for shipping items within 3 business days of a confirmed sale. Slabsend integrates with Matkahuolto and Posti for shipping across Finland, the Baltic states, and Sweden. Sellers must use a tracked shipping method for all orders.</p>
+          <p>Sellers are responsible for shipping items within 3 business days of a confirmed sale. Slabsend integrates with shipping carriers to provide tracked delivery across supported countries. Sellers must use a tracked shipping method for all orders.</p>
         </SubSection>
 
         <SubSection title="4.5 Seller Warranty">
