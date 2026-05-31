@@ -131,7 +131,7 @@ export default function PrivacyPage() {
         </SubSection>
 
         <SubSection title="3.3 How to File a Claim">
-          <p>To file a claim, email <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a> within 21 days of delivery. Include your order number, photos of the item, and a description of the issue. Slabsend will review your claim within 5 business days. If approved, you will receive a full refund including shipping.</p>
+          <p>To file a claim, email <a href="mailto:info@slabsend.com" style={{ color: '#FC7038' }}>info@slabsend.com</a> within 21 days of delivery. Include your order number, photos of the item, and a description of the issue. Slabsend will review your claim within 5 business days. If approved, you will receive a full refund excluding shipping fees.</p>
         </SubSection>
 
         <SubSection title="3.4 Seller Responsibilities">
@@ -160,7 +160,7 @@ export default function PrivacyPage() {
         </SubSection>
 
         <SubSection title="4.4 Shipping">
-          <p>Sellers are responsible for shipping items within 3 business days of a confirmed sale. Slabsend integrates with Matkahuolto for domestic shipping. Sellers must use a tracked shipping method for all orders.</p>
+          <p>Sellers are responsible for shipping items within 3 business days of a confirmed sale. Slabsend integrates with Matkahuolto and Posti for shipping across Finland, the Baltic states, and Sweden. Sellers must use a tracked shipping method for all orders.</p>
         </SubSection>
 
         <SubSection title="4.5 Seller Warranty">
