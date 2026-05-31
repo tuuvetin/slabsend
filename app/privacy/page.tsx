@@ -54,7 +54,12 @@ export default function PrivacyPage() {
         </SubSection>
 
         <SubSection title="1.7 Limitation of Liability">
-          <p>Slabsend is not liable for any direct, indirect, or consequential damages arising from transactions on the platform. Our total liability is limited to the amount of the service fee paid in the relevant transaction.</p>
+          <p>Slabsend acts as an intermediary and is not liable for damages arising between buyers and sellers. However, Slabsend provides the following protections:</p>
+          <ul>
+            <li><strong>Buyer Protection:</strong> Funds are held by Slabsend until the buyer confirms receipt. If an item is not received or significantly not as described, the buyer is entitled to a full refund of the item price in accordance with Section 3.</li>
+            <li><strong>Lost shipments:</strong> In the event of a lost shipment, Slabsend will file a compensation claim with the carrier on behalf of the seller.</li>
+          </ul>
+          <p>Slabsend's liability beyond the above is limited to the amount of the service fee paid in the relevant transaction.</p>
         </SubSection>
       </Section>
 
