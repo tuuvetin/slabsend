@@ -2,11 +2,11 @@ import { createClient } from '@/utils/supabase/server'
 import HomeClient from './HomeClient'
 
 const categories = [
-  { key: 'gear', label: 'Gear', subcategories: ['Harnesses', 'Ropes', 'Helmets', 'Crash pads'], defaultBg: '#6a8a94', href: '/listings?category=Gear' },
-  { key: 'shoes', label: 'Shoes', subcategories: ['Climbing shoes', 'Approach shoes', 'Mountain boots'], defaultBg: '#8a6a54', href: '/listings?category=Shoes' },
   { key: 'clothing', label: 'Clothing', subcategories: ['Jackets', 'Hoodies', 'Pants', 'T-Shirts'], defaultBg: '#6a7a5a', href: '/listings?category=Clothing' },
-  { key: 'wall', label: 'Wall equipment', subcategories: ['Climbing holds', 'Safety mats', 'Wall materials'], defaultBg: '#7a8a9a', href: '/listings?category=Wall+equipment' },
+  { key: 'shoes', label: 'Shoes', subcategories: ['Climbing shoes', 'Approach shoes', 'Mountain boots'], defaultBg: '#8a6a54', href: '/listings?category=Shoes' },
   { key: 'crashpads', label: 'Crash pads', subcategories: [], defaultBg: '#5a3e2b', href: '/listings?tab=sell&category=Gear&subcategory=Crash+pads' },
+  { key: 'gear', label: 'Gear', subcategories: ['Harnesses', 'Ropes', 'Helmets', 'Crash pads'], defaultBg: '#6a8a94', href: '/listings?category=Gear' },
+  { key: 'wall', label: 'Wall equipment', subcategories: ['Climbing holds', 'Safety mats', 'Wall materials'], defaultBg: '#7a8a9a', href: '/listings?category=Wall+equipment' },
 ]
 
 export const revalidate = 60
